@@ -4,7 +4,7 @@
 
 Agent skills for correctness-first engineering and clear technical judgment.
 
-These skills are small, composable rules for getting better engineering work from agents. They help agents reason from invariants, keep answers inside the user's frame, design simple surfaces, explain tradeoffs clearly, and avoid hiding bad decisions behind convention, churn, scope, or vibes. They are meant to be installed with the open `skills` CLI and adapted per repo.
+These skills are small, composable rules for getting better engineering work from agents. They are tailored toward real engineers, but still usable for vibe coders. They help agents reason from invariants, keep answers inside the user's frame, design simple surfaces, explain tradeoffs clearly, and avoid hiding bad decisions behind convention, churn, scope, or vibes. They are meant to be installed with the open `skills` CLI and adapted per repo.
 
 ## Quickstart
 
