@@ -55,7 +55,7 @@ Iterate until the user approves the breakdown.
 
 For each approved slice, publish a new issue to the issue tracker. Use the issue body template below. These issues are considered ready for AFK agents, so publish them with the correct triage label unless instructed otherwise.
 
-Publish issues in dependency order (blockers first) so you can reference real issue identifiers in the "Blocked by" field.
+Publish issues in dependency order (blockers first) so every genuine blocker already exists when you wire the native links in step 6.
 
 <issue-template>
 ## Parent
@@ -76,15 +76,18 @@ Avoid specific file paths or code snippets — they go stale fast. Exception: if
 
 ## Blocked by
 
-- A reference to the blocking ticket (if any)
-
-Or "None - can start immediately" if no blockers.
+Include this section ONLY for a genuine hard block — the slice cannot start, or cannot meet its acceptance criteria, until the blocker merges — and use it to say WHY in one line, the semantic a graph edge can't carry. Omit it entirely when the slice can start immediately. Do not paste "#N" references here to mirror the dependency graph: the native links (step 6) are the single source of truth for the tree, and a prose copy of them only rots.
 
 </issue-template>
 
 ### 6. Wire native relationships (ALWAYS — this is the point)
 
-Prose "Blocked by #N" text is a dead string. After publishing, mirror every relationship into the tracker's native links so it renders the real tree (the sub-issue panel on the issue page, the hierarchy in Projects/roadmap) and tools can traverse it. Do this every run, not only when asked.
+Prose "Blocked by #N" text is a dead string. After publishing, encode every relationship in the tracker's native links so it renders the real tree (the sub-issue panel on the issue page, the hierarchy in Projects/roadmap) and tools can traverse it. Do this every run, not only when asked.
+
+The native links are the ONLY place relationships live. Do not also maintain "Blocked by #N" prose lists that restate them — that is the dead-string antipattern this step exists to kill. Two rules keep the graph honest:
+
+- **Only genuine blocks become blocked-by edges.** Create a blocked-by dependency only when the slice truly cannot start, or cannot pass its acceptance criteria, until the blocker merges. Soft preference ("nicer to do after"), mere relatedness, or shared surface area are NOT blocks — leave them unlinked.
+- **Hierarchy is not blocking.** A sub-issue edge expresses containment (this slice lives under that parent), not execution order. Do not also add a blocked-by edge between a parent and its child unless the child is genuinely gated on the parent. Keep the two edge types semantically distinct; never duplicate one as the other.
 
 On GitHub, the `gh` CLI gained `--parent` / `--blocked-by` / `--blocking` in v2.94.0 (2026-06-10). On older `gh`, use `gh api`. Both need the issue's database id, not its number:
 
