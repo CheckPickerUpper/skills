@@ -11,6 +11,9 @@ Evidence that something is already common in a codebase. Convention can coexist 
 **Prevalence**
 How widespread a pattern is. Prevalence is not evidence; a wrong pattern can be common.
 
+**Transition size**
+How much work a change appears to take: blast radius, staging, compatibility lanes, legacy path survival. Transition size can shape a rollout plan, but it is never proof that a design is correct.
+
 **Canonical lane**
 The route a codebase currently treats as blessed. A canonical lane is still wrong if it preserves an invalid state or makes the real invariant optional.
 
@@ -30,6 +33,7 @@ How much breaks if a symbol changes — call sites, modules, flows. It ranks fin
 
 - Correctness can justify a convention.
 - Convention cannot justify correctness.
+- Transition size cannot justify correctness.
 - A canonical lane must still name the bug it prevents.
 - A finding must survive the refutation gate before it is reported.
 - A restructuring must prove behavior-preservation before it is recommended.
