@@ -2,5 +2,6 @@
 
 Skills for code, architecture, APIs, and design decisions, with an emphasis on correctness and simplicity.
 
-- **[antimatter-code-quality-review](./antimatter-code-quality-review/SKILL.md)** — Total annihilation: no finding survives unless it survives refutation. A strict pre-merge structural audit where every finding ships with a before→after, a behavior-preservation proof, and a correct-by-construction upgrade. Use for a deep code-quality audit with zero severity theater.
+- **[antimatter-code-quality-review](./antimatter-code-quality-review/SKILL.md)** — Total annihilation: no finding survives unless it survives refutation. Inspired by Cursor's [Thermo-Nuclear review](https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md), [Matt Pocock's skills](https://github.com/mattpocock/skills), and correctness-first design philosophy; pins the diff frame, checks intent and repo standards, and only reports provable findings.
 - **[pizza1](./pizza1/SKILL.md)** — Justify by correctness, never by convention. Use when a design is defended by "it's what the codebase does", "the canonical lane does it", ergonomics, churn, transition size, compatibility, legacy paths, or scope.
+- **[readonly](./readonly/SKILL.md)** — Prove, don't guess. A user-invoked modifier for codebase questions and other skills: exhaust read-only evidence, avoid "likely" answers when facts can be checked, and stop before implementation, issues, commits, or remote changes.
