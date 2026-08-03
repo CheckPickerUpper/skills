@@ -1,110 +1,86 @@
 ---
 name: to-issues
-description: "Break a plan, spec, or PRD into independently-grabbable issues using tracer-bullet vertical slices, then wire the blocked-by/parent relationships into native GitHub sub-issues and dependencies so the tracker renders the real tree (not just prose). Use when converting a plan into issues, creating implementation tickets, or breaking work into slices."
+description: "Create high-level GitHub issues from a plan, bug, finding, or PRD. Use when filing issues or turning work into issue-sized slices; shape observable acceptance criteria and publish directly with GitHub."
 ---
 
-# /to-issues
+# To issues
 
-Break a plan into independently-grabbable issues using vertical slices (tracer bullets), and leave behind a real dependency tree on the tracker, not prose that claims one.
+Turn a plan, bug report, audit finding, or PRD into live GitHub issues that explain the outcome clearly enough for another person to implement and verify.
 
-> An improvement on Matt Pocock's [`to-issues`](https://github.com/mattpocock/skills). Same tracer-bullet slicing and issue template; the addition is a mandatory final step that wires the blocked-by/parent edges into native GitHub sub-issues and dependencies, so the tracker renders the real tree instead of leaving "Blocked by #N" as dead prose.
-
-The issue tracker and triage label vocabulary should have been provided to you. If not, set them up before publishing.
+The tracker is the publication surface. Draft in the conversation, then create or edit the issue directly with GitHub. The skill supplies judgment and a repeatable shape; GitHub supplies the issue number, labels, and relationships.
 
 ## Process
 
-### 1. Gather context
+### 1. Gather the target
 
-Work from whatever is already in the conversation context. If the user passes an issue reference (issue number, URL, or path) as an argument, fetch it from the issue tracker and read its full body and comments.
+Identify the repository and the source material. Read an existing issue, plan, or evidence file when one is supplied. Explore the codebase only when the issue needs a fact that the conversation does not establish.
 
-### 2. Explore the codebase (optional)
+Search the repository's existing issues for a likely duplicate before creating a new one. Reuse an existing issue when it already represents the same outcome; update it when the user asked to reshape it.
 
-If you have not already explored the codebase, do so to understand the current state of the code. Issue titles and descriptions should use the project's domain glossary vocabulary, and respect ADRs in the area you're touching.
+Completion criterion: the target repository, issue count, and source facts are known.
 
-### 3. Draft vertical slices
+### 2. Shape the issue set
 
-Break the plan into **tracer bullet** issues. Each issue is a thin vertical slice that cuts through ALL integration layers end-to-end, NOT a horizontal slice of one layer.
+Make each issue one independently understandable outcome. Split when two outcomes can be implemented, reviewed, or closed separately. Keep related observations together when they share one desired end state.
 
-Slices may be 'HITL' or 'AFK'. HITL slices require human interaction, such as an architectural decision or a design review. AFK slices can be implemented and merged without human interaction. Prefer AFK over HITL where possible.
+Use domain language a customer, operator, or maintainer would recognize. Keep implementation choices, file paths, class names, and proposed APIs out of the title and main problem statement unless the user has already made that decision.
 
-<vertical-slice-rules>
-- Each slice delivers a narrow but COMPLETE path through every layer (schema, API, UI, tests)
-- A completed slice is demoable or verifiable on its own
-- Prefer many thin slices over few thick ones
-</vertical-slice-rules>
+If the requested breakdown is obvious, publish it without a planning ceremony. Ask one focused question only when an unresolved choice changes the issue count, scope, or relationship tree.
 
-### 4. Quiz the user
+Completion criterion: every issue has one outcome, a bounded scope, and an identified relationship set.
 
-Present the proposed breakdown as a numbered list. For each slice, show:
+### 3. Write the issue
 
-- **Title**: short descriptive name
-- **Type**: HITL / AFK
-- **Blocked by**: which other slices (if any) must complete first
-- **User stories covered**: which user stories this addresses (if the source material has them)
+Use this body shape:
 
-Ask the user:
+~~~markdown
+## Problem
 
-- Does the granularity feel right? (too coarse / too fine)
-- Are the dependency relationships correct?
-- Should any slices be merged or split further?
-- Are the correct slices marked as HITL and AFK?
+What is wrong, who experiences it, and what consequence does it have?
 
-Iterate until the user approves the breakdown.
+## Desired outcome
 
-### 5. Publish the issues to the issue tracker
-
-For each approved slice, publish a new issue to the issue tracker. Use the issue body template below. These issues are considered ready for AFK agents, so publish them with the correct triage label unless instructed otherwise.
-
-Publish issues in dependency order (blockers first) so every genuine blocker already exists when you wire the native links in step 6.
-
-<issue-template>
-## Parent
-
-A reference to the parent issue on the issue tracker (if the source was an existing issue, otherwise omit this section).
-
-## What to build
-
-A concise description of this vertical slice. Describe the end-to-end behavior, not layer-by-layer implementation.
-
-Avoid specific file paths or code snippets — they go stale fast. Exception: if a prototype produced a snippet that encodes a decision more precisely than prose can (state machine, reducer, schema, type shape), inline it here and note briefly that it came from a prototype. Trim to the decision-rich parts — not a working demo, just the important bits.
+Describe the high-level behavior or state that should exist when the issue is complete.
 
 ## Acceptance criteria
 
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- [ ] An observable behavior demonstrates the desired outcome.
+- [ ] The relevant failure, boundary, or empty state is handled when applicable.
+- [ ] The old bad state is no longer reachable through the supported path.
 
-## Blocked by
+## Evidence
 
-For a genuine hard block — the slice cannot start, or cannot meet its acceptance criteria, until the blocker merges — write one line naming the WHY (the semantic a graph edge can't carry). Otherwise omit this section; the native links (step 6) carry the dependency itself.
+Links, screenshots, logs, reproduction steps, or source references that justify the issue.
+~~~
 
-</issue-template>
+Acceptance criteria are finite, observable, and independently checkable. Prefer behavior over implementation: “a failed catalog request renders a recovery state” is useful; “add a try/catch” is not.
 
-### 6. Wire native relationships (ALWAYS — this is the point)
+Use a short Parent or Blocked by section only when the relationship needs human context in addition to the native GitHub edge. A blocker is genuine when the child cannot start or cannot meet its acceptance criteria until the blocker lands.
 
-After publishing, encode every relationship as a native link so the tracker renders the real tree — the sub-issue panel on the issue page, the hierarchy in Projects/roadmap — and tools can traverse it. Native links carry the relationships; build them every run. Two rules decide which edge to draw:
+Completion criterion: the title states the outcome, the body contains the problem and desired outcome, every criterion is observable, and evidence is traceable.
 
-- **Add a blocked-by edge for a genuine block:** the slice cannot start, or cannot pass its acceptance criteria, until the blocker merges.
-- **Add a sub-issue edge for containment:** the slice lives under its parent. Reach for blocked-by only when the child is genuinely gated on the parent.
+### 4. Publish directly
 
-On GitHub, the `gh` CLI gained `--parent` / `--blocked-by` / `--blocking` in v2.94.0 (2026-06-10). On older `gh`, use `gh api`. Both need the issue's database id, not its number:
+Create the issue with the authenticated GitHub identity:
 
-```sh
-gh api repos/{owner}/{repo}/issues/{N} --jq .id
-```
+~~~sh
+gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL
+~~~
 
-A slice that lives under a parent slice in the same repo is a sub-issue. Build the tree parent-by-parent (each issue has at most one parent):
+Use an existing repository label when one fits. If the requested label is absent, report that fact and continue only when the user has authorized creating labels.
 
-```sh
-gh api -X POST repos/{owner}/{repo}/issues/{PARENT}/sub_issues -F sub_issue_id={CHILD_DB_ID}
-```
+For an existing issue, use GitHub's normal issue edit surface and preserve its useful history. Do not create a second issue merely because the wording changed.
 
-A blocked-by edge that is not a single-parent hierarchy, or that crosses repositories, is a dependency. This is the only way to encode a cross-repo blocker, since sub-issues are same-repo only:
+### 5. Wire and verify relationships
 
-```sh
-gh api -X POST repos/{owner}/{repo}/issues/{N}/dependencies/blocked_by -F issue_id={BLOCKER_DB_ID}
-```
+When a parent or genuine blocker exists, create the native GitHub relationship after the issue exists. Prefer the current gh relationship flags; use the GitHub API when the installed CLI does not expose the needed operation. Use the issue database id for API relationship calls.
 
-Verify before reporting done: `gh api repos/{owner}/{repo}/issues/{ROOT} --jq .sub_issues_summary` shows the expected child total, and `.../dependencies/blocked_by` lists each blocker. If a relationship did not take, say so; do not report a tree you did not build.
+Do not encode ordinary sequencing as a blocker. Do not use a parent edge when the issue is merely related.
 
-Do NOT close or modify any parent issue.
+Verify each requested relationship on GitHub after creating it. If a relationship cannot be created, report the issue URL and the missing edge instead of implying that the tree is complete.
+
+Completion criterion: every created issue has a URL and number, the requested labels are present, and every requested native relationship is confirmed or explicitly reported as unavailable.
+
+## Final report
+
+Report the created or updated issue URLs, labels, parent/blocker edges, and any unresolved publication step. The report is the completion proof; the issue tracker is the durable record.
