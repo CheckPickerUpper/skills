@@ -1,6 +1,18 @@
 ---
 name: antimatter-code-quality-review
 description: "Total annihilation: no finding survives unless it survives refutation. An unusually strict maintainability and structural-quality audit of a diff — review frame, intent/spec fit, repo standards, abstraction quality, cohesion, type/boundary cleanliness, duplication, control-flow tangles, and correct-by-construction opportunities. Use for a deep code-quality audit, a harsh pre-merge review, or to determine what structural change makes a class of bug impossible rather than merely caught. Stricter than a conventional review because every finding must survive an adversarial refutation pass, ship with a concrete before→after, and prove it preserves behavior. Severity theater is prohibited: only provable findings are reported."
+short_description: "Strict code-quality review with adversarial refutation."
+catalog:
+  stage: "review"
+  order: 90
+  aliases:
+    - "strict code-quality review"
+    - "adversarial review"
+  when: "A diff needs a structural review that reports only findings that survive refutation."
+  where_it_fits: "Use after implementation when the review needs a correctness-first structural lens."
+  success_signals:
+    - "Every finding has before-and-after evidence and a behavior-preservation basis."
+    - "A clean diff receives an explicit approval instead of a manufactured finding."
 ---
 
 # /antimatter-code-quality-review

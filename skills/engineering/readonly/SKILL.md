@@ -1,7 +1,19 @@
 ---
 name: readonly
 description: "User-invoked modifier for evidence-first read-only investigation. Use when the user appends /readonly to a question or another skill request: answer by checking the codebase and available read-only sources, do not implement, do not open issues, do not mutate local or remote state, and do not guess with 'likely' or 'probably' when evidence can be gathered."
+short_description: "Evidence-first read-only investigation."
 disable-model-invocation: true
+catalog:
+  stage: "investigation"
+  order: 92
+  aliases:
+    - "read-only investigation"
+    - "prove this without changing anything"
+  when: "The user wants an answer proved from available evidence without mutations."
+  where_it_fits: "Use as a modifier before planning or implementation when the current state must stay frozen."
+  success_signals:
+    - "The answer cites the checked files and commands."
+    - "The final status proves no mutation occurred."
 ---
 
 # /readonly

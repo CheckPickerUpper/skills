@@ -1,6 +1,28 @@
 ---
 name: to-issues
 description: "Create high-level GitHub issues from a plan, bug, finding, or PRD. Use when filing issues or turning work into issue-sized slices; shape observable acceptance criteria and publish directly with GitHub."
+short_description: "Turn plans into observable GitHub issues."
+openai:
+  dependencies:
+    tools:
+      - type: "mcp"
+        value: "github"
+        description: "GitHub is the publication surface for issues and relationships."
+        transport: "streamable_http"
+  policy:
+    products:
+      - "codex"
+catalog:
+  stage: "tickets"
+  order: 81
+  aliases:
+    - "publish GitHub issues"
+    - "turn a plan into issues"
+  when: "A plan or finding needs high-level, observable issues published to GitHub."
+  where_it_fits: "Use when the tracker artifact is the primary deliverable rather than an implementation ticket chain."
+  success_signals:
+    - "Every issue has an observable outcome and traceable evidence."
+    - "Requested native relationships are confirmed or explicitly reported as unavailable."
 ---
 
 # To issues

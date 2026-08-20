@@ -2,9 +2,16 @@
   "name": "checkpickerupper-skills",
   "skills": [
     "./skills/engineering/antimatter-code-quality-review",
+    "./skills/engineering/code-review",
+    "./skills/engineering/implement",
     "./skills/engineering/pizza1",
     "./skills/engineering/readonly",
+    "./skills/engineering/tdd",
+    "./skills/engineering/to-spec",
+    "./skills/engineering/to-tickets",
+    "./skills/productivity/grill-with-docs",
     "./skills/productivity/grill-with-docs-requiem",
+    "./skills/productivity/skill-router",
     "./skills/productivity/to-issues"
   ]
 }

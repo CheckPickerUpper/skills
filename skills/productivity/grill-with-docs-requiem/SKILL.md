@@ -1,7 +1,19 @@
 ---
 name: grill-with-docs-requiem
 description: A high-judgment design interview that sharpens plans in useful batches and records settled domain language and ADRs as the conversation progresses.
+short_description: "Sharpen plans and record settled decisions."
 disable-model-invocation: true
+catalog:
+  stage: "alignment"
+  order: 80
+  aliases:
+    - "batch design questions"
+    - "record settled decisions"
+  when: "A plan needs a design interview that resolves real forks and records domain language."
+  where_it_fits: "Use for a deeper alignment conversation when the decision record matters as much as the questions."
+  success_signals:
+    - "Only consequential questions reach the user."
+    - "Settled terms and ADR-worthy decisions are recorded as the conversation moves."
 ---
 
 # grill-with-docs-requiem

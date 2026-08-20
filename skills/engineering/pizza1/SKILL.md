@@ -1,6 +1,18 @@
 ---
 name: pizza1
 description: "Justify by correctness, never by convention. Use when a design, fix, API, macro, library surface, hook message, or naming decision is defended by 'it's what the codebase does', 'the established pattern', 'the canonical lane does it', 'more ergonomic', 'less churn', 'already wired', 'smallest fix', 'compatibility', 'legacy path', or 'out of scope to change'. Prevalence and transition size are not evidence. Re-derive from correctness, name the bug the alternative causes, and be confident in the correct call even when the codebase already happens to do it."
+short_description: "Argue from correctness, not convention."
+catalog:
+  stage: "principles"
+  order: 91
+  aliases:
+    - "argue from correctness"
+    - "challenge convention"
+  when: "A design decision is being defended by precedent, ergonomics, churn, or transition size."
+  where_it_fits: "Use whenever a decision needs its invariant and failure mode named."
+  success_signals:
+    - "The chosen shape names the invariant it preserves."
+    - "The rejected shape has a concrete failure attached to it."
 ---
 
 # /pizza1

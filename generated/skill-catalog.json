@@ -1,0 +1,308 @@
+{
+  "version": 1,
+  "generated_from": "skills/{engineering,productivity,misc}/**/SKILL.md",
+  "display_name_rule": "kebab_to_title_case(name)",
+  "skills": [
+    {
+      "name": "antimatter-code-quality-review",
+      "display_name": "Antimatter Code Quality Review",
+      "bucket": "engineering",
+      "path": "skills/engineering/antimatter-code-quality-review",
+      "docs": "docs/engineering/antimatter-code-quality-review.md",
+      "description": "Total annihilation: no finding survives unless it survives refutation. An unusually strict maintainability and structural-quality audit of a diff — review frame, intent/spec fit, repo standards, abstraction quality, cohesion, type/boundary cleanliness, duplication, control-flow tangles, and correct-by-construction opportunities. Use for a deep code-quality audit, a harsh pre-merge review, or to determine what structural change makes a class of bug impossible rather than merely caught. Stricter than a conventional review because every finding must survive an adversarial refutation pass, ship with a concrete before→after, and prove it preserves behavior. Severity theater is prohibited: only provable findings are reported.",
+      "short_description": "Strict code-quality review with adversarial refutation.",
+      "allow_implicit_invocation": true,
+      "stage": "review",
+      "order": 90,
+      "aliases": [
+        "strict code-quality review",
+        "adversarial review"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $antimatter-code-quality-review for Strict code-quality review with adversarial refutation.",
+      "brand_color": null,
+      "dependencies": null,
+      "products": []
+    },
+    {
+      "name": "code-review",
+      "display_name": "Code Review",
+      "bucket": "engineering",
+      "path": "skills/engineering/code-review",
+      "docs": "docs/engineering/code-review.md",
+      "description": "Review a diff from a fixed point on two axes: documented repository standards and fit to the originating spec or ticket. Use for a branch, pull request, or work-in-progress after implementation and tests.",
+      "short_description": "Review a diff for standards and spec fit.",
+      "allow_implicit_invocation": true,
+      "stage": "review",
+      "order": 6,
+      "aliases": [
+        "review this diff",
+        "review the branch",
+        "pre-merge review"
+      ],
+      "predecessors": [
+        "tdd"
+      ],
+      "default_prompt": "Use $code-review to review this diff for standards and spec fit.",
+      "brand_color": "#DB2777",
+      "dependencies": null,
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "implement",
+      "display_name": "Implement",
+      "bucket": "engineering",
+      "path": "skills/engineering/implement",
+      "docs": "docs/engineering/implement.md",
+      "description": "Implement an approved spec or unblocked ticket slice, keeping the work inside its acceptance criteria and handing the result to test-driven development and review. Use when the user is ready to build from agreed work.",
+      "short_description": "Implement an approved ticket slice.",
+      "allow_implicit_invocation": false,
+      "stage": "implementation",
+      "order": 4,
+      "aliases": [
+        "implement the spec",
+        "build from the tickets",
+        "start the implementation"
+      ],
+      "predecessors": [
+        "to-tickets"
+      ],
+      "default_prompt": "Use $implement to build the first unblocked slice from this spec.",
+      "brand_color": "#16A34A",
+      "dependencies": null,
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "pizza1",
+      "display_name": "Pizza1",
+      "bucket": "engineering",
+      "path": "skills/engineering/pizza1",
+      "docs": "docs/engineering/pizza1.md",
+      "description": "Justify by correctness, never by convention. Use when a design, fix, API, macro, library surface, hook message, or naming decision is defended by 'it's what the codebase does', 'the established pattern', 'the canonical lane does it', 'more ergonomic', 'less churn', 'already wired', 'smallest fix', 'compatibility', 'legacy path', or 'out of scope to change'. Prevalence and transition size are not evidence. Re-derive from correctness, name the bug the alternative causes, and be confident in the correct call even when the codebase already happens to do it.",
+      "short_description": "Argue from correctness, not convention.",
+      "allow_implicit_invocation": true,
+      "stage": "principles",
+      "order": 91,
+      "aliases": [
+        "argue from correctness",
+        "challenge convention"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $pizza1 for Argue from correctness, not convention.",
+      "brand_color": null,
+      "dependencies": null,
+      "products": []
+    },
+    {
+      "name": "readonly",
+      "display_name": "Readonly",
+      "bucket": "engineering",
+      "path": "skills/engineering/readonly",
+      "docs": "docs/engineering/readonly.md",
+      "description": "User-invoked modifier for evidence-first read-only investigation. Use when the user appends /readonly to a question or another skill request: answer by checking the codebase and available read-only sources, do not implement, do not open issues, do not mutate local or remote state, and do not guess with 'likely' or 'probably' when evidence can be gathered.",
+      "short_description": "Evidence-first read-only investigation.",
+      "allow_implicit_invocation": false,
+      "stage": "investigation",
+      "order": 92,
+      "aliases": [
+        "read-only investigation",
+        "prove this without changing anything"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $readonly for Evidence-first read-only investigation.",
+      "brand_color": null,
+      "dependencies": null,
+      "products": []
+    },
+    {
+      "name": "tdd",
+      "display_name": "Tdd",
+      "bucket": "engineering",
+      "path": "skills/engineering/tdd",
+      "docs": "docs/engineering/tdd.md",
+      "description": "Use test-driven development at agreed public seams: write a failing behavior test, make the smallest change that passes, then verify the refactor. Use when building a feature or fixing a bug test-first, or when the work mentions red-green-refactor.",
+      "short_description": "Drive behavior from red-green-refactor.",
+      "allow_implicit_invocation": true,
+      "stage": "tdd",
+      "order": 5,
+      "aliases": [
+        "test-driven development",
+        "red green refactor",
+        "write the test first"
+      ],
+      "predecessors": [
+        "implement"
+      ],
+      "default_prompt": "Use $tdd to drive this change through a red-green-refactor loop.",
+      "brand_color": "#EA580C",
+      "dependencies": null,
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "to-spec",
+      "display_name": "To Spec",
+      "bucket": "engineering",
+      "path": "skills/engineering/to-spec",
+      "docs": "docs/engineering/to-spec.md",
+      "description": "Turn the current conversation and repository understanding into a user-facing feature spec without starting a new interview. Use after alignment when the behavior, scope, and decisions need one durable specification.",
+      "short_description": "Turn aligned decisions into a feature spec.",
+      "allow_implicit_invocation": false,
+      "stage": "spec",
+      "order": 2,
+      "aliases": [
+        "write a feature spec",
+        "turn this into a spec",
+        "synthesize the spec"
+      ],
+      "predecessors": [
+        "grill-with-docs"
+      ],
+      "default_prompt": "Use $to-spec to turn our aligned decisions into a feature spec.",
+      "brand_color": "#2563EB",
+      "dependencies": null,
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "to-tickets",
+      "display_name": "To Tickets",
+      "bucket": "engineering",
+      "path": "skills/engineering/to-tickets",
+      "docs": "docs/engineering/to-tickets.md",
+      "description": "Break a spec or aligned plan into tracer-bullet tickets with observable outcomes, explicit blockers, and a dependency order. Use after a spec when implementation needs independently verifiable vertical slices.",
+      "short_description": "Break a spec into vertical tickets.",
+      "allow_implicit_invocation": false,
+      "stage": "tickets",
+      "order": 3,
+      "aliases": [
+        "break this into vertical tickets",
+        "tracer-bullet tickets",
+        "split the spec into tickets"
+      ],
+      "predecessors": [
+        "to-spec"
+      ],
+      "default_prompt": "Use $to-tickets to break this spec into vertical tickets with real blockers.",
+      "brand_color": "#0891B2",
+      "dependencies": {
+        "tools": [
+          {
+            "type": "mcp",
+            "value": "github",
+            "description": "Publish approved tickets and native blocking relationships when GitHub is configured.",
+            "transport": "streamable_http"
+          }
+        ]
+      },
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "grill-with-docs",
+      "display_name": "Grill With Docs",
+      "bucket": "productivity",
+      "path": "skills/productivity/grill-with-docs",
+      "docs": "docs/productivity/grill-with-docs.md",
+      "description": "Align a fuzzy feature idea by asking only consequential questions, settling domain language, and recording decisions before a spec is written. Use when a design, product idea, or plan needs alignment.",
+      "short_description": "Align a fuzzy idea and record decisions.",
+      "allow_implicit_invocation": false,
+      "stage": "alignment",
+      "order": 1,
+      "aliases": [
+        "align this idea",
+        "design interview",
+        "pressure-test the plan"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $grill-with-docs to align this idea before we write its spec.",
+      "brand_color": "#7C3AED",
+      "dependencies": null,
+      "products": [
+        "codex"
+      ]
+    },
+    {
+      "name": "grill-with-docs-requiem",
+      "display_name": "Grill With Docs Requiem",
+      "bucket": "productivity",
+      "path": "skills/productivity/grill-with-docs-requiem",
+      "docs": "docs/productivity/grill-with-docs-requiem.md",
+      "description": "A high-judgment design interview that sharpens plans in useful batches and records settled domain language and ADRs as the conversation progresses.",
+      "short_description": "Sharpen plans and record settled decisions.",
+      "allow_implicit_invocation": false,
+      "stage": "alignment",
+      "order": 80,
+      "aliases": [
+        "batch design questions",
+        "record settled decisions"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $grill-with-docs-requiem for Sharpen plans and record settled decisions.",
+      "brand_color": null,
+      "dependencies": null,
+      "products": []
+    },
+    {
+      "name": "skill-router",
+      "display_name": "Skill Router",
+      "bucket": "productivity",
+      "path": "skills/productivity/skill-router",
+      "docs": "docs/productivity/skill-router.md",
+      "description": "Choose the one skill that best matches the user's current intent from the generated catalog, honoring explicit skill names and the alignment-to-review workflow. Use when the right skill is unclear or the user asks what to use next.",
+      "short_description": "Choose the next skill from the catalog.",
+      "allow_implicit_invocation": true,
+      "stage": "routing",
+      "order": 0,
+      "aliases": [
+        "which skill should I use",
+        "route this task",
+        "what should I use next"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $skill-router to choose the right next skill for this request.",
+      "brand_color": "#475569",
+      "dependencies": null,
+      "products": []
+    },
+    {
+      "name": "to-issues",
+      "display_name": "To Issues",
+      "bucket": "productivity",
+      "path": "skills/productivity/to-issues",
+      "docs": "docs/productivity/to-issues.md",
+      "description": "Create high-level GitHub issues from a plan, bug, finding, or PRD. Use when filing issues or turning work into issue-sized slices; shape observable acceptance criteria and publish directly with GitHub.",
+      "short_description": "Turn plans into observable GitHub issues.",
+      "allow_implicit_invocation": true,
+      "stage": "tickets",
+      "order": 81,
+      "aliases": [
+        "publish GitHub issues",
+        "turn a plan into issues"
+      ],
+      "predecessors": [],
+      "default_prompt": "Use $to-issues for Turn plans into observable GitHub issues.",
+      "brand_color": null,
+      "dependencies": {
+        "tools": [
+          {
+            "type": "mcp",
+            "value": "github",
+            "description": "GitHub is the publication surface for issues and relationships.",
+            "transport": "streamable_http"
+          }
+        ]
+      },
+      "products": [
+        "codex"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+name: Skill artifacts
+
+on:
+  push:
+    paths:
+      - "skills/**"
+      - "scripts/**"
+      - "evals/**"
+      - "generated/**"
+      - "docs/**"
+      - ".claude-plugin/plugin.json"
+  pull_request:
+    paths:
+      - "skills/**"
+      - "scripts/**"
+      - "evals/**"
+      - "generated/**"
+      - "docs/**"
+      - ".claude-plugin/plugin.json"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Check generated skill surfaces
+        run: python3 scripts/generate-skill-artifacts.py --check
+      - name: Run routing behavior evals
+        run: python3 scripts/evaluate-skill-router.py
