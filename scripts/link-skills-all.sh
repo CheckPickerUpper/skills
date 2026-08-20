@@ -15,7 +15,7 @@ if [ -n "${SKILL_CLIENT_DIRS:-}" ]; then
 fi
 
 mapfile -t SKILL_DIRS < <(
-  find "$REPO/skills" -mindepth 2 -maxdepth 2 -type f -name SKILL.md -print |
+  find "$REPO/skills" -mindepth 3 -maxdepth 3 -type f -name SKILL.md -print |
     sort |
     while IFS= read -r skill_md; do
       dirname "$skill_md"
