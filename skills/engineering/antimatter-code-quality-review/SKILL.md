@@ -1,6 +1,6 @@
 ---
 name: antimatter-code-quality-review
-description: "Total annihilation: no finding survives unless it survives refutation. An unusually strict maintainability and structural-quality audit of a diff — review frame, intent/spec fit, repo standards, abstraction quality, cohesion, type/boundary cleanliness, duplication, control-flow tangles, and correct-by-construction opportunities. Use for a deep code-quality audit, a harsh pre-merge review, or to determine what structural change makes a class of bug impossible rather than merely caught. Stricter than a conventional review because every finding must survive an adversarial refutation pass, ship with a concrete before→after, and prove it preserves behavior. Severity theater is prohibited: only provable findings are reported."
+description: "Total annihilation: no finding survives unless it survives refutation. An unusually strict maintainability and structural-quality audit of a diff — review frame, intent/spec fit, repo standards, abstraction quality, cohesion, type/boundary cleanliness, duplication, control-flow tangles, missed extractions and invented variation, data structures whose cost grows faster than they need to, allocation on repeating paths, and correct-by-construction opportunities. Use for a deep code-quality audit, a harsh pre-merge review, or to determine what structural change makes a class of bug impossible rather than merely caught. Stricter than a conventional review because every finding must survive an adversarial refutation pass, ship with a concrete before→after, and prove it preserves behavior. Severity theater is prohibited: only provable findings are reported."
 ---
 
 # /antimatter-code-quality-review
@@ -76,6 +76,9 @@ Survivors are ranked by blast radius and partitioned into *Blocks merge* and *Su
 - **Types and boundaries** — unnecessary optionality, `any` / `unknown`, cast-heavy code, and loosely-shaped objects standing in for explicit typed models.
 - **Duplication and ownership** — feature-specific logic leaking into shared utilities, re-implemented canonical helpers, and architectural-boundary drift.
 - **Intent fit** — whether the diff omits required behavior, adds behavior the intent source did not ask for, or implements the right words with the wrong observable behavior. Skip this dimension when no intent source was found.
+- **Algorithmic cost** — whether the data structure fits the operation performed on it. A lookup by scanning, a loop nested over the same collection, a sort where one pass answers the question: each names a shape the data could have had instead.
+- **Allocation** — whether the change allocates on a path that repeats. A collection, closure, or copy built fresh per call is free once and expensive every frame.
+- **Generalization** — whether one form is written twice under two names, and whether an abstraction's parameters are ones some instance actually supplies. Both directions are findings: a hand-written second copy of a nameable form, and a knob no instance turns.
 - **Correct-by-construction** — whether a type, boundary, or data-shape change renders the finding's entire class unrepresentable rather than caught. This is the highest-value finding when available.
 
 ## Smell prompts
@@ -88,6 +91,21 @@ Use these as search prompts only. They are never findings by themselves, and eac
 - **Types and boundaries:** data clumps, primitive obsession, refused inheritance contracts.
 - **Duplication and ownership:** duplicated code, feature envy, message chains.
 - **Intent fit:** missing requirement, scope creep, or a behavior that satisfies the letter of the request while violating its observable purpose.
+- **Algorithmic cost:** iteration nested over one collection, lookup by scan, repeated sorting, a value recomputed inside a loop that cannot change it.
+- **Allocation:** a collection, closure, or copy built per call; rebuilding a whole collection to append one element; a defensive copy of a value nobody mutates.
+- **Generalization:** the same shape written twice under two names; a type parameter, strategy seam, or config field no instance varies.
+
+## Route a survivor to its lens
+
+A survivor usually has a shape with a known procedure behind it. Load the matching reference and fold its result into the finding's before → after. These references are self-contained; nothing outside this skill has to be installed.
+
+| Load | When the survivor is |
+|---|---|
+| `references/construction-lens.md` | a state the code can be told to be in and should not be able to be: a redundant field, a union arm that means nothing, a check standing where a shape belongs |
+| `references/generalization-lens.md` | one form written twice under two names, or a parameter no instance supplies |
+| `references/performance-lens.md` | an operation whose cost grows faster than it needs to, or work allocated on a path that repeats |
+
+Route only survivors. A provisional finding that has not passed Phase 2 does not earn a lens.
 
 ## Required evidence per finding
 
@@ -96,7 +114,7 @@ Each surviving finding carries:
 1. **Before → after.** A concrete restructuring. A finding whose "after" cannot be written is hand-waving and is destroyed.
 2. **Defect removed.** The specific complexity or bug the change eliminates — what fails today that would not.
 3. **Behavior-preservation.** The basis for equivalence: pure move, test coverage, or type check. A change whose equivalence cannot be guaranteed is downgraded to a flagged risk.
-4. **Blast radius.** The call sites and modules affected. This determines rank.
+4. **Blast radius.** The call sites and modules affected. This determines rank. A performance finding ranks by what grows and how often its path runs, not by how many call sites it has: one line on a per-frame path outranks a wide but cold change.
 5. **Cost.** Churn and regression risk. A high-cost, low-payoff restructuring is a note, not a blocker.
 
 ## File size
@@ -128,5 +146,6 @@ A change adds a third `if (feature === 'x')` branch inside a shared `renderRow` 
 4. Inventory existing abstractions before proposing new ones.
 5. Examine every applicable dimension; report clean dimensions as clean and unavailable dimensions as unavailable.
 6. Destroy every finding that fails refutation, lacks a before→after, or cannot be shown behavior-preserving.
-7. Rank survivors by blast radius; partition blocks-merge from suggestion; attach cost to each.
-8. Approve cleanly when the change is clean. No severity theater.
+7. Route each survivor whose shape matches a lens through that reference before writing its before → after.
+8. Rank survivors by blast radius; partition blocks-merge from suggestion; attach cost to each.
+9. Approve cleanly when the change is clean. Report every clean dimension by name, including the ones that found nothing.
