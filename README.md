@@ -39,7 +39,7 @@ Skills for code, architecture, APIs, and design decisions, with an emphasis on c
 General workflow tools.
 
 - **[grill-with-docs-requiem](./skills/productivity/grill-with-docs-requiem/SKILL.md)** — A design interview that asks useful batches, infers obvious answers, and records settled domain language and ADRs as the conversation progresses. Use when sharpening a plan while maintaining docs.
-- **[to-issues](./skills/productivity/to-issues/SKILL.md)** — An improvement on Matt Pocock's `to-issues`: break a plan into tracer-bullet vertical slices, publish them, and wire the blocked-by/parent edges into native GitHub sub-issues + dependencies so the tracker shows the real tree (not just prose). Use when turning a plan into issues.
+- **[to-issues-clearly](./skills/productivity/to-issues-clearly/SKILL.md)** — Create GitHub issues whose titles a stranger can act on. Refuses rhetoric, sarcasm, personified code, and type vocabulary dressed as domain language; splits issues by whether anything visibly breaks; errs granular, demands watchable acceptance criteria, and wires real GitHub sub-issue edges rather than prose references. Use when turning a plan, audit or bug report into tracked work.
 
 ### Misc
 
