@@ -2,6 +2,7 @@
   "name": "checkpickerupper-skills",
   "skills": [
     "./skills/engineering/antimatter-code-quality-review",
+    "./skills/engineering/antimatter-codebase-structure-review",
     "./skills/engineering/pizza1",
     "./skills/engineering/readonly",
     "./skills/productivity/compose-goal",
