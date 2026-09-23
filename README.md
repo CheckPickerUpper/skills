@@ -54,3 +54,10 @@ Tools kept around but rarely used. None yet.
 ./scripts/list-skills.sh
 ./scripts/link-skills.sh
 ```
+
+## Publishing
+
+Publish skills, catalog entries, and plugin registrations directly to `main`
+from a task worktree after validation. Routine releases do not use GitHub issues
+or pull requests. If GitHub rejects a direct push, report the exact restriction
+instead of routing the change through an issue or pull request.
