@@ -1,92 +1,172 @@
 ---
 name: dependency-trace
-description: "Dependency trace: derive the correctness graph before implementation. Use when the user asks for dependency order, foundations, or a lowest-to-highest flow for a feature, especially when they ask for the correct road before implementation or reject MVP/fastest-path planning."
-short_description: "Derive the correctness order before implementation."
+description: "Dependency trace: clarify scope, close the recursive capability graph, and derive the correctness order before implementation. Use when the user asks what a feature uses, what its dependencies use, dependency order, foundations, or a lowest-to-highest flow."
+short_description: "Clarify scope and derive the full dependency graph."
 allow_implicit_invocation: true
 ---
 
 # Dependency trace
 
-Dependency trace is the leading word for finding the correct road from
-foundational contracts to higher behavior.
+Dependency trace is the leading word for finding the complete correctness road
+from foundational contracts to higher behavior.
 
 <what-to-do>
 Enter dependency-trace mode when the user asks for dependency order,
-foundations, the correct road, a lowest-to-highest flow, or what must exist
-before a feature. Treat the requested feature as the destination of the
-analysis. Do not let the original feature request pull the work into
-implementation before the trace is complete.
+foundations, the correct road, a lowest-to-highest flow, what a feature uses,
+or what its dependencies use. Run the scope gate before searching the
+repository or naming an issue.
 </what-to-do>
 
 <supporting-info>
-Ordinary planning asks what can be built first. Dependency trace asks what
-must exist for the result to be correct. Those are different orders.
+Ordinary planning asks what can be built first. Dependency trace first closes
+the complete capability surface, then asks what must exist for that surface to
+be correct. Those are different orders.
 </supporting-info>
 
 ## Procedure
 
 <what-to-do>
-### 1. Freeze the objective
+### 1. Clarify and lock scope
+
+Read the preceding conversation before choosing the target. Preserve the
+user's quantifiers and constraints. “Every,” “all,” “full,” “complete,”
+“proper,” and “system-wide” establish capability-complete scope. A request for
+“what next” inherits the established scope; it does not narrow it to the
+nearest issue or first runnable path.
+
+When the conversation leaves the scope open and the choice would change the
+graph, ask one focused clarification before tracing. Use the host's native
+question tool when available; otherwise ask in prose:
+
+```text
+Should this dependency trace cover:
+
+A. the complete capability surface, including everything it uses and
+   everything those dependencies use; or
+B. one bounded vertical slice, such as one input-to-runtime path?
+
+I recommend A when the goal is to make the capability generally possible.
+```
+
+If the conversation already answers the question, state the locked scope and
+continue without asking a redundant question.
+
+Completion criterion: the output records the user's goal, locked scope, and
+the evidence or answer that resolved any scope ambiguity before repository
+exploration begins.
+</what-to-do>
+
+<supporting-info>
+The skill failed when “make every ability possible” became “make one key press
+activate one ability.” Scope is a graph boundary, not a descriptive preface.
+</supporting-info>
+
+<what-to-do>
+### 2. Freeze the objective inside that scope
 
 Begin with this header:
 
 ```text
 Mode: dependency trace
-Target: {behavior being worked toward}
+Scope: {capability-complete or bounded slice}
+Goal: {user's requested outcome}
+Target surface: {the complete capability surface in that scope}
 Invariant: {what must never be false when it is complete}
 Deliverable: {dependency graph and topological order}
 Work state: analysis only
 ```
 
-Completion criterion: the target, invariant, deliverable, and work state are
-written before any task or issue is ranked.
+Completion criterion: the target surface is broad enough to match the locked
+scope, and no issue, task, or implementation path has been selected as the
+target by itself.
 </what-to-do>
 
 <supporting-info>
-The original feature request supplies the destination. It does not decide
-which prerequisite is foundational, and it does not authorize a fastest-path
-implementation.
+The original request supplies the goal and destination. It does not decide
+which prerequisite is foundational, and an issue number cannot define the
+capability surface.
 </supporting-info>
 
 <what-to-do>
-### 2. Trace from the destination to the leaves
+### 3. Close the capability graph before ordering it
 
-Start at the target behavior and list every fact, ownership relation,
-boundary, and shared contract it requires. For each requirement, follow the
-actual producer, writer, reader, caller, schema, or design document downward
-until reaching a leaf with no unresolved prerequisite.
+Start at the complete target surface and inventory every concept it declares,
+reads, writes, owns, produces, consumes, executes, or uses transitively. Check
+all applicable surfaces before ordering anything:
 
-Trace downward to discover the graph; present the finished order upward.
+- declaration and authoring;
+- inputs and activation;
+- ownership, grants, and lending;
+- effects and outcomes;
+- tags, attributes, formulas, conditions, facts, and world conditions;
+- costs and cooldowns;
+- lifecycle, removal, spawning, persistence, and networking;
+- verification, content, and tests.
 
-Completion criterion: every requirement of the target reaches an evidenced
-leaf, or is explicitly listed as unresolved.
+For every discovered concept, recursively expand its direct uses with this
+edge:
+
+```text
+A ──uses──▶ B means A directly relies on B.
+```
+
+Trace downward to discover the graph; present the finished build order upward.
+Do not stop at the first input, runtime, or user-visible path.
+
+Completion criterion: every applicable surface is marked found, intentionally
+not applicable, unresolved, or missing; every found concept has its direct
+uses expanded; and no discovered concept is silently omitted.
 </what-to-do>
 
 <what-to-do>
-### 3. Prove every edge
+### 4. Prove ownership and evidence
 
-Use this orientation:
+For every node, record its domain owner, design source, type or schema,
+producer, consumer, implementation, open issue, or capability gap when the
+repository provides one. Use `unknown after checking` when evidence is absent;
+leave the branch unresolved instead of filling it with a guess.
 
-```text
-A → B means B cannot be correct without A.
-```
+An issue number, existing implementation, empty catalog, or “ready” label
+proves identity or current state only. It does not prove that the node is a
+dependency or that the current path is correct.
 
-For every edge, write:
-
-```text
-B depends on A because {specific correctness or acceptance consequence}.
-```
-
-Use repository evidence when the edge depends on existing code or documents.
-An issue number, existing implementation, or “ready” label is evidence of
-identity only; it is not evidence of dependency.
-
-Completion criterion: every edge has a reason that names the bad state or
-missing behavior caused by omitting its prerequisite.
+Completion criterion: every node in the capability graph has evidence, an
+explicit unknown, or a documented reason it is not applicable.
 </what-to-do>
 
 <what-to-do>
-### 4. Classify the nodes
+### 5. Draw both dependency diagrams
+
+Show the graph before showing the numbered order. Always include both:
+
+1. **Usage diagram:** the complete semantic closure, with `uses` arrows from
+   the requested capability to everything it requires transitively.
+2. **Build diagram:** the correctness order, with `before` arrows from the
+   foundational leaves to higher functionality.
+
+Use labeled nodes and edge labels. If the graph is wide, split it into
+branch diagrams that share the same root; do not replace a branch with prose.
+
+Use this orientation for the build diagram:
+
+```text
+A ──before──▶ B means B cannot be correct without A.
+```
+
+For every edge in either diagram, write the corresponding proof:
+
+```text
+A uses B because {specific semantic requirement}.
+B must follow A because {specific correctness or acceptance consequence}.
+```
+
+Completion criterion: both diagrams contain every graph node, every edge is
+labeled with its direction, and every edge has a proof or is shown as
+unresolved.
+</what-to-do>
+
+<what-to-do>
+### 6. Classify nodes and derive the build order
 
 Label each node as one of:
 
@@ -96,15 +176,8 @@ Label each node as one of:
 - **Higher functionality** — behavior composed from lower functionality.
 
 Resolve a shared design contract before functionality that assumes it.
-
-Completion criterion: each node has one classification and its owner is named
-when the repository proves one.
-</what-to-do>
-
-<what-to-do>
-### 5. Produce the correctness order
-
-Topologically order the graph from:
+Reverse the proven usage dependencies into `before` edges, then topologically
+order the result from:
 
 ```text
 leaf design contract → shared shape → lower functionality → higher functionality
@@ -113,12 +186,12 @@ leaf design contract → shared shape → lower functionality → higher functio
 Independent branches may sit beside one another. Do not force a sequence
 between nodes that have no edge.
 
-Completion criterion: the order contains every graph node exactly once, and
-every dependency points from an earlier node to a later node.
+Completion criterion: each node has one classification and owner where known,
+and the order contains every graph node exactly once with no reversed edge.
 </what-to-do>
 
 <what-to-do>
-### 6. Expose false foundations and incidental sequencing
+### 7. Expose false foundations and incidental sequencing
 
 Create separate sections for:
 
@@ -128,20 +201,21 @@ Create separate sections for:
   required for correctness.
 - **Unresolved:** facts or design decisions that prevent a proven edge.
 
-Treat issue IDs as labels attached after the graph is correct. They must not
-generate the graph.
+Treat issue IDs as annotations added after the conceptual graph is complete.
+They must not generate the graph.
 
 Completion criterion: every proposed shortcut is either proved as a real edge,
 listed as incidental sequencing, or rejected as a false foundation.
 </what-to-do>
 
 <what-to-do>
-### 7. Stop at the analysis boundary
+### 8. Stop at the analysis boundary
 
-Report the trace and stop. A dependency trace does not create issues, edit
-code, commit, or announce readiness to build. If implementation is explicitly
-requested in the same instruction, report the completed trace first and keep
-implementation as a separate phase.
+Report the scope, coverage, both diagrams, edge proofs, build order, false
+foundations, incidental sequencing, and unresolved branches. A dependency
+trace ends at analysis. If implementation is explicitly requested in the same
+instruction, report the completed trace first and keep implementation as a
+separate phase.
 
 Completion criterion: the final line states whether analysis is complete and
 whether implementation started.
@@ -150,13 +224,15 @@ whether implementation started.
 ## Ordering guardrails
 
 <what-to-do>
-Use correctness as the ordering criterion. Cost, existing wiring, issue size,
+Use correctness as the ordering criterion. Preserve capability-complete scope
+when that is what the user requested. Cost, existing wiring, issue size,
 shortest path, first playable result, MVP, and fastest implementation do not
 break ties unless the user explicitly requests that optimization.
 
-Call a change a dependency only when its absence makes a downstream result
-incorrect or prevents its acceptance criteria. “It makes later work easier”
-is not enough.
+Call a semantic edge a dependency only when the upstream concept is actually
+used. Call a build edge a dependency only when its absence makes a downstream
+result incorrect or prevents its acceptance criteria. “It makes later work
+easier” is not enough.
 </what-to-do>
 
 <supporting-info>
@@ -170,17 +246,46 @@ the feature while permitting a forbidden state is not an available route.
 <what-to-do>
 Use this shape:
 
-```md
+~~~md
 ## Dependency trace
 
 Mode: dependency trace
-Target: ...
+Scope: capability-complete or bounded slice
+Goal: ...
+Target surface: ...
 Invariant: ...
 Work state: analysis only
 
-### Dependency edges
+### Scope decision
 
-- A → B — B depends on A because ...
+- ...
+
+### Usage dependency diagram
+
+```text
+┌──────────────┐    uses    ┌──────────────┐
+│ A            │───────────▶│ B            │
+└──────────────┘            └──────────────┘
+```
+
+### Coverage ledger
+
+| Surface | Direct uses expanded | Owner/evidence | Status |
+|---|---|---|---|
+| ... | ... | ... | found / not applicable / unresolved / gap |
+
+### Build dependency diagram
+
+```text
+┌──────────────────┐  before  ┌────────────────────┐
+│ foundational leaf│─────────▶│ higher functionality│
+└──────────────────┘          └────────────────────┘
+```
+
+### Edge proofs
+
+- A ──uses──▶ B — A uses B because ...
+- A ──before──▶ B — B must follow A because ...
 
 ### Correctness order
 
@@ -200,21 +305,47 @@ Work state: analysis only
 - ...
 
 Analysis complete. Implementation started: no.
-```
+~~~
 
-Completion criterion: a reader can verify the invariant, every edge, the
-leaf-to-higher order, and the stopping boundary without reconstructing the
-agent’s reasoning.
+Completion criterion: a reader can verify the locked scope, complete coverage,
+both diagrams, every edge, the leaf-to-higher order, and the stopping boundary
+without reconstructing the agent's reasoning.
 </what-to-do>
 
 ## Example
 
 <supporting-info>
-For an ability system, a global list assigned to every fighter may make a
-demo run, but it is a false foundation if the invariant says a fighter can
-use only abilities lent to them. A lender/cause contract can therefore be a
-true prerequisite for a grant, the grant for granted-only runtime creation,
-and the runtime for the first authored ability. World-condition access belongs
-in the shared condition contract when an ability must be usable only under a
-world condition; it is not a later polish item.
+For a capability-complete ability trace, the usage diagram must expand beyond
+the key path:
+
+```text
+┌──────────────┐    uses    ┌────────────────┐
+│ Ability      │───────────▶│ GameplayEffect │
+└──────┬───────┘            └───────┬────────┘
+       │ uses                        │ uses
+       ▼                             ├────────▶ Tags / Attributes / Formulas
+┌──────────────┐                     ├────────▶ Conditions / Facts
+│ Grant /      │                     └────────▶ WorldConditions
+│ Lender/Input │
+└──────────────┘
+```
+
+The build diagram is a separate view:
+
+```text
+┌──────────────────────┐  before  ┌──────────────┐
+│ Facts / WorldConditions│───────▶│ Conditions   │
+└──────────────────────┘          └──────┬───────┘
+                                         │ before
+┌──────────────────────┐                 ▼
+│ Tags / Attributes    │────────────▶ GameplayEffects
+└──────────────────────┘                 │ before
+                                         ▼
+                                   Ability execution
+```
+
+A global list assigned to every fighter may make a demo run, but it is a false
+foundation if the invariant says a fighter can use only abilities lent to
+them. The diagrams must show that false foundation separately rather than
+letting it define the target.
 </supporting-info>
