@@ -52,8 +52,48 @@ Tools kept around but rarely used. None yet.
 
 ```bash
 ./scripts/list-skills.sh
-./scripts/link-skills.sh
+./scripts/list-skills.sh --client codex
+./scripts/link-skills.sh --client claude
+./scripts/link-skills.sh --client codex
+./scripts/link-skills.sh --client gemini
+./scripts/link-skills.sh --client pi
+./scripts/link-skills-all.sh
+# Replace stale real copies with links to this repo, keeping recoverable backups.
+./scripts/link-skills-all.sh --replace-existing
 ```
+
+## Client targeting
+
+Skills are universal by default. Add an explicit allow-list only when a skill
+depends on one client's tools or runtime:
+
+```yaml
+name: codex-only-workflow
+description: Run a workflow that requires Codex-only capabilities.
+clients: [codex]
+```
+
+The registered client names are `claude`, `codex`, `gemini`, `antigravity`,
+`antigravity-cli`, and `pi`. Use a list when a skill supports more than one
+client, for example `clients: [claude, codex]`. An omitted `clients` field
+means every registered client. The registry lives in
+`scripts/agent-targets.json`, so adding a client does not require changing the
+metadata parser or linker. The linker validates unknown names and removes an
+old symlink from a client when a skill no longer targets it. Skill instructions
+remain one shared body; only discovery and delivery are client-specific.
+
+The default destinations are `~/.claude/skills`, `~/.agents/skills`,
+`~/.gemini/skills`, `~/.gemini/config/skills`,
+`~/.gemini/antigravity-cli/skills`, and `~/.pi/agent/skills`. Set the
+destination environment variable named for the client in
+`scripts/agent-targets.json` when a client uses a different destination.
+
+The `clients` field is enforced by this repository's list and link scripts.
+Other installers must apply the same filter before adding a skill to their
+catalog; metadata alone cannot stop a client that ignores it from loading the
+file. Keep every published skill in the README catalogs, but add a
+client-targeted skill to `.claude-plugin/plugin.json` only when it targets
+Claude or is universal.
 
 ## Publishing
 

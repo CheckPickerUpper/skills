@@ -1,0 +1,26 @@
+{
+  "claude": {
+    "destination_env": "CLAUDE_SKILLS_DIR",
+    "default_destination": "~/.claude/skills"
+  },
+  "codex": {
+    "destination_env": "CODEX_SKILLS_DIR",
+    "default_destination": "~/.agents/skills"
+  },
+  "gemini": {
+    "destination_env": "GEMINI_SKILLS_DIR",
+    "default_destination": "~/.gemini/skills"
+  },
+  "antigravity": {
+    "destination_env": "ANTIGRAVITY_SKILLS_DIR",
+    "default_destination": "~/.gemini/config/skills"
+  },
+  "antigravity-cli": {
+    "destination_env": "ANTIGRAVITY_CLI_SKILLS_DIR",
+    "default_destination": "~/.gemini/antigravity-cli/skills"
+  },
+  "pi": {
+    "destination_env": "PI_SKILLS_DIR",
+    "default_destination": "~/.pi/agent/skills"
+  }
+}
