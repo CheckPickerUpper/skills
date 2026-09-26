@@ -25,7 +25,7 @@ The review surface is the diff against a fixed point. If the user supplied a com
 
 ## Excluded
 
-Whitespace, naming-only changes, and any defect a linter or formatter catches are out of scope. Those surfaces are owned by automated tooling and are not reported here.
+Whitespace, style-only naming changes, and any defect a linter or formatter catches are out of scope. Style includes length, casing, and similar preferences. A name that contradicts its definition is not a style-only naming change and is in scope under Naming truth.
 
 ## Procedure
 
@@ -52,7 +52,9 @@ Inventory local standards before applying generic taste:
 - Inventory existing conventions, shared utilities, abstractions, and type vocabulary before proposing new structure.
 - Let documented repo standards override generic smell prompts. A proposal that re-implements an existing helper is itself a finding, not an improvement.
 
-### Phase 1 — Per-dimension review (provisional)
+### Phase 1 — Definition-first, then per-dimension review (provisional)
+Read the definition before you write the finding. For every file, type, function, or field a finding will name, open that file and read the definition at the line you will cite: the struct's fields, the enum's variants, the function's body and callers. Do this before writing a single word of the finding. Cite the line you read. Never infer what a thing is from its name, its file name, a docstring, a comment, a PR body, or an issue body; those are claims about the code, and the definition is the code. When the name and the definition disagree, the disagreement is itself a finding (see Naming truth).
+
 Each dimension below is examined independently. A silently skipped dimension is a defect; a dimension with no finding is reported as clean with its reason, never omitted.
 
 ### Phase 2 — Refutation gate (annihilation)
@@ -70,6 +72,7 @@ Survivors are ranked by blast radius and partitioned into *Blocks merge* and *Su
 
 ## Dimensions
 
+- **Naming truth** — whether a name predicts the definition. A name lies when a reader from the domain would predict fields, storage, or behavior the definition does not have: `LocalFsBlobStore` holding a `HashMap`, an `Outcome` that is an `Error`, a `check` that returns `Ready` without checking. Style, length, and casing stay excluded; only a name that contradicts its definition is a finding. Evidence: the name, the definition at file:line, and the wrong prediction a reader would make. After: the term the domain already uses. Correct-by-construction upgrade: the type's shape and its name stop being two owners of one fact.
 - **Cohesion** — whether a unit has more than one reason to change. Measured in responsibilities, not lines.
 - **Abstraction quality** — whether a simpler reframing eliminates a category of complexity, or whether a thin wrapper or identity abstraction adds indirection without clarity.
 - **Control flow** — whether branching has grown where a model belongs. Repeated conditionals over the same shape indicate a missing type.
