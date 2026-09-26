@@ -1,6 +1,8 @@
 ---
 name: to-issues-clearly
-description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles a stranger can act on. Use when filing issues or turning work into issue-sized slices. Builds every title as what somebody wrote or did followed by what the system did with it, refuses words that exist only inside the codebase, and reads each title cold before publishing. Splits issues by whether anything visibly breaks; cuts vertically and sizes each to one fresh context window; sequences a wide refactor as expand-migrate-contract; puts the breakdown to the user before publishing anything; and wires real GitHub sub-issue edges rather than prose references."
+description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; and wires real GitHub sub-issue edges rather than prose references."
+short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
+allow_implicit_invocation: true
 ---
 
 # To issues clearly
@@ -9,13 +11,48 @@ Turn a plan, bug report, audit finding, or PRD into live GitHub issues that expl
 
 The tracker is the publication surface. Draft in the conversation, then create or edit the issue directly with GitHub. The skill supplies judgment and a repeatable shape; GitHub supplies the issue number, labels, and relationships.
 
-## The title is the whole job
+## Choose the issue shape before writing
+
+The title and body depend on what the source is asking for. Do not force every issue into a defect-shaped template.
+
+- **Decision:** a product, policy, workflow, or boundary choice is unresolved. Use an imperative title such as `Decide where customers book online` and the decision template below.
+- **Change, fix, or capability:** the issue exists to make the product do something. Use an imperative desired-outcome title such as `Show seller-linked colour photos in the storefront before vision processing completes` or `Keep a failed upload available for retry`.
+- **Reported defect or contract failure:** the issue exists to record and investigate what is wrong now. Use the observed-action-and-consequence title shape below.
+- **Wide refactor:** one mechanical change has a cross-codebase blast radius. Use the expand/migrate/contract sequence below.
+
+Classify first. A decision issue asks people to choose; an implementation issue tells someone what behavior to build; a defect issue says what behavior is wrong now.
+
+## Titles that survive a cold read
+
+The title is the first test of whether the issue is understandable without the source plan.
+
+### Whose words
+
+Write every title and body in the **verifier's language**: the words of whoever will check the work. A behavior change is verified by a product user, so its title uses domain words. A code-internal change is verified by an engineer, so its title names the code object and the operation (`Delete the empty server cue and equipment stubs`, `Split the server character type from client presentation`).
+
+The stranger is a skilled engineer new to this repository. They understand types, adapters, imports, and checks; they do not know your names yet. Define each repo-specific noun where they first meet it — file plus one-line meaning, in prose — and never a glossary section.
+
+Name the operation and the primary object; details live in the body. A title that needs a semicolon is two titles or a spec wearing a title's clothes — cut it.
+
+### Decision titles
+
+Use this shape only when the choice is genuinely unresolved:
+
+    Decide where customers book online
+    Choose how a business reaches its booking page
+    Define what a guest can see before signing in
+
+Name the decision in terms of the person, business, or product surface it affects. Replace architecture words such as `boundary`, `projection`, `surface`, and `route map` with the concrete choice they describe. Do not force a system consequence into a decision title, and do not silently choose an option while rewriting the issue.
+
+Read a decision title cold and answer: **what choice is unresolved, and who does it affect?** If the answer is not clear, make the actor or product object concrete.
+
+### Behavior and defect titles
 
 Everything else here is ordinary. This part is not, because it fails constantly and always looks fine at the time.
 
-### The shape
+#### The shape
 
-**A title has two halves: what somebody wrote, asked for, or did — then what the system did with it.**
+**A behavior title has two halves: what somebody wrote, asked for, or did — then what the system did with it.**
 
     A config can set retries to five, and the client gives up after three
     A user can mark an invoice paid, and the balance does not move
@@ -31,17 +68,35 @@ When nobody wrote anything and the thing simply misbehaves, the first half is th
 
 Not a state of affairs, and not a description of code. Something a person does, then what came of it.
 
-### Every word must survive a stranger
+For a reported user-visible defect, the action must be the interaction a person can perform or the state transition they can see. Never make the selector, rule, token, cascade, or other mechanism the actor. `Hovering a primary button makes its label unreadable` is the title; the style rule that causes it belongs in the body.
 
-**A word that exists only inside your codebase costs the reader a lookup. Two of them and the title is unreadable, however plain each one looks on its own.**
+For a change, fix, or capability issue, use the desired outcome instead: `Show seller-linked colour photos in the storefront before vision processing completes`. Start with the verifier's verb: `Show`, `Allow`, `Keep`, `Prevent`, the domain's own verb — or the code operation (`Split`, `Delete`, `Narrow`) for code-internal work. Do not narrate the current failure in the title when the issue is asking someone to change it; open `## Outcome` with it instead.
 
-`rule`, `tag`, `arm`, `node`, `handler`, `resolver`, `context`, `entry`, `record` are all concrete nouns and all internal. Replace each with the thing it stands for in the world the software is about — an invoice, a retry, a login, a status.
+#### Finding translation
 
-This is the one that is easiest to think you passed. Read only the title, and for each noun ask: would somebody who has never opened this repository *know* what it refers to? Not "could they guess". Know.
+For every defect or audit finding, write these facts before writing the issue:
 
-### The output check
+1. **Observed behavior:** the action or input and the result someone can see or reproduce.
+2. **Impact:** what becomes unusable, misleading, or blocked.
+3. **Cause:** the technical reason for that result.
+4. **Prevention and proof:** the invariant, guard, fix, and evidence.
 
-**Write the title with your rule, then read it cold and answer: what is broken?**
+Open `## Outcome` from **Observed behavior** and **Impact** (`X does Y, so ...`), then state what should be true instead. Choose the title from the issue intent: the desired outcome for a change, fix, or capability issue; **Observed behavior** and **Impact** only for a reported defect; the decision shape for a decision. Put **Cause**, **Prevention**, and **Proof** in the body. This is a separation of facts, not a list of words to ban.
+
+Regression example:
+
+    Bad:  A state rule recolors the surface while the ink stays owned by another rule
+    Good report: Hovering a primary button makes its label unreadable
+    Good change: Make hovering a primary button keep its label readable
+
+    Bad:  A seller binds a photo to a colour, and the storefront hides it until a vision model has looked at it
+    Good: Show seller-linked colour photos in the storefront before vision processing completes
+
+Before publishing, ask: **Can a stranger reproduce or observe the problem from the title alone?** If not, rewrite it around the action and observable result.
+
+#### The output check
+
+**For a behavior or defect title, write the title with your rule, then read it cold and answer: what is broken?**
 
 If the honest reaction is *ok, and?*, it has failed — even when it breaks none of the rules below. This is what catches the titles that read fine while the reasoning is still in your head.
 
@@ -54,7 +109,7 @@ These four shipped from an earlier run of this skill, and every one of them pass
 
 Not one has a first half. Not one survives "and?". A ban list cannot catch these, because banning is a way of saying what not to write, and there is always an infinite amount left over. The shape is what closes it.
 
-### The backstop
+#### The backstop
 
 The shape and the stranger test catch most of it. These constructions still get through, so they are refused outright:
 
@@ -71,9 +126,9 @@ The shape and the stranger test catch most of it. These constructions still get 
 
 **No word with two readings in the domain.** "An author can contradict it" — a person writing content, or an in-world author? If it can be misread, replace it.
 
-**A type defect still takes the shape.** Do not name the type in the title and do not paraphrase it away either. Say what somebody can write and what becomes of it; name the type in the first line of the body, where the implementer needs it and nobody else has to read it.
+**A code-internal defect names its object.** Say what somebody can wrongly write and what becomes of it, using the symbol's name: the verifier is an engineer, and the name is the fastest pointer to the fault. Define the symbol where it first appears in the body.
 
-### Worked corrections
+#### Worked corrections
 
 These come from one game codebase. The shape does not.
 
@@ -94,11 +149,18 @@ These come from one game codebase. The shape does not.
     An error and a warning reach the output differently
       -> Code can report an error, and it prints exactly like a warning
 
-The last one is worth studying: it described the *desired* state as though it were the defect. A title names what is wrong now. What you want instead belongs in **Desired outcome**.
+The last one is worth studying: it described the *desired* state as though it were the defect. A title names what is wrong now. What you want instead belongs in **Outcome**.
 
-### The good sentence is usually already written
+A decision title needs a different correction:
 
-When a title fights you, look at how you described the issue in prose — in the conversation, in the Problem section, in a commit message. That sentence is usually already in the shape, because explaining something to a person forces both halves out of you. Prefer it over anything composed against this section.
+    Decide patient-facing online-booking site boundary vs the organization website
+      -> Decide where customers book online
+
+The first title makes the reader decode an architecture boundary. The second names the choice in the language of the person who needs the result. The decision body still records the options, constraints, identity flow, empty states, and lifecycle rules that an implementer will need later.
+
+#### The good sentence is usually already written
+
+When a title fights you, look at how you described the issue in prose — in the conversation, in the Outcome section, in a commit message. That sentence is usually already in the shape, because explaining something to a person forces both halves out of you. Prefer it over anything composed against this section.
 
 
 ## Process
@@ -113,14 +175,17 @@ Reuse an existing issue when it already represents the same outcome; update it w
 
 ### 2. Decide which kind of issue each one is
 
-Ask this before writing any title, because it decides what goes in the first half of the shape:
+Ask these in order before writing any title:
 
-**Does anything visibly break?**
+1. **Is a choice still unresolved?** If yes, this is a decision issue. State the choice and the people or product surface it affects; do not turn it into an implementation issue.
+2. **Is the requested work to make, fix, prevent, or preserve a behavior?** If yes, this is a change issue. Title the desired outcome with an imperative verb in the verifier's language, even when the source also describes a current failure.
+3. **Is the source only reporting or investigating what is wrong now?** If yes, this is a reported defect. Title the observable action and consequence: `Retrying a failed upload uploads it twice.`
 
-- **Yes** → the first half is the action that sets it off. `Retrying a failed upload uploads it twice.`
-- **No** → the first half is what somebody can wrongly write. `A config can set retries to five, and the client gives up after three.`
+For a reported contract or type failure with no user-visible symptom, the first half is what somebody can wrongly write: `A config can set retries to five, and the client gives up after three.`
 
-Never write a behaviour title for a problem with no behaviour. That is where invented poetry comes from: you reach for a user-facing sentence, there isn't one, and you produce something that sounds like a sentence but names nothing.
+When a source contains both a failure and a fix, classify it by the requested deliverable, not by the failure's wording.
+
+Never write a behavior title for a decision with no chosen behavior. That is where invented poetry comes from: you reach for a user-facing sentence, there isn't one, and you produce something that sounds like a sentence but names nothing.
 
 An issue whose only symptom is "the type permits nonsense" is a real issue. Say so plainly and stop.
 
@@ -134,9 +199,13 @@ One issue per outcome that can be implemented, reviewed, and closed on its own.
 
 Split when two outcomes could land separately, when two parts would be reviewed by different people, or when one part could ship while the other waits on a decision. Keep observations together only when they share one end state and one review.
 
+For a **decision issue**, keep the decision and the questions needed to make it together. Do not make one issue for every question in the decision body. Split only when the choices can be made independently, have different owners, or unblock different implementation work. Once a decision is made, its implementation is a separate issue or child issue unless the user explicitly asks for a decision-and-build issue.
+
 **Cut each issue vertically, not by layer.** One issue is a narrow but complete path through everything it touches — the shape, the code that reads it, the callers, the tests. An issue that is only the schema change, with the callers in a second issue, cannot be verified or landed on its own.
 
 **Size each one to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If finishing it needs more than they can hold at once, it is two issues.
+
+**Apply the atomicity test before finalizing the split.** Can each issue land green on its own? If two slices only make sense together and cannot land separately, they are one issue. Splitting what must land atomically adds tracking overhead without reducing risk.
 
 **Look for the prefactor and file it first.** *Make the change easy, then make the easy change.* When one preparatory change would make three others straightforward, that is its own issue and it blocks them. Finding it after filing the three is finding it too late.
 
@@ -160,18 +229,59 @@ If the breakdown is obvious, publish it without ceremony. Ask one focused questi
 
 ### 4. Write the body
 
+#### Decision and product-choice issues
+
+Use this shape when the source asks where, whether, or how a product behavior should be owned or exposed:
+
 ~~~markdown
-## Problem
+## Question
 
-What is wrong, who hits it, and what it costs them.
+When [person or organization] wants to [goal], where or how should [the product behavior] work?
 
-## Desired outcome
+Choose one:
 
-What should be true when this is done.
+- [Concrete option in domain language]
+- [Concrete option in domain language]
+- [A combined option, only if it is genuinely distinct]
 
-## Acceptance criteria
+## Why we need this decision
 
-- [ ] Something observable that shows it is done.
+[Name what cannot be built, tested, communicated, or launched until the choice is made. State the known constraints and downstream work without prescribing an implementation.]
+
+## Questions to answer
+
+- [Entry point, ownership, or address question, when relevant]
+- [Anonymous, signed-in, or privacy boundary question, when relevant]
+- [Source of truth, lifecycle, or duplicate-record question, when relevant]
+- [Missing, empty, unavailable, or error-state question, when relevant]
+
+## Done when
+
+- [ ] One option or policy is chosen and written in product language.
+- [ ] The affected people, surfaces, and boundaries are specified.
+- [ ] The relevant guest/authenticated, failure, empty, and privacy states are clear.
+- [ ] The resulting data or workflow joins the existing lifecycle without a parallel record.
+- [ ] The downstream issue can be built without guessing about this decision.
+~~~
+
+Use only the questions and criteria relevant to the decision. The checklist is a prompt for missing boundaries, not boilerplate to paste into every issue. If the source does not establish a fact, turn it into a question or constraint; do not invent the answer.
+
+Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made, not a recommendation the skill invented.
+
+Do not prepend the generic `Outcome` and `Done when` sections to a decision issue. `Why we need this decision` explains the consequence of waiting, and its own `Done when` defines the decision's completion.
+
+#### Defect, capability, and refactor issues
+
+~~~markdown
+## Outcome
+
+What done looks like, in one short paragraph. When a current failure
+motivates the change, open with it (`X does Y, so ...`), then state
+what should be true instead.
+
+## Done when
+
+- [ ] Something checkable that shows it is done.
 - [ ] The failure, boundary or empty case, when there is one.
 - [ ] The old bad state is no longer reachable through the supported path.
 
@@ -180,33 +290,50 @@ What should be true when this is done.
 Only for a defect that exists now: where it is, and the quoted code that proves it.
 ~~~
 
-The plainness rule governs the body too. It is a report, not a case being argued.
+The verifier's language governs the body too. It is a report, not a case being argued.
 
-**Every criterion is something you can watch happen.** Someone must be able to close the issue by doing the thing and seeing the result — not by reading the diff and agreeing with it.
+**Every criterion is something the verifier can check.** For a behavior issue that means watching the product do the thing. For a code-internal issue it means an engineer-observable check: the typecheck passes, a `grep` for the deleted symbol returns nothing, the suite is green with no behavior diff. Someone must be able to close the issue by running the check and seeing the result — not by reading the diff and agreeing with it.
 
 | Checkable | Not checkable |
 |---|---|
 | A fighter killed by the death effect reads as holding the dead tag | Add tag handling |
 | An item marked drop-only and unselectable no longer compiles | Make availability a proper union |
 | Buying a second hour while one is running ends four hours from now, not two | Fix the extend logic |
+| No server file imports the client presentation shape | Separate the concerns properly |
 
 Three rules that catch most bad criteria:
 
-- **No criterion names a file, class, or function.** If it does, it is describing the implementation somebody has not chosen yet.
+- **Name what the verifier needs to run the check.** A symbol, file, or command the check depends on belongs in the criterion; an implementation guess somebody has not chosen yet does not.
 - **One criterion, one observation.** A criterion with "and" in it is two criteria, and half of it will be skipped.
 - **Include the failure and the empty case.** "The old bad state is unreachable" is the criterion that stops an issue closing while the defect still has a back door.
 
-**Keep file paths out of everything except Evidence.** A path in the Problem or the criteria is a guess about code that does not exist yet, and it rots between filing and implementing. Describe the behaviour and let the implementer find the file.
+Name file paths where the verifier needs them to find the check. A path that guesses at code nobody has written yet rots between filing and implementing — describe the behaviour and let the implementer find the file.
 
-Evidence is the one exception, and only when the issue asserts something is broken **right now**. A claim nobody can check is worse than a path that might move, so a finding cites where it is and quotes the code that proves it. Say which commit or day it was read on — Evidence is a snapshot, not a live pointer.
+Evidence is for when the issue asserts something is broken **right now**. A claim nobody can check is worse than a path that might move, so a finding cites where it is and quotes the code that proves it. Say which commit or day it was read on — Evidence is a snapshot, not a live pointer.
 
 An issue describing work that does not exist yet has no Evidence section at all. It has nothing to cite.
+
+#### The verifier-language rewrite pass
+
+Apply this pass to every issue, and apply it especially when the source is a technical plan or audit:
+
+1. Name the actor, action, object, and consequence in the verifier's language — domain words for behavior, code words for code-internal work.
+2. Define each repo-specific noun where it first appears: file plus one-line meaning, in prose.
+3. Remove YAML keys, route-map scaffolding, and implementation guesses from the main prose. Keep a machine-readable key only when known repository automation requires it.
+4. Preserve issue links and established terms when they carry useful context; explain an unavoidable term the first time it appears.
+5. Translate competitor, reference-product, or screenshot analysis into behavior and constraints. Omit the reference brand, palette, and route-map detail unless it affects the decision or belongs in Evidence.
+6. Turn unresolved choices into explicit options and questions. Never hide a decision inside the outcome or resolve it by implication.
+7. Add only facts grounded in the source or evidence. A useful new boundary question is allowed; an invented rule is not.
+
+The final draft should stand on its own. A reader should understand the verifier, the change, why it matters, what must be answered, and how completion will be checked without opening the source plan.
 
 ### 5. Put the breakdown to the user before publishing anything
 
 **Nothing is created until the user has seen the set.** An issue published wrong has to be edited, and a set published wrong has to be edited eleven times.
 
-Show a numbered list. For each: **title**, **blocked by**, and **what it delivers** in one line. Then ask three things:
+Show a numbered list. For each: **title**, **blocked by**, and **what it delivers** in one line. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
+
+Then ask three things:
 
 - Is the granularity right — too coarse, too fine?
 - Is each blocking edge real, or is it just ordering?
@@ -263,10 +390,11 @@ If an edge cannot be created, report the URL and the missing edge rather than im
 
 Before reporting, list every title with no other context — no body, no conversation, no repository open — and put each through both checks:
 
-1. **The shape.** Point at the first half and the second half. If you cannot point at a first half, the title is about a mechanism and has to be rewritten around whoever wrote or did something.
-2. **The output check.** Answer *what is broken?* If the honest reaction is *ok, and?*, it fails, however many rules it obeys.
+1. **The shape.** For a decision, point at the unresolved choice and its affected actor or surface. For a behavior title, point at the first half and the second half. For a code-internal title, point at the operation and the object. If you cannot point at the relevant parts, rewrite the title around the person, action, choice, operation, or checkable result.
+2. **The output check.** For a decision, answer *what choice is unresolved and why now?* For a defect, answer *what is broken?* For a capability, answer *what should someone be able to do?* If the honest reaction is *ok, and?*, it fails, however many rules it obeys.
+3. **The witness.** For a reported user-visible defect, the title names the interaction and observable result. For a change, fix, or capability issue, the title names the desired action and result in the verifier's language. A title its verifier cannot act on fails in either mode.
 
-Then read every noun once more and ask which of them exist only inside this repository. Two is unreadable. One is a lookup you should have spent somewhere else.
+Then read every noun once more and ask whether the verifier knows it. A repo-specific noun the body never defines is a lookup you owe the reader — define it where it first appears, in prose.
 
 Any title that fails gets rewritten and the issue edited before you report. This step is where the bad ones get caught — they always read fine while the reasoning is still in your head.
 
