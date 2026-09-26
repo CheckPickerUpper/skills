@@ -1,0 +1,4 @@
+interface:
+  display_name: "Agent MD Lint"
+  short_description: "Review AGENTS.md edits for structural and semantic drift"
+  default_prompt: "Review this AGENTS.md change for malformed Markdown, duplicated or contradictory instructions, and unintended loss or drift from the prior rules."

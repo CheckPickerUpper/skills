@@ -1,0 +1,4 @@
+interface:
+  display_name: "Test Failure Triage"
+  short_description: "Write tests, classify failures, and fix nothing"
+  default_prompt: "Use $test-failure-triage to write and run focused tests without fixing implementation failures."
