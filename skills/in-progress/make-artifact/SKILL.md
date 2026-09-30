@@ -45,15 +45,21 @@ scrolling.
   answer: issue threads, decision records, sibling repositories, and the user's
   earlier messages. Present a question that is already settled as the decision,
   with its source.
+- Read the underlying records (issues, rows, logs, files) before choosing how
+  the page is organized. Group them, and let the grouping that explains the
+  most records set the headline and the sections.
 
-Done when every claim carries a source and every open question survived a
-search for its answer.
+Done when every claim carries a source, every open question survived a search
+for its answer, and the page's organization came from the records.
 </what-to-do>
 
 <supporting-info>
 A polished page makes an unsourced claim look settled, so errors travel further
 than they would in chat. A page that asks the reader to decide something they
-already decided gets corrected and costs their trust in the rest of it.
+already decided gets corrected and costs their trust in the rest of it. A
+structure picked before reading the records answers the author's guess; the
+real headline often sits in the records' text, such as a run of issues that all
+say the same screen is broken.
 </supporting-info>
 
 ## 3. Write in layers
@@ -88,23 +94,32 @@ For a new artifact:
    Follow the type or skill it names. Load `artifact-capabilities` before
    writing any runtime behavior.
 2. Write the file in the session scratchpad.
-3. Before every publish, re-read the whole file. Fix stray or corrupted lines
-   and check each link target.
-4. When a browser tool is exposed, render the file at phone width in light and
-   dark mode and look at it.
-5. Publish with `icon` set to one generic word on the first publish only.
-   `icon` is the one icon field.
+3. Before every publish, re-read the whole file. Read each CSS declaration in
+   the token and theme blocks as a value, and check each link target.
+4. Take the one pre-publish look `artifact-design` allows whenever the page
+   draws anything to scale or has layout you wrote by hand (breakpoints, bars,
+   grids). Spend it on those parts.
+5. Publish with `icon` set to one generic word. Pass it on a path's first
+   publish only; a redeploy carries no icon field.
 
 To update, republish the same file path. For an artifact from another
 conversation, `read` its URL first, build on what comes back, and publish with
 `url`.
 
-When a publish reports the artifact deleted or access lost, tell the user the
-old link no longer works, then publish without `url` for a new link.
+A watch-ended notice saying the artifact was not found, or a publish reporting
+it deleted or access lost, means the link is dead. Tell the user in that turn,
+then treat the next publish as a new artifact without `url`.
 
 Reply with the link and one or two lines saying what the page answers. The page
 carries the content.
 </what-to-do>
+
+<supporting-info>
+The browser drops an invalid CSS declaration without a sound, so a garbled
+token beside a valid one renders fine until the order flips, and nothing in the
+publish path reports it. Proportional drawings and hand-written breakpoints are
+the parts a reader sees wrong first and the author never sees at all.
+</supporting-info>
 
 ## 5. Revise from feedback
 
