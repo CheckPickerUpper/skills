@@ -1,41 +1,122 @@
 # Generalization lens
 
-Two findings live here and they point opposite ways. Run both: a review that only looks for duplication approves every knob nobody turns, and one that only looks for over-abstraction approves every form written twice.
+<supporting-info>
+Categorical generalization means identifying the behavior that stays the same
+when the concrete instance changes. The first feature reveals the capability;
+it does not own its name, placement, or permitted callers. **Instance ownership**
+is the failure where that feature's vocabulary or boundaries define the general
+operation.
 
-## Direction one — the form is written twice
+Predictability comes from giving equivalent requirements a coherent shared
+implementation and making necessary differences explicit. A familiar pattern
+is a candidate to inspect, not proof that it is correct.
+</supporting-info>
 
-Ask: **can you name the general form in one line, inventing no new parameters?**
+<what-to-do>
+## Procedure
 
-If yes, the second hand-written copy is the finding, and the `after` is the named form with both sites pointing at it.
+Run this for a proposed reuse, extension, extraction, competing implementation,
+or abstraction whose name or flexibility is under review.
 
-- `particleEmittersIn(root)` is `descendantsOfClass(instance, className)`.
-- `sumContributions(list)` is `sumBy`.
-- Two constructors that each switch a string to pick a kind are one constructor per kind.
+1. **Name the instance.** Identify the changed implementation and any existing
+   counterparts by definition and caller locations. State what each does.
+2. **Separate local words.** List names inherited from the first instance:
+   feature, screen, command, file, provider, framework, or lifecycle terms.
+   Restate the operation without them.
+3. **Name the shared behavior.** Write one sentence describing the operation
+   and guarantee that survive a change of instance. Check that sentence against
+   the implementations, including their errors and side effects. If the words
+   hide different requirements, record the differences before proposing reuse.
+4. **Identify real variation.** Name the inputs, data, policy, or adapters the
+   operation actually requires. Ground each in inspected behavior or explicit
+   requirements. Separate instance-specific policy from the shared operation.
+   Every proposed parameter or extension point must correspond to one of these
+   differences; adding hooks to make unrelated implementations fit is invented
+   variation.
+5. **Check three unlike instances.** Use the original and two instances from
+   different features or surfaces. Prefer inspected examples. Label plausible
+   examples as hypothetical; they test the proposed name and boundary, not
+   repository coverage or demand for extra configuration. For each, state what
+   stays the same and what varies. Narrow the proposal when the operation only
+   makes sense for the original, and remove flexibility the comparison did not
+   establish.
+6. **Choose name and owner.** Name the capability from the shared behavior.
+   Restore a local word only after explaining why every valid instance needs
+   that distinction. Keep a framework-required lifecycle name in its local
+   wrapper. Place the shared operation with the owner of its guarantee; retain
+   feature policy with that feature. A generic `utils` folder is not an owner.
+7. **Write the resulting shape.** State which callers reuse it, which existing
+   capability changes, which duplicate implementations disappear, and which
+   necessary variants remain. Check behavior preservation for each affected
+   caller. Report migration risk when equivalence cannot be established.
 
-**Consumer count decides nothing.** "Only one caller", "no second instance yet", "nothing outside this domain reads it" are not evidence, and none of them survives Phase 2 as a refutation. The form is the argument. You would never refuse to write `add(a, b)` because nothing calls it twice.
+**Complete when:** the analysis identifies the shared behavior, necessary
+variation, name, owner, three-instance check, and affected callers. It must
+support a concrete before-and-after or reject the proposed abstraction with
+the requirement it would violate.
 
-The one thing that does refute it: naming the form requires inventing a config knob, a strategy seam, or a type parameter to hold variation that has no shape yet. That is direction two, and the answer is to leave the code alone.
+## Decision rules
 
-## Direction two — a parameter no instance supplies
+- **Reuse:** the existing capability is correct and already satisfies the new
+  requirement. Point the changed caller at it.
+- **Extend:** the same guarantee holds and a real requirement adds variation.
+  Extend the owned capability while preserving its existing callers.
+- **Generalize:** a nameable shared operation is confined to one instance or
+  hand-written at several sites. Extract that operation and move instance
+  policy to its callers. Account for relevant sibling implementations in the
+  proposed migration.
+- **Separate:** the guarantees, lifecycle, or ownership boundaries differ in a
+  way that makes a shared implementation incorrect. Cite the concrete
+  difference; superficial resemblance does not require unification.
+- **Correct the pattern:** an existing implementation violates the required
+  guarantee. Propose a corrected shared shape and account for affected callers.
+  Repetition does not make the defect a valid precedent.
 
-Ask: **does any instance supply a different value for this?**
+Consumer count does not decide generality. A single implementation can already
+express a reusable operation. Judge parameters by the operation's requirements,
+not merely by how many current callers pass different values. Remove a
+parameter when it represents a constant fixed by the guarantee; retain an
+input when the operation legitimately accepts different values.
 
-If every instance passes the same thing, the parameter is not variation, it is a constant with a longer name. The `after` is deletion.
+## Verdict and finding evidence
 
-The same question catches a type parameter with one argument, a strategy interface with one implementation, and a config field every caller sets identically.
+Record one generalization verdict alongside the implementation decision:
 
-## The vocabulary check
+- **INSTANCE-BOUND:** the first instance's name, policy, or placement still
+  owns a shared operation. Give the replacement name, owner, and real variation.
+- **GENERALIZED:** the name and owner express the shared operation, with
+  instance differences supplied as inputs, policy, or adapters.
+- **OVER-GENERALIZED:** the proposal invents variation or combines incompatible
+  guarantees. Remove the invented flexibility or keep the operations separate,
+  and state the smaller behavior each owns.
 
-Before accepting any name in either direction, quarantine the words the first instance donated: proper nouns, file names, screens, commands, framework terms, repo habits, and local lifecycle words such as `install`, `wire`, `setup`, `mount`.
+Carry the following into a surviving finding:
 
-Restate the abstraction with those words gone. If it stops making sense, the first instance still owns it and the name is not general yet. Add one word back only after showing it defines every member of the class.
+- changed and existing definition/caller locations;
+- the shared guarantee and necessary differences;
+- words inherited from the first instance;
+- three-instance check, distinguishing observed from hypothetical examples;
+- verdict and decision: reuse, extend, generalize, separate, or correct;
+- concrete before-and-after, affected callers, and behavior-preservation basis.
 
-## Verdict
+Run the main skill's refutation gate before reporting a finding. A completed
+analysis may support a clean approval. A different implementation is a finding
+only when evidence establishes an unnecessary competing path and a concrete
+correctness or maintenance defect.
+</what-to-do>
 
-Report a survivor as one of these, so the reader knows which way the fix runs:
+<supporting-info>
+## Examples
 
-- **Form written twice** — name the combinator, point both sites at it, migrate the siblings in the same change.
-- **Variation invented** — delete the axis, restate the smaller invariant, and name the concrete second use that would earn it back.
-- **Named by its first instance** — give the replacement name and what the instance words were hiding.
-
-A change that extracts a genuine form and gains its second consumer in the same diff is a clean approval on this dimension, and worth saying so: it is the move this lens exists to encourage.
+- A new export manually walks a tree for one object class while an existing
+  selector performs the same traversal. Compare traversal order and scope;
+  reuse or extend the selector when its guarantee fits. Calling the new code
+  an export does not make tree selection export-owned.
+- An HTTP endpoint and a background import independently enforce the same
+  domain validation. Share the domain rule; retain request decoding and import
+  error presentation at their respective boundaries. Their code can differ
+  while the validation guarantee is the same.
+- Two retry loops look alike, but one retries an idempotent read and the other
+  can repeat a payment. Establish the operation's guarantee before combining
+  them; visual similarity alone does not make the policies interchangeable.
+</supporting-info>
