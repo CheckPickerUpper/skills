@@ -63,9 +63,14 @@ as agents driven through herdr. Use the answer for the whole effort.
   client exposes. Continue an implementer by messaging the same agent, which
   keeps its context; start a fresh one only for a new issue.
 - **herdr:** follow `herdr --skill` for command syntax; it requires
-  `HERDR_ENV=1`. Give your own pane and each implementer's pane a name with
-  `herdr agent rename`, and put your pane's name in the brief so replies reach
-  you as `herdr agent prompt <conductor> "<implementer>: ..."`.
+  `HERDR_ENV=1`. Find implementers with `herdr agent list` and choose each pane
+  by its `cwd` and `terminal_title`; the `agent_session` id can name another
+  repository's thread, so it never selects a pane. Send only to panes whose
+  `cwd` is this effort's repository. Address every pane by its `pane_id`: prompt
+  with `herdr agent prompt <pane_id> "<text>"`, read with
+  `herdr pane read <pane_id>`, and put your own `pane_id` (`$HERDR_PANE_ID`) in
+  the brief so replies come back as
+  `herdr agent prompt <conductor pane_id> "<implementer>: ..."`.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
 the hand-back, and the decisions log the shared memory.
@@ -73,8 +78,12 @@ the hand-back, and the decisions log the shared memory.
 
 <supporting-info>
 herdr behaviors seen in practice: `agent prompt --wait` can return `timeout`
-after the prompt was delivered, so confirm delivery with
-`herdr agent read <name> --source visible` before resending. A reply prompted
+after the prompt was delivered, so confirm delivery before resending. For a
+Codex implementer, find the prompt's text in its thread rollout,
+`~/.codex/sessions/YYYY/MM/DD/rollout-*-<thread-id>.jsonl`, and watch the
+rollout's `payload.type` for `agent_message` and `task_complete` (the turn
+ended, not the goal); for other agents, read the pane. A prompt sent while the
+agent is working queues into its running turn. A reply prompted
 into your pane arrives as a user message, and the same text can also arrive as
 a paste; the implementer's name prefix tells them apart. A question from an
 implementer's own subagent may never reach you; answer through the
