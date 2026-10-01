@@ -1,6 +1,6 @@
 ---
 name: to-issues-clearly
-description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; wires real GitHub sub-issue edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
+description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
 short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
 allow_implicit_invocation: true
 ---
@@ -81,7 +81,7 @@ For every defect or audit finding, write these facts before writing the issue:
 3. **Cause:** the technical reason for that result.
 4. **Prevention and proof:** the invariant, guard, fix, and evidence.
 
-Open `## Outcome` from **Observed behavior** and **Impact** (`X does Y, so ...`), then state what should be true instead. Choose the title from the issue intent: the desired outcome for a change, fix, or capability issue; **Observed behavior** and **Impact** only for a reported defect; the decision shape for a decision. Put **Cause**, **Prevention**, and **Proof** in the body. This is a separation of facts, not a list of words to ban.
+Open `## Outcome` from **Observed behavior** and **Impact** (`X does Y, so ...`), then state what should be true instead. Choose the title from the issue intent: the desired outcome for a change, fix, or capability issue; **Observed behavior** and **Impact** only for a reported defect; the decision shape for a decision. Put **Cause** and **Prevention** in `## Cause and required change`, and **Proof** in `## Evidence`. This is a separation of facts, not a list of words to ban.
 
 Regression example:
 
@@ -217,16 +217,6 @@ For a **decision issue**, keep the decision and the questions needed to make it 
 
 Use words a maintainer would recognise. Keep file paths and proposed APIs out of the title unless the user has already made that decision.
 
-### 3b. Place the set in a milestone
-
-A milestone groups issues that must all close for one deliverable to ship: a release, a launch, a cutover, a dated commitment. A parent issue groups the slices of one outcome; a milestone groups the outcomes one deliverable needs. Decide each issue's milestone from that definition:
-
-- **Existing milestone.** Propose it when the milestone's description names a deliverable this issue is required for. Read the description, not the title alone: a title that shares a word with the issue is not evidence.
-- **New milestone.** Propose one when the issues together deliver something a person can ship or announce, no open milestone covers it, and closing them all marks that deliverable done. Title it as the deliverable in the verifier's language (`Venues take bookings without Central Admin`). Write a one-sentence description of what is true when it closes. Set a due date only when the user or the source gave one.
-- **No milestone.** A standalone fix, chore, or decision that no deliverable waits on stays out of milestones.
-
-An issue belongs to at most one milestone; when two fit, propose the one whose deliverable ships first and say why.
-
 ### 3a. The wide refactor is the exception to vertical slicing
 
 A **wide refactor** is one mechanical change — rename a field, retype a shared symbol, split a union — whose blast radius fans across the whole codebase. A single edit breaks hundreds of call sites at once, so no vertical slice can land green and forcing one produces an issue nobody can finish.
@@ -242,6 +232,18 @@ When even a batch cannot stay green alone, keep the sequence but let the batches
 Spot one by asking: *would doing this in one commit break call sites in files this issue does not name?* If yes, it is a wide refactor, whatever it looks like.
 
 If the breakdown is obvious, publish it without ceremony. Ask one focused question only when an unresolved choice changes the issue count, scope, or relationship tree.
+
+### 3b. Place the set in a milestone
+
+A milestone groups issues that must all close for one deliverable to ship: a release, a launch, a cutover, a dated commitment. A parent issue groups the slices of one outcome; a milestone groups the outcomes one deliverable needs. Decide each issue's milestone from that definition:
+
+- **Existing milestone.** Propose it when the milestone's description names a deliverable this issue is required for. Read the description, not the title alone: a title that shares a word with the issue is not evidence.
+- **New milestone.** Propose one when the issues together deliver something a person can ship or announce, no open milestone covers it, and closing them all marks that deliverable done. Title it as the deliverable in the verifier's language (`Venues take bookings without Central Admin`). Write a one-sentence description of what is true when it closes. Set a due date only when the user or the source gave one.
+- **No milestone.** A standalone fix, chore, or decision that no deliverable waits on stays out of milestones.
+
+An issue belongs to at most one milestone; when two fit, propose the one whose deliverable ships first and say why.
+
+**Push back on catch-all milestones.** A milestone means done only when someone can check that its deliverable shipped. Flag a milestone as a bucket when its description lists themes or says "everything" (`Everything after the KYC launch: products, fund pages, subscriptions...`), or when it holds more than 50 open issues. Tell the user, propose a deliverable-sized milestone for the issues being filed instead, and leave the issues already in the bucket where they are unless the user asks to move them.
 
 ### 4. Write the body
 
@@ -295,6 +297,13 @@ What done looks like, in one short paragraph. When a current failure
 motivates the change, open with it (`X does Y, so ...`), then state
 what should be true instead.
 
+## Cause and required change
+
+- **Written at:** the file and line where the bad state is written.
+- **Class:** the class of bad state, stripped of this incident's names.
+- **Required change:** the exact change that makes the class unwritable,
+  including every type, function, file, or path that gets deleted.
+
 ## Done when
 
 - [ ] Something checkable that shows it is done.
@@ -329,6 +338,8 @@ Evidence is for when the issue asserts something is broken **right now**. A clai
 
 An issue describing work that does not exist yet has no Evidence section at all. It has nothing to cite.
 
+`## Cause and required change` carries the fix-the-class result, and every reported defect and every change or fix to existing behavior has one. Name where the bad state is written, not where it is noticed; name the class without the incident's nouns; and list the deletions explicitly, because a required change that only adds leaves the old path open. A capability with no existing code path replaces the section with the place the new behavior goes and anything it supersedes.
+
 #### The verifier-language rewrite pass
 
 Apply this pass to every issue, and apply it especially when the source is a technical plan or audit:
@@ -347,7 +358,7 @@ The final draft should stand on its own. A reader should understand the verifier
 
 **Nothing is created until the user has seen the set.** An issue published wrong has to be edited, and a set published wrong has to be edited eleven times.
 
-Show a numbered list. For each: **title**, **blocked by**, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
+Show a numbered list. For each: **title**, **kind label** (and priority, for a bug), **blocked by**, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
 
 Then ask three things:
 
@@ -382,6 +393,10 @@ Apply the tracker's agent-pickup label (commonly `ready-for-agent`) unless told 
 
 Read the repository's existing labels first and use them. **Never invent a label.** If none fits, publish without it and report the gap — the user decides whether a new label exists.
 
+**The kind label follows the issue shape from step 2.** Only a reported defect that exists now gets the bug label (`kind:bug`, `bug`, or the repo's equivalent). A change, fix, or capability gets the repo's change, feature, or tech-debt label; a decision gets the decision label when one exists. A fix for a known bug is a change issue: the bug label on it inflates the bug count a zero-bug policy tracks. When the repository uses GitHub issue types, set the matching type with `--type` as well.
+
+**Every bug carries a priority when the repository has a priority scheme.** Look for one in the labels (`bug:high` and `bug:low`, `priority:*`, `P0`–`P3`). When one exists, file no bug without a priority from it; when the source does not establish the priority, ask in step 5.
+
 `gh issue create` takes repeated `--label` flags. Building them in a shell loop is where they silently go missing; `read -ra` is not portable to zsh. Verify the labels landed afterwards rather than assuming.
 
 For an existing issue, edit it and preserve its history. Do not create a second issue because the wording changed.
@@ -403,12 +418,28 @@ Note `-F`, not `-f`. `-f` sends the id as a string and the API rejects it as not
 
 A blocker is genuine only when the child cannot start, or cannot meet its criteria, until the blocker lands. Ordinary sequencing is not a blocker, and "related" is not a parent.
 
+Create a "blocked by" edge at creation or afterwards; each flag takes issue numbers or URLs:
+
+~~~sh
+gh issue create --repo OWNER/REPO ... --blocked-by 1138,1139
+gh issue edit 1164 --repo OWNER/REPO --add-blocked-by 1161
+~~~
+
+The REST equivalent takes the blocker's database id: `gh api repos/OWNER/REPO/issues/BLOCKED/dependencies/blocked_by -F issue_id=$(gh api repos/OWNER/REPO/issues/BLOCKER --jq .id)`.
+
+**When one issue replaces another**, record it natively:
+
+- One-to-one, same outcome: `gh issue close OLD --repo OWNER/REPO --duplicate-of NEW`. GitHub shows the duplicate link on both issues.
+- Split into several, or reshaped beyond the same outcome: GitHub has no "replaced by" edge. Open each replacement with `Replaces #OLD` in its body, so the old issue's timeline lists every replacement, then `gh issue close OLD --repo OWNER/REPO --reason "not planned" --comment "Replaced by #A and #B"`. Move any sub-issues and blocked-by edges from the old issue onto the replacements.
+
 **Never close or edit a parent issue.** Wiring a child under it does not give you licence to touch it. If the parent's own text is wrong, say so in the report and let the user decide.
 
 **Verify every edge by reading it back**, not by trusting the create call:
 
 ~~~sh
 gh api repos/OWNER/REPO/issues/PARENT/sub_issues --jq '.[] | "\(.number) \(.title)"'
+gh api repos/OWNER/REPO/issues/BLOCKED/dependencies/blocked_by --jq '.[] | "\(.number) \(.title)"'
+gh api graphql -f query='{repository(owner:"OWNER",name:"REPO"){issue(number:OLD){stateReason duplicateOf{number}}}}'
 ~~~
 
 If an edge cannot be created, report the URL and the missing edge rather than implying the tree is complete.
@@ -427,4 +458,4 @@ Any title that fails gets rewritten and the issue edited before you report. This
 
 ## Final report
 
-Report the issue URLs, the labels that actually landed, the milestone each issue actually sits in (with the URL of any milestone you created), the edges that actually exist, and any unresolved publication step. Name the gaps rather than implying completeness.
+Report the issue URLs, the labels that actually landed, the milestone each issue actually sits in (with the URL of any milestone you created), the sub-issue and blocked-by edges that actually exist, each replaced issue and how it was closed, any catch-all milestone you flagged, and any unresolved publication step. Name the gaps rather than implying completeness.
