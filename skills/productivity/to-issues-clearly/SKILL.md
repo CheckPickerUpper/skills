@@ -1,6 +1,6 @@
 ---
 name: to-issues-clearly
-description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; and wires real GitHub sub-issue edges rather than prose references."
+description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; wires real GitHub sub-issue edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
 short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
 allow_implicit_invocation: true
 ---
@@ -173,6 +173,12 @@ Search existing issues for a duplicate before creating anything. **Read the cand
 
 Reuse an existing issue when it already represents the same outcome; update it when the user asked to reshape it.
 
+List the repository's open milestones with their descriptions and due dates:
+
+~~~sh
+gh api repos/OWNER/REPO/milestones --jq '.[] | "\(.number)\t\(.title)\t\(.due_on // "no due date")\t\(.description)"'
+~~~
+
 ### 2. Decide which kind of issue each one is
 
 Ask these in order before writing any title:
@@ -210,6 +216,16 @@ For a **decision issue**, keep the decision and the questions needed to make it 
 **Look for the prefactor and file it first.** *Make the change easy, then make the easy change.* When one preparatory change would make three others straightforward, that is its own issue and it blocks them. Finding it after filing the three is finding it too late.
 
 Use words a maintainer would recognise. Keep file paths and proposed APIs out of the title unless the user has already made that decision.
+
+### 3b. Place the set in a milestone
+
+A milestone groups issues that must all close for one deliverable to ship: a release, a launch, a cutover, a dated commitment. A parent issue groups the slices of one outcome; a milestone groups the outcomes one deliverable needs. Decide each issue's milestone from that definition:
+
+- **Existing milestone.** Propose it when the milestone's description names a deliverable this issue is required for. Read the description, not the title alone: a title that shares a word with the issue is not evidence.
+- **New milestone.** Propose one when the issues together deliver something a person can ship or announce, no open milestone covers it, and closing them all marks that deliverable done. Title it as the deliverable in the verifier's language (`Venues take bookings without Central Admin`). Write a one-sentence description of what is true when it closes. Set a due date only when the user or the source gave one.
+- **No milestone.** A standalone fix, chore, or decision that no deliverable waits on stays out of milestones.
+
+An issue belongs to at most one milestone; when two fit, propose the one whose deliverable ships first and say why.
 
 ### 3a. The wide refactor is the exception to vertical slicing
 
@@ -331,13 +347,14 @@ The final draft should stand on its own. A reader should understand the verifier
 
 **Nothing is created until the user has seen the set.** An issue published wrong has to be edited, and a set published wrong has to be edited eleven times.
 
-Show a numbered list. For each: **title**, **blocked by**, and **what it delivers** in one line. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
+Show a numbered list. For each: **title**, **blocked by**, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
 
 Then ask three things:
 
 - Is the granularity right — too coarse, too fine?
 - Is each blocking edge real, or is it just ordering?
 - Should any of these be merged or split?
+- Is each milestone placement right, and should the proposed new milestone exist?
 
 Iterate until they approve. Read the titles back to yourself here too (step 8) — before publishing is when it is cheap.
 
@@ -345,11 +362,21 @@ Skip this only when the user has already approved a breakdown in the conversatio
 
 ### 6. Publish, blockers first
 
+Create any approved new milestone first, then read its number back:
+
+~~~sh
+gh api repos/OWNER/REPO/milestones -f title="..." -f description="..." --jq .number
+~~~
+
+Add `-f due_on=YYYY-MM-DDT00:00:00Z` only when a due date was approved. Create a milestone only after the user approved it in step 5.
+
 Create issues in dependency order — anything that blocks something else goes first — so a child can reference a real number instead of a placeholder.
 
 ~~~sh
-gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL
+gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL --milestone "MILESTONE TITLE"
 ~~~
+
+`--milestone` takes the milestone's title. To place an existing issue, use `gh issue edit NUMBER --repo OWNER/REPO --milestone "MILESTONE TITLE"`. Verify placement afterwards with `gh issue view NUMBER --repo OWNER/REPO --json milestone`.
 
 Apply the tracker's agent-pickup label (commonly `ready-for-agent`) unless told otherwise. These issues are written to be picked up cold; that is what the label says.
 
@@ -400,4 +427,4 @@ Any title that fails gets rewritten and the issue edited before you report. This
 
 ## Final report
 
-Report the issue URLs, the labels that actually landed, the edges that actually exist, and any unresolved publication step. Name the gaps rather than implying completeness.
+Report the issue URLs, the labels that actually landed, the milestone each issue actually sits in (with the URL of any milestone you created), the edges that actually exist, and any unresolved publication step. Name the gaps rather than implying completeness.
