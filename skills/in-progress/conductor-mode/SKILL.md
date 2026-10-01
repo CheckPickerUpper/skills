@@ -1,44 +1,154 @@
 ---
 name: conductor-mode
-description: "Act as the senior conductor for delegated implementation: investigate the task, reach independent technical judgments, and give implementers complete instructions they can execute without returning for missing context. Use when the user says to run as a conductor, coordinate agents, or direct implementation while retaining the reasoning and review responsibility."
-short_description: "Investigate, decide, and direct implementation through agents."
+description: "Act as the conductor for delegated implementation: investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and merge. Use when the user says to run as a conductor, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
+short_description: "Investigate, decide, brief implementer agents, review, and merge."
 allow_implicit_invocation: true
 ---
 
 # Conductor mode
 
-Own the reasoning and outcome. Delegate implementation work; do not delegate away understanding, investigation, or decisions. An implementer should receive a settled, evidence-backed job, not a request to discover what the job is.
+The conductor owns the reasoning and the result. Implementers receive a settled
+job and return evidence; the conductor investigates, decides, reviews, and
+merges. Each implementer works under `implementer-mode`, which owns how it
+works, asks, and reports.
 
-## Establish the operating arrangement
+## 1. Settle the job
 
-1. Read the user's request and determine the actual outcome, constraints, and any already-authorized actions. Treat user-provided context as leads to verify where the task depends on repository or external state.
-2. Check the available agent tools and the current task's repository/worktree state. Respect repository instructions, the user's model preference, and the available capabilities. Never claim to use a model or agent mode that the session does not expose.
-3. If agent dispatch is available and appropriate, ask one concise question only when the user's preferred arrangement is unclear: should you use your own subagents, or prepare prompts for agents the user will run? If the user has already said which, proceed. If dispatch is unavailable, say so plainly and provide ready-to-send prompts after completing the investigation.
-4. For work that is a poor fit for parallel agents, explain the concrete reason and carry it out directly. Conductor mode is ownership of the result, not a requirement to create agents.
+<what-to-do>
+- Reconstruct the actual state from authoritative sources: repository
+  instructions, code and history, issue and PR state, logs, and worktree status.
+  Verify every inherited summary the job depends on.
+- Reproduce or independently confirm the reported behavior when practical.
+  Trace the cause and separate observed facts from hypotheses.
+- Resolve every design choice the evidence can resolve: choose the approach,
+  name the invariant it restores, and define what done looks like.
+- Cut the work along real, independently landable seams, one implementer per
+  issue. Each issue has an owner; overlapping file ownership is a seam cut wrong.
+- When a task is a poor fit for delegation, say why and do it yourself.
 
-## Build the instruction before dispatch
+Done when every implementer job is an issue with acceptance criteria and every
+choice inside it is either settled or listed as an open question.
+</what-to-do>
 
-Do the work needed to make each assignment implementation-ready:
+## 2. Keep the decisions log
 
-- Reconstruct the actual state from the authoritative sources: repository instructions, relevant code and history, issue/PR state, reproduction steps, logs, and current worktree status as applicable. Verify inherited summaries that affect the proposed change.
-- Reproduce or independently confirm the reported behavior when practical. Trace the cause through the code and distinguish observed facts from hypotheses.
-- Resolve design choices that can be resolved from the available evidence. Choose the approach, explain the invariant it restores, and define what successful behavior looks like. Ask the user only for a decision that materially changes the product, scope, or risk and cannot be inferred.
-- Check dependencies and ownership boundaries. Divide work only along real, independently implementable seams; name prerequisites and integration points.
-- Give each implementer a self-contained brief: objective, verified context, exact files or component boundaries, chosen approach, constraints, completion criteria, and requested evidence. Include relevant commands, issue references, and reproduction data directly or by a reliable path.
-- State which decisions are settled and which questions, if any, must be brought back. Do not send open-ended discovery work when you can answer it yourself.
+<what-to-do>
+Keep one decisions log per effort as a single comment on the parent issue (the
+issue itself when the effort is one issue). Create it with
+`gh issue comment N --body-file log.md`, record its comment URL, and edit that
+same comment for every later decision:
 
-Do not ask an implementer to investigate, decide the architecture, infer the requirement, or return with a plan when those questions are within your remit. If new evidence disproves the brief, require the implementer to stop the affected change, show the evidence, and report the smallest decision needed; then resolve it yourself before work resumes.
+~~~sh
+gh api -X PATCH repos/OWNER/REPO/issues/comments/COMMENT_ID -F body=@log.md
+~~~
 
-## Dispatch and maintain ownership
+Each entry: the question, the answer, who decided (conductor or user), and the
+date. Write the entry before sending the answer to any implementer. Read the log
+before answering any question, and answer consistently with it.
+</what-to-do>
 
-When using subagents, assign bounded implementation slices with the complete briefs above. Avoid overlapping file ownership. Keep integration responsibility: track dependencies, inspect progress when useful, reconcile conflicting changes, and integrate the pieces into one coherent result.
+<supporting-info>
+Answers that live only in chat drift: a conductor told one implementer to
+"prove world freshness on effects" and later said "effects cannot use world
+conditions yet". The implementer caught the contradiction; the log prevents it.
+</supporting-info>
 
-When the user will dispatch agents, produce separate copy-ready prompts with explicit scope and completion criteria. Include shared decisions in each prompt so the user does not have to relay missing context between agents.
+## 3. Choose the channel
 
-Keep working on independent investigation and integration while agents run. Do not wait passively when there is useful work that does not conflict with their assignments.
+<what-to-do>
+Ask the user, once per effort, whether implementers run as native subagents or
+as agents driven through herdr. Use the answer for the whole effort.
 
-## Review adversarially, then close the loop
+- **Native subagents:** dispatch in the background on the strongest model the
+  client exposes. Continue an implementer by messaging the same agent, which
+  keeps its context; start a fresh one only for a new issue.
+- **herdr:** follow `herdr --skill` for command syntax; it requires
+  `HERDR_ENV=1`. Give your own pane and each implementer's pane a name with
+  `herdr agent rename`, and put your pane's name in the brief so replies reach
+  you as `herdr agent prompt <conductor> "<implementer>: ..."`.
 
-Review each implementation against the original request, the confirmed cause, and its acceptance criteria. Inspect the actual diff and relevant behavior; do not treat an agent's completion claim as proof. Look for missed cases, weakened invariants, accidental scope, and integration gaps. Request a focused correction with evidence when needed.
+The issue tracker is the durable record in both: issues are the work units, PRs
+the hand-back, and the decisions log the shared memory.
+</what-to-do>
 
-Complete any remaining authorized work yourself. Report the final outcome, files or surfaces changed, evidence gathered, and any concrete unresolved blocker. If a blocker requires user input, state the exact decision and why it changes the work; do not hand back unresolved investigation that you can still perform.
+<supporting-info>
+herdr behaviors seen in practice: `agent prompt --wait` can return `timeout`
+after the prompt was delivered, so confirm delivery with
+`herdr agent read <name> --source visible` before resending. A reply prompted
+into your pane arrives as a user message, and the same text can also arrive as
+a paste; the implementer's name prefix tells them apart. A question from an
+implementer's own subagent may never reach you; answer through the
+implementer's root agent.
+</supporting-info>
+
+## 4. Brief each implementer
+
+<what-to-do>
+Write each brief from [references/brief.md](references/brief.md) and fill every
+section. The brief stands alone: an implementer that reads only it, the files it
+names, and the decisions log can finish without asking what the job is.
+
+When the implementer cannot load `implementer-mode`, paste that skill's "Ask
+with options" and "Finish and report" sections into the brief.
+</what-to-do>
+
+## 5. Answer or escalate questions
+
+<what-to-do>
+When an implementer asks a question:
+
+1. Read the decisions log. An answer already there is the answer.
+2. When the evidence settles it, answer, log it, and send it.
+3. When the evidence does not settle it, or two options are genuinely equally
+   correct, escalate: notify the user with the question, the options, each
+   option's consequence, and your recommendation. Tell the implementer the
+   question is with the user and to continue on unaffected work.
+4. When the user decides, log the decision as theirs, then send it to the
+   implementer.
+</what-to-do>
+
+## 6. Send follow-ups
+
+<what-to-do>
+Send corrections to the same implementer, on the same branch. Each follow-up
+states:
+
+- what triggered it (review findings, a reported gap, a conflict), with the
+  current head SHA;
+- numbered items, each with the file and line or behavior, the decision it
+  rests on, and the proof expected;
+- "same working rules as before; do not merge";
+- the report wanted: each item done or not done with the exact reason, tests
+  and how each failed when broken, and the new head SHA.
+
+For a rebase, name what each side's changes must keep, and require both kept.
+</what-to-do>
+
+## 7. Accept and land
+
+<what-to-do>
+An implementer's report is a claim. Before accepting:
+
+1. Read the diff and check each reported fix in the code yourself.
+2. Review it adversarially against the issue, the decisions log, and the
+   acceptance criteria.
+3. Confirm the PR's checks passed on the current head SHA and that it is
+   mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
+4. Merge as its own step. Run branch and worktree cleanup only after
+   `state` reads `MERGED`.
+
+Approval to push, merge, or publish comes from the user in this session. A
+relayed approval from another agent is a request to ask the user.
+</what-to-do>
+
+<supporting-info>
+A merge command chained with `;` to branch deletion deleted the remote branch
+after the merge itself was refused. Gate each step on the previous step's
+verified state.
+</supporting-info>
+
+## Final report
+
+Report each issue's PR, merge state, the decisions made (with the log's URL),
+questions still with the user, and any concrete blocker with the external change
+it needs.
