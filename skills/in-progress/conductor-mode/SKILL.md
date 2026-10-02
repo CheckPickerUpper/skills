@@ -70,7 +70,9 @@ as agents driven through herdr. Use the answer for the whole effort.
   with `herdr agent prompt <pane_id> "<text>"`, read with
   `herdr pane read <pane_id>`, and put your own `pane_id` (`$HERDR_PANE_ID`) in
   the brief so replies come back as
-  `herdr agent prompt <conductor pane_id> "<implementer>: ..."`.
+  `herdr agent prompt <conductor pane_id> "<implementer>: ..."`. Record each
+  implementer's `pane_id` and whether you started it (`herdr pane split` then
+  `herdr agent start`) or the user handed it to you.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
 the hand-back, and the decisions log the shared memory.
@@ -145,6 +147,11 @@ An implementer's report is a claim. Before accepting:
    mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
 4. Merge as its own step. Run branch and worktree cleanup only after
    `state` reads `MERGED`.
+5. Release the implementer. When its PR reads `MERGED` and no follow-up is
+   pending, or its job was dropped or reassigned, close a pane you started
+   with `herdr pane close <pane_id>`. A pane the user handed you stays open;
+   tell the user it is free. Before the final report, run `herdr pane list`
+   and close every implementer pane you started that is still open.
 
 Approval to push, merge, or publish comes from the user in this session. A
 relayed approval from another agent is a request to ask the user.
@@ -159,5 +166,5 @@ verified state.
 ## Final report
 
 Report each issue's PR, merge state, the decisions made (with the log's URL),
-questions still with the user, and any concrete blocker with the external change
-it needs.
+questions still with the user, the implementer panes closed and any left open
+with the reason, and any concrete blocker with the external change it needs.
