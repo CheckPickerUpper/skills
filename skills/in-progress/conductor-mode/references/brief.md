@@ -29,7 +29,10 @@ Work under the implementer-mode skill.
 names the proof that shows it met>
 
 ## Working rules
-- Worktree: `git -C <checkout> fetch origin && git -C <checkout> worktree add -b <branch> <checkout>-<issue>-<topic> origin/<base>`.
+- Worktree: `<checkout>-<issue>-<topic>` on branch `<branch>`, already
+  created by the conductor and your pane's working directory. (For a
+  subagent, give the command instead:
+  `git -C <checkout> fetch origin && git -C <checkout> worktree add -b <branch> <checkout>-<issue>-<topic> origin/<base>`.)
   Leave the primary checkout on its branch.
 - Enforcement: <write guard, hooks, and how to handle a refusal in this repo>.
 - Tests: <test commands>; each new test fails against a plausible wrong
