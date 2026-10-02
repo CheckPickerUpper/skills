@@ -146,8 +146,9 @@ Run this whenever an implementer asks a question, and whenever anything in the
 job is even slightly ambiguous, asked or not:
 
 1. Read the decisions log. An answer already there is the answer.
-2. Derive the answer from the principles before deciding. Load the skills the
-   question touches and apply them as the judge:
+2. Derive the answer from the principles before deciding. Load
+   `zen-of-checkpickerupper` and judge the question against its lines. When a
+   line decides the case and you need its procedure, load its source skill:
 
    | Question touches | Principle skill |
    |---|---|
