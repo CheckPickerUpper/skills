@@ -33,6 +33,11 @@ the proof that will show it met.
   enforcement and test rules, a commit per verified step.
 - A bug you find outside the job, if small and blocking, goes in a separate
   commit named in the report.
+- Close every pane you open. Record the `pane_id` each `herdr pane split` or
+  `herdr agent start` returns, and run `herdr pane close <pane_id>` as soon as
+  that pane's job ends: the test run finished, the server is no longer needed,
+  the helper agent reported. Close only panes you created; the conductor's and
+  the user's panes stay.
 </what-to-do>
 
 ## 3. Ask with options
@@ -73,6 +78,10 @@ show a test fails, goes through the guard.
 Reach the brief's finish line: pushed, PR open with its closing line, checks
 passed on the pushed head SHA, mergeable. Leave merging to the conductor.
 
+Before reporting, run `herdr pane list` and close any pane you created that is
+still open. A pane that must stay open, such as a server the conductor will
+review against, goes in the report with its `pane_id` and why.
+
 Report in this shape:
 
 1. PR URL, head SHA, check state on that SHA, mergeable state.
@@ -83,6 +92,7 @@ Report in this shape:
 4. Each refusal you could not resolve, verbatim.
 5. Anything in the design or brief that looked contradictory.
 6. Changes beyond the job, each with its commit.
+7. Panes you left open, each with its `pane_id` and reason; "none" otherwise.
 </what-to-do>
 
 ## 6. Follow-ups
