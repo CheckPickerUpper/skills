@@ -70,12 +70,12 @@ as agents driven through herdr. Use the answer for the whole effort.
   each implementer's `pane_id` and whether you started it or the user handed it
   to you.
 
-  **Name your tab for your standing area** when you start, so the user can
-  tell conductors apart at a glance:
-  `herdr tab rename "$HERDR_TAB_ID" "<repo> <area>"`, such as `NRO prediction`.
-  Leave issue numbers out: a conductor's context can be cleared and reused for
-  other issues, and a numbered name goes stale. Only the conductor names its
-  tab.
+  **Label your pane for your standing area** when you start, so the user can
+  tell conductors apart in the workspace:
+  `herdr pane rename "$HERDR_PANE_ID" "<repo> <area>"`, such as
+  `NRO prediction`. Leave issue numbers out: a conductor's context can be
+  cleared and reused for other issues, and a numbered label goes stale. Only
+  the conductor labels panes.
 
   **Pair each implementer with you.** Create its worktree first, then split
   your own pane to the right in that worktree and start the implementer there,
