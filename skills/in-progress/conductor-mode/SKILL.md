@@ -63,16 +63,37 @@ as agents driven through herdr. Use the answer for the whole effort.
   client exposes. Continue an implementer by messaging the same agent, which
   keeps its context; start a fresh one only for a new issue.
 - **herdr:** follow `herdr --skill` for command syntax; it requires
-  `HERDR_ENV=1`. Find implementers with `herdr agent list` and choose each pane
-  by its `cwd` and `terminal_title`; the `agent_session` id can name another
-  repository's thread, so it never selects a pane. Send only to panes whose
-  `cwd` is this effort's repository. Address every pane by its `pane_id`: prompt
-  with `herdr agent prompt <pane_id> "<text>"`, read with
-  `herdr pane read <pane_id>`, and put your own `pane_id` (`$HERDR_PANE_ID`) in
-  the brief so replies come back as
-  `herdr agent prompt <conductor pane_id> "<implementer>: ..."`. Record each
-  implementer's `pane_id` and whether you started it (`herdr pane split` then
-  `herdr agent start`) or the user handed it to you.
+  `HERDR_ENV=1`. Address every pane by its `pane_id`: prompt with
+  `herdr agent prompt <pane_id> "<text>"`, read with `herdr pane read <pane_id>`,
+  and put your own `pane_id` (`$HERDR_PANE_ID`) in the brief so replies come
+  back as `herdr agent prompt <conductor pane_id> "<implementer>: ..."`. Record
+  each implementer's `pane_id` and whether you started it or the user handed it
+  to you.
+
+  **Pair each implementer with you.** Create its worktree first, then split
+  your own pane to the right in that worktree and start the implementer there,
+  so each conductor sits beside its implementers:
+
+  ~~~sh
+  P=$(herdr pane split --current --direction right --cwd <implementer worktree> --no-focus | jq -r .result.pane.pane_id)
+  herdr agent start <name> --kind codex --pane "$P"
+  ~~~
+
+  The name matches `[a-z][a-z0-9_-]{0,31}` and is unique among live agents,
+  such as `impl-848`. Use the agent kind the user names when it is not Codex.
+  Send the brief only after `agent start` returns ready.
+
+  **A pane the user hands you** is chosen by its `cwd` and `terminal_title`;
+  the `agent_session` id can name another repository's thread, so it never
+  selects a pane. Send only to panes whose `cwd` is this effort's repository.
+
+  **When an implementer's session dies**, resume the same thread beside you:
+  find its thread id by searching
+  `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief, run
+  `herdr pane close <old pane_id>`, split your pane again as above, and start
+  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`.
+  Once it returns ready, re-send your last instruction: a resumed thread does
+  not receive a prompt sent before it was ready.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
 the hand-back, and the decisions log the shared memory.
