@@ -81,11 +81,16 @@ as agents driven through herdr. Use the answer for the whole effort.
   Only the conductor labels panes.
 
   **Keep your pane alone in its tab; put every implementer in one second tab**
-  in the same workspace. Create each implementer's worktree first. The first
-  implementer opens the implementers tab; record that tab's id:
+  in the same workspace, placed directly after your tab, so the workspace reads
+  conductor, its implementers, next conductor, its implementers. Create each
+  implementer's worktree first. The first implementer opens the implementers
+  tab; record that tab's id and place it after yours with this skill's
+  `scripts/place_tab_after.py`, since the herdr CLI has no tab-move command:
 
   ~~~sh
-  P=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <implementer worktree> --label "<repo> <area>" --no-focus | jq -r .result.root_pane.pane_id)
+  NEW=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <implementer worktree> --label "<repo> <area>" --no-focus)
+  IMPL_TAB=$(jq -r .result.tab.tab_id <<<"$NEW"); P=$(jq -r .result.root_pane.pane_id <<<"$NEW")
+  python3 <conductor-mode skill directory>/scripts/place_tab_after.py "$IMPL_TAB" "$HERDR_TAB_ID"
   ~~~
 
   Each later implementer splits an implementer pane in that tab:
