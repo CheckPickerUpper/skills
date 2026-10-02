@@ -34,6 +34,7 @@ Skills for code, architecture, APIs, and design decisions, with an emphasis on c
 - **[antimatter-codebase-structure-review](./skills/engineering/antimatter-codebase-structure-review/SKILL.md)** — Audits hierarchy, naming, ownership, dependency boundaries, and growth readiness; every finding must survive refutation and specify an evidence-backed change.
 - **[pizza1](./skills/engineering/pizza1/SKILL.md)** — Justify by correctness, never by convention. Use when a design is defended by "it's what the codebase does", "the canonical lane does it", ergonomics, churn, transition size, compatibility, legacy paths, or scope.
 - **[readonly](./skills/engineering/readonly/SKILL.md)** — Prove, don't guess. A user-invoked modifier for codebase questions and other skills: exhaust read-only evidence, avoid "likely" answers when facts can be checked, and stop before implementation, issues, commits, or remote changes.
+- **[zen-of-checkpickerupper](./skills/engineering/zen-of-checkpickerupper/SKILL.md)** — The Zen of CheckPickerUpper: twenty-one lines that judge designs, fixes, abstractions, types, structure, and questions, each expanded and traced to its source skill. Use when settling a design choice or an ambiguous question, choosing between options, judging whether a fix, abstraction, type, or layout is right, or when someone asks for the zen of checkpickerupper.
 
 ### Productivity
 
