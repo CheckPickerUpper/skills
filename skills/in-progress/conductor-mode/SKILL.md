@@ -80,35 +80,49 @@ as agents driven through herdr. Use the answer for the whole effort.
   be cleared and reused for other issues, and a numbered label goes stale.
   Only the conductor labels panes.
 
-  **Pair each implementer with you.** Create its worktree first, then split
-  your own pane to the right in that worktree and start the implementer there,
-  so each conductor sits beside its implementers:
+  **Keep your pane alone in its tab; put every implementer in one second tab**
+  in the same workspace. Create each implementer's worktree first. The first
+  implementer opens the implementers tab; record that tab's id:
 
   ~~~sh
-  P=$(herdr pane split --current --direction right --cwd <implementer worktree> --no-focus | jq -r .result.pane.pane_id)
+  P=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <implementer worktree> --label "<repo> <area>" --no-focus | jq -r .result.root_pane.pane_id)
+  ~~~
+
+  Each later implementer splits an implementer pane in that tab:
+
+  ~~~sh
+  P=$(herdr pane split <implementer pane_id> --direction right --cwd <implementer worktree> --no-focus | jq -r .result.pane.pane_id)
+  ~~~
+
+  Then start and label it:
+
+  ~~~sh
   herdr agent start <repo>-<topic> --kind codex --pane "$P"
   herdr pane rename "$P" "<repo> <topic>"
   ~~~
 
   The agent name follows the label in lowercase, such as `nro-input-buffering`;
-  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Use the agent kind the user names when it is not Codex.
-  Send the brief only after `agent start` returns ready.
+  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Use
+  the agent kind the user names when it is not Codex. Split `down` instead of
+  `right` once a row gets narrow. Send the brief only after `agent start`
+  returns ready. When the last implementer pane closes and the tab goes with
+  it, the next implementer opens a new implementers tab.
 
   **A pane the user hands you** is chosen by its `cwd` and `terminal_title`;
   the `agent_session` id can name another repository's thread, so it never
   selects a pane. Send only to panes whose `cwd` is this effort's repository.
-  Move an implementer already running in another tab beside you, and address
-  it by the new id from `.result.move_result.pane.pane_id`:
-  `herdr pane move <pane_id> --tab "$HERDR_TAB_ID" --split right --target-pane "$HERDR_PANE_ID" --no-focus`.
+  Move an implementer running anywhere else into the implementers tab, and
+  address it by the new id from `.result.move_result.pane.pane_id`:
+  `herdr pane move <pane_id> --tab <implementers tab_id> --split right --no-focus`.
 
-  **When an implementer's session dies**, resume the same thread beside you:
-  find its thread id by searching
+  **When an implementer's session dies**, resume the same thread in the
+  implementers tab: find its thread id by searching
   `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief, run
-  `herdr pane close <old pane_id>`, split your pane again as above, and start
+  `herdr pane close <old pane_id>`, open a pane as above, start
   `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`,
-  and label the new pane as before. Once it returns ready, re-send your last
-  instruction: a resumed thread does
-  not receive a prompt sent before it was ready.
+  and label it as before. Once it returns ready, re-send your last
+  instruction: a resumed thread does not receive a prompt sent before it was
+  ready.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
 the hand-back, and the decisions log the shared memory.
