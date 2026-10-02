@@ -1,6 +1,6 @@
 ---
 name: conductor-mode
-description: "Act as the conductor for delegated implementation: investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and merge. Use when the user says to run as a conductor, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
+description: "Act as the conductor for delegated implementation: investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and land it. Use when the user says to run as a conductor, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
 short_description: "Investigate, decide, brief implementer agents, review, and merge."
 allow_implicit_invocation: true
 ---
@@ -11,6 +11,35 @@ The conductor owns the reasoning and the result. Implementers receive a settled
 job and return evidence; the conductor investigates, decides, reviews, and
 merges. Each implementer works under `implementer-mode`, which owns how it
 works, asks, and reports.
+
+## Load the settings first
+
+<what-to-do>
+From the effort's repository, run
+`python3 <conductor-mode skill directory>/scripts/conductor_config.py show`. It
+prints two settings with the file each came from. The project file
+`.checkpickerupper/conductor-mode.toml` at the repository root overrides the
+global `~/.config/checkpickerupper/conductor-mode.toml`.
+
+- **`max_implementers`:** the most implementers running at once under you.
+  Queue the rest, and start the next when one is released in step 7.
+- **`merge`:** `conductor` means you merge in step 7. `implementer` means the
+  brief tells the implementer to merge once you send acceptance, and you send
+  it only after step 7's checks pass.
+
+When the command exits 3, a setting is set in neither file. Ask the user for
+each missing one, through `AskUserQuestion` where the client has it: how many
+implementers may run at once, who merges, and whether to save the answer for
+every project (global) or only this repository (project). Save it:
+
+~~~sh
+python3 <conductor-mode skill directory>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer
+~~~
+
+A project file is a change to the repository; land it like any other change.
+The channel and the agent kind are not settings: they depend on what the user
+can use at the time, so step 3 asks for them each effort.
+</what-to-do>
 
 ## 1. Settle the job
 
@@ -58,7 +87,9 @@ conditions yet". The implementer caught the contradiction; the log prevents it.
 
 <what-to-do>
 Ask the user, once per effort, whether implementers run as native subagents or
-as agents driven through herdr. Use the answer for the whole effort.
+as agents driven through herdr, and for herdr, which agent kind (Codex, Claude,
+Pi, or another kind herdr supports). Use the answers for the whole effort.
+Never run more implementers at once than `max_implementers`.
 
 - **Native subagents:** dispatch in the background on the strongest model the
   client exposes. Continue an implementer by messaging the same agent, which
@@ -102,13 +133,13 @@ as agents driven through herdr. Use the answer for the whole effort.
   Then start and label it:
 
   ~~~sh
-  herdr agent start <repo>-<topic> --kind codex --pane "$P"
+  herdr agent start <repo>-<topic> --kind <kind> --pane "$P"
   herdr pane rename "$P" "<repo> <topic>"
   ~~~
 
   The agent name follows the label in lowercase, such as `nro-input-buffering`;
-  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Use
-  the agent kind the user names when it is not Codex. Split `down` instead of
+  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Split
+  `down` instead of
   `right` once a row gets narrow. Send the brief only after `agent start`
   returns ready. When the last implementer pane closes and the tab goes with
   it, the next implementer opens a new implementers tab.
@@ -124,7 +155,8 @@ as agents driven through herdr. Use the answer for the whole effort.
   implementers tab: find its thread id by searching
   `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief, run
   `herdr pane close <old pane_id>`, open a pane as above, start
-  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`,
+  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`
+  (for another kind, use that agent's own resume argument),
   and label it as before. Once it returns ready, re-send your last
   instruction: a resumed thread does not receive a prompt sent before it was
   ready.
@@ -200,7 +232,7 @@ states:
   current head SHA;
 - numbered items, each with the file and line or behavior, the decision it
   rests on, and the proof expected;
-- "same working rules as before; do not merge";
+- "same working rules as before", and the merge rule from the brief;
 - the report wanted: each item done or not done with the exact reason, tests
   and how each failed when broken, and the new head SHA.
 
@@ -217,8 +249,10 @@ An implementer's report is a claim. Before accepting:
    acceptance criteria.
 3. Confirm the PR's checks passed on the current head SHA and that it is
    mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
-4. Merge as its own step. Run branch and worktree cleanup only after
-   `state` reads `MERGED`.
+4. Land it as its own step. With `merge = "conductor"`, merge it yourself.
+   With `merge = "implementer"`, send the implementer acceptance and let it
+   merge. Either way, run branch and worktree cleanup only after `state` reads
+   `MERGED`.
 5. Release the implementer. When its PR reads `MERGED` and no follow-up is
    pending, or its job was dropped or reassigned, close a pane you started
    with `herdr pane close <pane_id>`. A pane the user handed you stays open;

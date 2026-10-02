@@ -77,7 +77,9 @@ show a test fails, goes through the guard.
 
 <what-to-do>
 Reach the brief's finish line: pushed, PR open with its closing line, checks
-passed on the pushed head SHA, mergeable. Leave merging to the conductor.
+passed on the pushed head SHA, mergeable. Merge only when the brief's finish
+line says you merge, and only after the conductor sends acceptance; otherwise
+the conductor merges.
 
 Before reporting, run `herdr pane list` and close any pane you created that is
 still open. A pane that must stay open, such as a server the conductor will
