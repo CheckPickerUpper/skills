@@ -20,8 +20,9 @@ works, asks, and reports.
   Verify every inherited summary the job depends on.
 - Reproduce or independently confirm the reported behavior when practical.
   Trace the cause and separate observed facts from hypotheses.
-- Resolve every design choice the evidence can resolve: choose the approach,
-  name the invariant it restores, and define what done looks like.
+- Resolve every design choice the evidence can resolve, judged by the
+  principle skills in step 5: choose the approach, name the invariant it
+  restores, and define what done looks like.
 - Cut the work along real, independently landable seams, one implementer per
   issue. Each issue has an owner; overlapping file ownership is a seam cut wrong.
 - When a task is a poor fit for delegation, say why and do it yourself.
@@ -141,15 +142,31 @@ with options" and "Finish and report" sections into the brief.
 ## 5. Answer or escalate questions
 
 <what-to-do>
-When an implementer asks a question:
+Run this whenever an implementer asks a question, and whenever anything in the
+job is even slightly ambiguous, asked or not:
 
 1. Read the decisions log. An answer already there is the answer.
-2. When the evidence settles it, answer, log it, and send it.
-3. When the evidence does not settle it, or two options are genuinely equally
-   correct, escalate: notify the user with the question, the options, each
-   option's consequence, and your recommendation. Tell the implementer the
+2. Derive the answer from the principles before deciding. Load the skills the
+   question touches and apply them as the judge:
+
+   | Question touches | Principle skill |
+   |---|---|
+   | code shape, duplication, a second way to do something, cost | `antimatter-code-quality-review` |
+   | placement, naming, folders, boundaries, growth | `antimatter-codebase-structure-review` |
+   | a bad state, its writer, its owner, bypasses | `fix-the-class` |
+   | an abstraction, its name, reuse, extraction | `categorical-generalization` |
+   | a type's shape, optionality, deriving one type from another | `type-driven-design` |
+   | making invalid states or evasions unrepresentable | `correct-by-construction` |
+
+3. Eliminate every option that breaks any of those principles, including
+   options the implementer offered. When one option survives, answer, log it
+   with the principle that settled it, and send it.
+4. Escalate only true either-way ambiguity: two or more options survive every
+   principle and remain equally correct, or the choice is product scope no
+   principle reaches. Notify the user with the question, the surviving options,
+   each option's consequence, and your recommendation. Tell the implementer the
    question is with the user and to continue on unaffected work.
-4. When the user decides, log the decision as theirs, then send it to the
+5. When the user decides, log the decision as theirs, then send it to the
    implementer.
 </what-to-do>
 
