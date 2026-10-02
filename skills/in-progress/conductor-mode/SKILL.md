@@ -70,12 +70,14 @@ as agents driven through herdr. Use the answer for the whole effort.
   each implementer's `pane_id` and whether you started it or the user handed it
   to you.
 
-  **Label your pane for your standing area** when you start, so the user can
-  tell conductors apart in the workspace:
-  `herdr pane rename "$HERDR_PANE_ID" "<repo> <area>"`, such as
-  `NRO prediction`. Leave issue numbers out: a conductor's context can be
-  cleared and reused for other issues, and a numbered label goes stale. Only
-  the conductor labels panes.
+  **Label every pane you own** with the repository name plus what it does, so
+  the user can read the workspace at a glance. Your own pane carries your
+  standing area: `herdr pane rename "$HERDR_PANE_ID" "<repo> <area>"`, such as
+  `NRO prediction`. Each implementer pane carries its worktree's topic:
+  `herdr pane rename <pane_id> "<repo> <topic>"`, such as
+  `NRO input buffering`. Leave issue numbers out of every label: a context can
+  be cleared and reused for other issues, and a numbered label goes stale.
+  Only the conductor labels panes.
 
   **Pair each implementer with you.** Create its worktree first, then split
   your own pane to the right in that worktree and start the implementer there,
@@ -83,11 +85,12 @@ as agents driven through herdr. Use the answer for the whole effort.
 
   ~~~sh
   P=$(herdr pane split --current --direction right --cwd <implementer worktree> --no-focus | jq -r .result.pane.pane_id)
-  herdr agent start <name> --kind codex --pane "$P"
+  herdr agent start <repo>-<topic> --kind codex --pane "$P"
+  herdr pane rename "$P" "<repo> <topic>"
   ~~~
 
-  The name matches `[a-z][a-z0-9_-]{0,31}` and is unique among live agents,
-  such as `impl-848`. Use the agent kind the user names when it is not Codex.
+  The agent name follows the label in lowercase, such as `nro-input-buffering`;
+  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Use the agent kind the user names when it is not Codex.
   Send the brief only after `agent start` returns ready.
 
   **A pane the user hands you** is chosen by its `cwd` and `terminal_title`;
@@ -101,8 +104,9 @@ as agents driven through herdr. Use the answer for the whole effort.
   find its thread id by searching
   `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief, run
   `herdr pane close <old pane_id>`, split your pane again as above, and start
-  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`.
-  Once it returns ready, re-send your last instruction: a resumed thread does
+  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`,
+  and label the new pane as before. Once it returns ready, re-send your last
+  instruction: a resumed thread does
   not receive a prompt sent before it was ready.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
