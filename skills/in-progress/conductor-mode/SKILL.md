@@ -70,6 +70,11 @@ as agents driven through herdr. Use the answer for the whole effort.
   each implementer's `pane_id` and whether you started it or the user handed it
   to you.
 
+  **Name your tab for the effort** when you start, and rename it when the
+  effort changes, so the user can tell conductors apart at a glance:
+  `herdr tab rename "$HERDR_TAB_ID" "<repo> <effort>"`, such as
+  `NRO prediction #938`.
+
   **Pair each implementer with you.** Create its worktree first, then split
   your own pane to the right in that worktree and start the implementer there,
   so each conductor sits beside its implementers:
@@ -86,6 +91,9 @@ as agents driven through herdr. Use the answer for the whole effort.
   **A pane the user hands you** is chosen by its `cwd` and `terminal_title`;
   the `agent_session` id can name another repository's thread, so it never
   selects a pane. Send only to panes whose `cwd` is this effort's repository.
+  Move an implementer already running in another tab beside you, and address
+  it by the new id from `.result.move_result.pane.pane_id`:
+  `herdr pane move <pane_id> --tab "$HERDR_TAB_ID" --split right --target-pane "$HERDR_PANE_ID" --no-focus`.
 
   **When an implementer's session dies**, resume the same thread beside you:
   find its thread id by searching
