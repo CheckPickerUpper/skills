@@ -4,7 +4,7 @@ Fill every section. Write facts and paths the implementer can open; leave
 nothing for it to infer.
 
 ~~~markdown
-Implement OWNER/REPO#N ("<issue title>") and open a PR. Do not merge it.
+Implement OWNER/REPO#N ("<issue title>") and open a PR. <merge line>
 Work under the implementer-mode skill.
 
 ## You own
@@ -44,6 +44,9 @@ names the proof that shows it met>
 - Open a PR against <base> with `Closes #N` and a body saying what changed and
   how it was verified.
 - Wait until the PR's checks pass on the pushed head SHA and it is mergeable.
+- <merge line>: with `merge = "conductor"`, "Do not merge it; the conductor
+  merges." With `merge = "implementer"`, "Merge it once the conductor sends
+  acceptance, then confirm it reads MERGED."
 
 ## Asking
 Ask <conductor name and channel> with the question, options with their
