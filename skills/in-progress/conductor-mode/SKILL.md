@@ -1,7 +1,7 @@
 ---
 name: conductor-mode
-description: "Act as the conductor for delegated implementation: investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and land it. Use when the user says to run as a conductor, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
-short_description: "Investigate, decide, brief implementer agents, review, and merge."
+description: "Act as the conductor for delegated implementation: read its saved settings first and ask for any that are missing, then investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and land it. Use when the user says to run as a conductor, set up conductor mode, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
+short_description: "Investigate, decide, brief implementer agents, review, and land the work."
 allow_implicit_invocation: true
 ---
 
@@ -9,31 +9,46 @@ allow_implicit_invocation: true
 
 The conductor owns the reasoning and the result. Implementers receive a settled
 job and return evidence; the conductor investigates, decides, reviews, and
-merges. Each implementer works under `implementer-mode`, which owns how it
-works, asks, and reports.
+lands the work. Each implementer works under `implementer-mode`, which owns how
+it works, asks, and reports.
 
-## Load the settings first
+## Before anything else: your settings
 
 <what-to-do>
-From the effort's repository, run
-`python3 <conductor-mode skill directory>/scripts/conductor_config.py show`. It
-prints two settings with the file each came from. The project file
-`.checkpickerupper/conductor-mode.toml` at the repository root overrides the
-global `~/.config/checkpickerupper/conductor-mode.toml`.
+Your first action, before step 1, is reading your two settings. Run this from
+the effort's repository; it needs no path lookup:
+
+~~~sh
+for f in "${XDG_CONFIG_HOME:-$HOME/.config}/checkpickerupper/conductor-mode.toml" \
+         "$(git rev-parse --show-toplevel)/.checkpickerupper/conductor-mode.toml"; do
+  echo "== $f"; cat "$f" 2>/dev/null || echo "(not set)"; done
+~~~
+
+The first file is global and the second is this repository's; a key in the
+second overrides the first.
 
 - **`max_implementers`:** the most implementers running at once under you.
   Queue the rest, and start the next when one is released in step 7.
-- **`merge`:** `conductor` means you merge in step 7. `implementer` means the
-  brief tells the implementer to merge once you send acceptance, and you send
-  it only after step 7's checks pass.
+- **`merge`:** `"conductor"` means you merge in step 7. `"implementer"` means
+  the brief tells the implementer to merge once you send acceptance, and you
+  send it only after step 7's checks pass.
 
-When the command exits 3, a setting is set in neither file. Ask the user for
-each missing one, through `AskUserQuestion` where the client has it: how many
-implementers may run at once, who merges, and whether to save the answer for
-every project (global) or only this repository (project). Save it:
+**When either key is in neither file, ask the user now**, before any other
+work, with `AskUserQuestion` where the client has it. Ask only for the missing
+keys, plus where to save:
+
+| Question | Options |
+|---|---|
+| How many implementers may run at once under one conductor? | 1, 2, 3, 4 |
+| Who merges an implementer's PR? | The conductor, after its review; the implementer, once the conductor sends acceptance |
+| Save for every project or only this repository? | Every project (global); this repository only (committed project file) |
+
+Save the answers with `scripts/conductor_config.py`, which sits beside this
+SKILL.md (Claude Code prints that folder as the skill's base directory when the
+skill loads). It validates the values and creates the folder and its README:
 
 ~~~sh
-python3 <conductor-mode skill directory>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer
+python3 <folder of this SKILL.md>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer
 ~~~
 
 A project file is a change to the repository; land it like any other change.
@@ -121,7 +136,7 @@ Never run more implementers at once than `max_implementers`.
   ~~~sh
   NEW=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <implementer worktree> --label "<repo> <area>" --no-focus)
   IMPL_TAB=$(jq -r .result.tab.tab_id <<<"$NEW"); P=$(jq -r .result.root_pane.pane_id <<<"$NEW")
-  python3 <conductor-mode skill directory>/scripts/place_tab_after.py "$IMPL_TAB" "$HERDR_TAB_ID"
+  python3 <folder of this SKILL.md>/scripts/place_tab_after.py "$IMPL_TAB" "$HERDR_TAB_ID"
   ~~~
 
   Each later implementer splits an implementer pane in that tab:
