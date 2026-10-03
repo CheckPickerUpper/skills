@@ -15,7 +15,10 @@ Work under the implementer-mode skill.
 - `gh issue view N --repo OWNER/REPO`: its Done when is the acceptance list.
   Parent: #P.
 - Decisions log: <comment URL>. Every answer there is settled.
-- Design: <doc path and the sections that apply>; <ADRs>.
+- Cause and fix: <the defect's file and line, and the settled fix design:
+  tables, types, and which code owns each rule>. Build this design; ask before
+  departing from it.
+- Design docs: <doc path and the sections that apply>; <ADRs>.
 - Repo rules: <CLAUDE.md / AGENTS.md / skills to read before writing>.
 - Where the code is: <the existing modules, types, and entry points this job
   touches, and what each holds today>.
@@ -39,10 +42,11 @@ names the proof that shows it met>
   version before it is committed.
 - Commit each verified step; end messages with <attribution line>.
 
-## Reviews before reporting
-- Run each of these skills on your diff against <base>: <review_skills, or
-  "none declared">. Fix every finding that survives a review's refutation,
-  commit each fix, and run the reviews again until none survive.
+## Self-check before reporting
+- Once the PR is complete, run each of these skills once on your diff against
+  <base>: <review_skills, or "none declared">. Fix every finding that survives
+  a review's refutation and commit each fix. The conductor's independent review
+  follows your report.
 
 ## Finish line
 - Push the branch; the pre-push checks pass.
