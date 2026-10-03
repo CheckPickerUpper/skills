@@ -301,8 +301,8 @@ An implementer's report is a claim. Before accepting:
    fix, so your own review would grade your design rather than test it. Without
    subagents, start a fresh agent for the review. This is the one independent
    review per PR; it does not rerun on every push. Send each finding that
-   survives refutation and your own check of the code (step 6) back as a follow-
-   up, then check each follow-up fix yourself as in 1. Accept when every
+   survives refutation and your own check of the code (step 6) back as a
+   follow-up, then check each follow-up fix yourself as in 1. Accept when every
    surviving finding is fixed.
 4. Confirm the PR's checks passed on the current head SHA and that it is
    mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
