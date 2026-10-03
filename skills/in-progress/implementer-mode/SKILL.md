@@ -76,12 +76,13 @@ show a test fails, goes through the guard.
 ## 5. Finish and report
 
 <what-to-do>
-Before reporting, run every review skill the brief names on your diff against
-its base. Fix every finding that survives a review's refutation, commit each
-fix, and run the reviews again until none survive. A finding you cannot fix
-inside the brief goes to the conductor as a question (step 3). A review skill
-your client does not have is reported as unavailable, and the conductor runs it
-in its own review.
+Once the work is complete, run every review skill the brief names once on your
+diff against its base, as a self-check. Fix every finding that survives a
+review's refutation and commit each fix. The conductor's independent review
+follows your report, so do not rerun the reviews after each fix. A finding you
+cannot fix inside the brief goes to the conductor as a question (step 3). A
+review skill your client does not have is reported as unavailable, and the
+conductor runs it in its own review.
 
 Reach the brief's finish line: pushed, PR open with its closing line, checks
 passed on the pushed head SHA, mergeable. Merge only when the brief's finish
