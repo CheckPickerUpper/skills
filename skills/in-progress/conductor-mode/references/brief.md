@@ -15,7 +15,8 @@ Work under the implementer-mode skill.
 - `gh issue view N --repo OWNER/REPO`: its Done when is the acceptance list.
   Parent: #P.
 - Decisions log: <comment URL>. Every answer there is settled.
-- Cause and fix: <the defect's file and line, and the settled fix design:
+- Cause and fix: <quoted from the decisions log: the defect's file and line, or
+  for new work the missing capability and its owner; and the settled fix design:
   tables, types, and which code owns each rule>. Build this design; ask before
   departing from it.
 - Design docs: <doc path and the sections that apply>; <ADRs>.
@@ -32,7 +33,8 @@ Work under the implementer-mode skill.
 names the proof that shows it met>
 
 ## Working rules
-- Worktree: `<checkout>-<issue>-<topic>` on branch `<branch>`, already
+- Worktree: <the repository's worktree convention from its AGENTS.md or
+  CLAUDE.md, else `<checkout>-<issue>-<topic>`> on branch `<branch>`, already
   created by the conductor and your pane's working directory. (For a
   subagent, give the command instead:
   `git -C <checkout> fetch origin && git -C <checkout> worktree add -b <branch> <checkout>-<issue>-<topic> origin/<base>`.)
@@ -40,7 +42,8 @@ names the proof that shows it met>
 - Enforcement: <write guard, hooks, and how to handle a refusal in this repo>.
 - Tests: <test commands>; each new test fails against a plausible wrong
   version before it is committed.
-- Commit each verified step; end messages with <attribution line>.
+- Commit each verified step; end messages with <the trailer the repository
+  requires, or "no trailer">.
 
 ## Self-check before reporting
 - Once the PR is complete, run each of these skills once on your diff against
