@@ -15,7 +15,7 @@ it works, asks, and reports.
 ## Before anything else: your settings
 
 <what-to-do>
-Your first action, before step 1, is reading your two settings. Run this from
+Your first action, before step 1, is reading your three settings. Run this from
 the effort's repository; it needs no path lookup:
 
 ~~~sh
@@ -32,8 +32,12 @@ second overrides the first.
 - **`merge`:** `"conductor"` means you merge in step 7. `"implementer"` means
   the brief tells the implementer to merge once you send acceptance, and you
   send it only after step 7's checks pass.
+- **`review_skills`:** the skills that must review every PR before it is
+  accepted or merged. The implementer runs them before reporting and you run
+  them again in step 7. An empty list means no declared reviews. A project list
+  replaces the global one.
 
-**When either key is in neither file, ask the user now**, before any other
+**When any key is in neither file, ask the user now**, before any other
 work, with `AskUserQuestion` where the client has it. Ask only for the missing
 keys, plus where to save:
 
@@ -41,6 +45,7 @@ keys, plus where to save:
 |---|---|
 | How many implementers may run at once under one conductor? | 1, 2, 3, 4 |
 | Who merges an implementer's PR? | The conductor, after its review; the implementer, once the conductor sends acceptance |
+| Which skills must review every PR before it is accepted or merged? | The review skills installed in this client, found by their names and descriptions, plus "None" (multi-select) |
 | Save for every project or only this repository? | Every project (global); this repository only (committed project file) |
 
 Save the answers with `scripts/conductor_config.py`, which sits beside this
@@ -48,7 +53,7 @@ SKILL.md (Claude Code prints that folder as the skill's base directory when the
 skill loads). It validates the values and creates the folder and its README:
 
 ~~~sh
-python3 <folder of this SKILL.md>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer
+python3 <folder of this SKILL.md>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer --review-skills name,name
 ~~~
 
 A project file is a change to the repository; land it like any other change.
@@ -262,13 +267,18 @@ An implementer's report is a claim. Before accepting:
 1. Read the diff and check each reported fix in the code yourself.
 2. Review it adversarially against the issue, the decisions log, and the
    acceptance criteria.
-3. Confirm the PR's checks passed on the current head SHA and that it is
+3. Run every skill in `review_skills` on the PR's current head against its
+   base, yourself, whatever the implementer reported. Send every finding that
+   survives a review's refutation back as a follow-up (step 6), and run the
+   reviews again on the new head. Accept only when no finding survives any of
+   them.
+4. Confirm the PR's checks passed on the current head SHA and that it is
    mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
-4. Land it as its own step. With `merge = "conductor"`, merge it yourself.
+5. Land it as its own step. With `merge = "conductor"`, merge it yourself.
    With `merge = "implementer"`, send the implementer acceptance and let it
    merge. Either way, run branch and worktree cleanup only after `state` reads
    `MERGED`.
-5. Release the implementer. When its PR reads `MERGED` and no follow-up is
+6. Release the implementer. When its PR reads `MERGED` and no follow-up is
    pending, or its job was dropped or reassigned, close a pane you started
    with `herdr pane close <pane_id>`. A pane the user handed you stays open;
    tell the user it is free. Before the final report, run `herdr pane list`

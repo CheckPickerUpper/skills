@@ -39,6 +39,11 @@ names the proof that shows it met>
   version before it is committed.
 - Commit each verified step; end messages with <attribution line>.
 
+## Reviews before reporting
+- Run each of these skills on your diff against <base>: <review_skills, or
+  "none declared">. Fix every finding that survives a review's refutation,
+  commit each fix, and run the reviews again until none survive.
+
 ## Finish line
 - Push the branch; the pre-push checks pass.
 - Open a PR against <base> with `Closes #N` and a body saying what changed and

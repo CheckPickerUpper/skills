@@ -76,6 +76,11 @@ show a test fails, goes through the guard.
 ## 5. Finish and report
 
 <what-to-do>
+Before reporting, run every review skill the brief names on your diff against
+its base. Fix every finding that survives a review's refutation, commit each
+fix, and run the reviews again until none survive. A finding you cannot fix
+inside the brief goes to the conductor as a question (step 3).
+
 Reach the brief's finish line: pushed, PR open with its closing line, checks
 passed on the pushed head SHA, mergeable. Merge only when the brief's finish
 line says you merge, and only after the conductor sends acceptance; otherwise
@@ -96,6 +101,8 @@ Report in this shape:
 5. Anything in the design or brief that looked contradictory.
 6. Changes beyond the job, each with its commit.
 7. Panes you left open, each with its `pane_id` and reason; "none" otherwise.
+8. Each review skill the brief named: clean, or the findings it raised and the
+   commit that fixed each.
 </what-to-do>
 
 ## 6. Follow-ups
