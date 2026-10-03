@@ -33,7 +33,8 @@ second overrides the first.
   once it is unblocked and its cause and fix are designed (step 1), so design
   the next issue before a slot frees. Queue the rest, and start the next as
   soon as one is released in step 7. The number is the user's ceiling for this
-  machine; never exceed it to use spare work.
+  machine; never exceed it to use spare work. It counts implementers, one per
+  issue in flight; an implementer's own subagents inside its issue do not count.
 - **`merge`:** `"conductor"` means you merge in step 7. `"implementer"` means
   the brief tells the implementer to merge once you send acceptance, and you
   send it only after step 7's checks pass.
