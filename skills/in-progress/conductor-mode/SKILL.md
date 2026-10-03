@@ -77,19 +77,21 @@ can use at the time, so step 3 asks for them each effort.
 - Read the repository's existing decision records before settling anything:
   ADRs, design docs, and issues or comments where the owner decided. Never
   re-decide or re-ask what they settle.
-- Find the exact cause and design the exact fix yourself. Name the defect's file
-  and line, and settle the fix's shape: the tables, types, and which code owns
-  each rule. Judge every design choice by `zen-of-checkpickerupper` and the
-  principle skills in step 5, name the invariant the fix restores, and define
-  what done looks like. The implementer builds this design; it does not
-  produce one.
+- Find the exact cause and design the exact fix yourself. For a bug, name the
+  defect's file and line. For new work, name the missing capability, the code
+  that will own it, and the existing lines it builds on. Settle the fix's shape:
+  the tables, types, and which code owns each rule. Judge every design choice by
+  `zen-of-checkpickerupper` and the principle skills in step 5, name the
+  invariant the fix restores, and define what done looks like. The implementer
+  builds this design; it does not produce one.
 - Cut the work along real, independently landable seams, one implementer per
   issue, so the independent issues run in parallel up to `max_implementers`.
   Each issue has an owner; overlapping file ownership is a seam cut wrong.
 - When a task is a poor fit for delegation, say why and do it yourself.
 
 Done when every implementer job is an issue with acceptance criteria and its
-cause and fix design written down, and every choice inside it is either settled
+cause and fix design recorded in the decisions log (step 2), which the brief's
+Cause and fix line quotes, and every choice inside it is either settled
 or listed as an open question.
 </what-to-do>
 
@@ -298,8 +300,9 @@ An implementer's report is a claim. Before accepting:
    implementer's own self-check found. Give the subagent the PR, the issue, the
    brief, and the decisions log, but not your conversation: the brief's cause
    and fix design is a claim it tests, not a fact it trusts. You designed the
-   fix, so your own review would grade your design rather than test it. Without
-   subagents, start a fresh agent for the review. This is the one independent
+   fix, so your own review would grade your design rather than test it. One
+   subagent may run all the skills in turn. Without subagents, start a fresh
+   agent for the review. This is the one independent
    review per PR; it does not rerun on every push. Send each finding that
    survives refutation and your own check of the code (step 6) back as a
    follow-up, then check each follow-up fix yourself as in 1. Accept when every
