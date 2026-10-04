@@ -37,8 +37,10 @@ the proof that will show it met.
   `herdr agent start` returns, and run `herdr pane close <pane_id>` as soon as
   that pane's job ends: the test run finished, the server is no longer needed,
   the helper agent reported. Close only panes you created; the conductor's and
-  the user's panes stay. Pane and tab labels belong to the conductor; leave
-  them as they are.
+  the user's panes stay. Your own pane stays in the workspace the conductor
+  started it in, under the label the conductor gave it: layout and labels
+  belong to the conductor, and `herdr pane move` kills the agent in the moved
+  pane.
 </what-to-do>
 
 ## 3. Ask with options
