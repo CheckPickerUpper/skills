@@ -34,11 +34,12 @@ names the proof that shows it met>
 
 ## Working rules
 - Worktree: <the repository's worktree convention from its AGENTS.md or
-  CLAUDE.md, else `<checkout>-<issue>-<topic>`> on branch `<branch>`, already
-  created by the conductor and your pane's working directory. (For a
-  subagent, give the command instead:
+  CLAUDE.md, else `<checkout>-<issue>-<topic>`> on branch `<branch>` from
+  `origin/<base>`, already created by the conductor and your pane's working
+  directory. (For a subagent, give the command instead:
   `git -C <checkout> fetch origin && git -C <checkout> worktree add -b <branch> <checkout>-<issue>-<topic> origin/<base>`.)
-  Leave the primary checkout on its branch.
+  Leave the primary checkout on its branch. <base> is the repository's
+  canonical branch unless the decisions log records another.
 - Enforcement: <write guard, hooks, and how to handle a refusal in this repo>.
 - Tests: <test commands>; each new test fails against a plausible wrong
   version before it is committed.
