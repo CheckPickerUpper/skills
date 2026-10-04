@@ -142,67 +142,57 @@ while independent issues are waiting.
   each implementer's `pane_id` and whether you started it or the user handed it
   to you.
 
-  **Label every pane you own** with the repository name plus what it does, so
-  the user can read the workspace at a glance. Your own pane carries your
-  standing area: `herdr pane rename "$HERDR_PANE_ID" "<repo> <area>"`, such as
-  `NRO prediction`. Each implementer pane carries its worktree's topic:
-  `herdr pane rename <pane_id> "<repo> <topic>"`, such as
-  `NRO input buffering`. Leave issue numbers out of every label: a context can
-  be cleared and reused for other issues, and a numbered label goes stale.
-  Only the conductor labels panes.
-
-  **Keep your pane alone in its tab; put every implementer in one second tab**
-  in the same workspace. Panes in your tab that you neither started nor were
-  handed belong to someone else: leave them where they are, and tell the user
-  they share your tab. The implementers tab sits directly after your tab, so the
-  workspace reads conductor, its implementers, next conductor, its implementers.
-  Create each implementer's worktree first. The first implementer opens the
-  implementers tab; record that tab's id and place it after yours with this
-  skill's `scripts/place_tab_after.py`, since the herdr CLI has no tab-move
-  command:
+  **Give each implementer its own worktree workspace.** One command creates the
+  issue's git worktree and a herdr workspace linked to the repository, with one
+  pane whose working directory is that worktree. Then start the agent in it:
 
   ~~~sh
-  NEW=$(herdr tab create --workspace "$HERDR_WORKSPACE_ID" --cwd <implementer worktree> --label "<repo> <area>" --no-focus)
-  IMPL_TAB=$(jq -r .result.tab.tab_id <<<"$NEW"); P=$(jq -r .result.root_pane.pane_id <<<"$NEW")
-  python3 <folder of this SKILL.md>/scripts/place_tab_after.py "$IMPL_TAB" "$HERDR_TAB_ID"
+  NEW=$(herdr worktree create --cwd <checkout> --branch <branch> --base origin/<base> \
+          --path <worktree path> --label "<repo> <topic>" --no-focus)
+  P=$(jq -r .result.root_pane.pane_id <<<"$NEW"); WS=$(jq -r .result.workspace.workspace_id <<<"$NEW")
+  herdr agent start <repo>-<topic> --kind <kind> --pane "$P" --timeout 120000
   ~~~
 
-  Each later implementer splits an implementer pane in that tab:
-
-  ~~~sh
-  P=$(herdr pane split <implementer pane_id> --direction right --cwd <implementer worktree> --no-focus | jq -r .result.pane.pane_id)
-  ~~~
-
-  Then start and label it:
-
-  ~~~sh
-  herdr agent start <repo>-<topic> --kind <kind> --pane "$P"
-  herdr pane rename "$P" "<repo> <topic>"
-  ~~~
+  Name the repository with `--cwd` alone: `--cwd` and `--workspace` together
+  print usage and create nothing. The worktree path and branch follow the
+  brief's worktree convention. Record `$P` and `$WS`; step 7 removes the
+  workspace by its id. Add `--trust-repository` only when herdr refuses the
+  repository as untrusted and the user confirms it.
 
   The agent name follows the label in lowercase, such as `nro-input-buffering`;
-  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. Split
-  `down` instead of
-  `right` once a row gets narrow. Send the brief only after `agent start`
-  returns ready. When the last implementer pane closes and the tab goes with
-  it, the next implementer opens a new implementers tab.
+  it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. A
+  Codex start can outlast herdr's 30-second default, so pass the timeout above.
+  Send the brief only after `agent start` returns ready.
+
+  **Label what you own** with the repository name plus what it does, so the
+  user can read the sidebar at a glance. Your own pane carries your standing
+  area: `herdr pane rename "$HERDR_PANE_ID" "<repo> <area>"`, such as
+  `NRO prediction`. Each implementer workspace carries its topic through
+  `--label`, such as `NRO input buffering`. Leave issue numbers out of every
+  label: a context can be cleared and reused for other issues, and a numbered
+  label goes stale. Only the conductor labels panes and workspaces.
+
+  **Leave every pane that runs an agent where it is.** `herdr pane move`
+  reports success and kills the Codex agent inside
+  ([herdrdev/herdr#4864](https://github.com/herdrdev/herdr/issues/4864)), so an
+  implementer is addressed in place by its `pane_id`, wherever it runs.
 
   **A pane the user hands you** is chosen by its `cwd` and `terminal_title`;
   the `agent_session` id can name another repository's thread, so it never
-  selects a pane. Send only to panes whose `cwd` is this effort's repository.
-  Move an implementer running anywhere else into the implementers tab, and
-  address it by the new id from `.result.move_result.pane.pane_id`:
-  `herdr pane move <pane_id> --tab <implementers tab_id> --split right --no-focus`.
+  selects a pane. Send only to panes whose `cwd` is this effort's repository or
+  one of its worktrees.
 
-  **When an implementer's session dies**, resume the same thread in the
-  implementers tab: find its thread id by searching
-  `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief, run
-  `herdr pane close <old pane_id>`, open a pane as above, start
-  `herdr agent start <name> --kind codex --pane <new pane_id> -- resume <thread id>`
-  (for another kind, use that agent's own resume argument),
-  and label it as before. Once it returns ready, re-send your last
-  instruction: a resumed thread does not receive a prompt sent before it was
-  ready.
+  **When an implementer's session dies**, resume the same thread in its
+  worktree: find its thread id by searching
+  `~/.codex/sessions/YYYY/MM/DD/rollout-*.jsonl` for text from its brief. When
+  its pane is back at a shell prompt, reuse it; when its workspace is gone, open
+  the worktree again with
+  `herdr worktree open --cwd <checkout> --path <worktree path> --label "<repo> <topic>" --no-focus`
+  and take `.result.root_pane.pane_id`. Start
+  `herdr agent start <name> --kind codex --pane <pane_id> --timeout 120000 -- resume <thread id>`
+  (for another kind, use that agent's own resume argument). Once it returns
+  ready, re-send your last instruction: a resumed thread does not receive a
+  prompt sent before it was ready.
 
 The issue tracker is the durable record in both: issues are the work units, PRs
 the hand-back, and the decisions log the shared memory.
@@ -308,17 +298,22 @@ An implementer's report is a claim. Before accepting:
    survives refutation and your own check of the code (step 6) back as a
    follow-up, then check each follow-up fix yourself as in 1. Accept when every
    surviving finding is fixed.
-4. Confirm the PR's checks passed on the current head SHA and that it is
-   mergeable (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,statusCheckRollup`).
+4. Confirm the PR's checks passed on the current head SHA, that it is
+   mergeable, and that `baseRefName` is the base the brief named
+   (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,baseRefName,statusCheckRollup`).
 5. Land it as its own step. With `merge = "conductor"`, merge it yourself.
    With `merge = "implementer"`, send the implementer acceptance and let it
    merge. Either way, run branch and worktree cleanup only after `state` reads
    `MERGED`.
 6. Release the implementer. When its PR reads `MERGED` and no follow-up is
-   pending, or its job was dropped or reassigned, close a pane you started
-   with `herdr pane close <pane_id>`. A pane the user handed you stays open;
-   tell the user it is free. Before the final report, run `herdr pane list`
-   and close every implementer pane you started that is still open.
+   pending, or its job was dropped or reassigned, remove a worktree workspace
+   you created with `herdr worktree remove --workspace <workspace_id>`, which
+   deletes the checkout and closes the workspace and its panes, then delete the
+   local branch with `git branch -D <branch>`, which herdr leaves behind. A
+   dropped job's branch with unpushed commits is pushed first. A pane the user
+   handed you stays open; tell the user it is free. Before the final report,
+   run `herdr worktree list --cwd <checkout>` and remove every implementer
+   worktree you created that is still open.
 
 The saved `merge` setting is the user's standing approval to merge a PR that
 passes this step; do not ask again per PR. Any other push, merge, or publish
@@ -335,5 +330,5 @@ verified state.
 ## Final report
 
 Report each issue's PR, merge state, the decisions made (with the log's URL),
-questions still with the user, the implementer panes closed and any left open
-with the reason, and any concrete blocker with the external change it needs.
+questions still with the user, the implementer worktrees removed and any left
+open with the reason, and any concrete blocker with the external change it needs.
