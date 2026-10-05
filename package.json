@@ -1,0 +1,21 @@
+{
+  "name": "checkpickerupper-skills",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Agent skills for correctness-first engineering and clear technical judgment",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CheckPickerUpper/skills"
+  },
+  "license": "MIT",
+  "scripts": {
+    "changeset": "changeset",
+    "version": "changeset version && python3 scripts/sync-plugin-version.py",
+    "release": "bash scripts/release.sh"
+  },
+  "devDependencies": {
+    "@changesets/changelog-github": "^0.7.0",
+    "@changesets/cli": "^2.31.1"
+  },
+  "packageManager": "npm@11.19.0"
+}
