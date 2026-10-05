@@ -110,6 +110,17 @@ new skill, `patch` for a fix or wording change), and describe what changed for
 someone who uses the skill. Commit the generated `.changeset/*.md` with the
 change.
 
+Write one changeset per change, in the shape of the existing entries in
+`CHANGELOG.md`:
+
+- Open with one sentence naming what changed, with the skill in bold code,
+  such as "Ship **`pizza1`** in the **Engineering** bucket, so it installs
+  with `npx skills` and loads from the Claude Code plugin."
+- Follow with a paragraph that names the skill, marks it `(user-invoked)` or
+  `(model-invoked)`, and says what it now does for its user.
+- Add bullets only for distinct behavior changes, and an upgrade step only
+  when users must act.
+
 ## Releases
 
 Pending changesets on `main` become a release when you run:

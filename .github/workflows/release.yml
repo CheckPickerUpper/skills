@@ -61,5 +61,5 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}
         run: |
-          awk -v heading="## $VERSION" '$0 == heading { found = 1; next } found && /^## / { exit } found' CHANGELOG.md > release-notes.md
+          awk -v heading="## $VERSION" '$0 == heading { found = 1; next } found && /^## / { exit } found && (started || NF) { started = 1; print }' CHANGELOG.md > release-notes.md
           gh release create "v$VERSION" --target "$(git rev-parse HEAD)" --title "v$VERSION" --notes-file release-notes.md
