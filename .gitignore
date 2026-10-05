@@ -1,3 +1,13 @@
 .DS_Store
-node_modules/
 __pycache__/
+node_modules/
+
+# Local agent instructions and session state, kept out of the published repo.
+AGENTS.md
+CLAUDE.md
+.claude/
+.worktrees/
+
+# Local-only skills; only the bucket README is published.
+skills/personal/*
+!skills/personal/README.md
