@@ -1,6 +1,6 @@
 {
   "name": "checkpickerupper-skills",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Agent skills for correctness-first engineering and clear technical judgment",
   "repository": {
