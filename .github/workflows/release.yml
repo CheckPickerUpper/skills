@@ -1,0 +1,65 @@
+name: Release
+
+# Started by `npm run release`. Consumes the pending changesets into
+# CHANGELOG.md, commits the version straight to main, then publishes the
+# GitHub Release for that version with its CHANGELOG section as the notes.
+
+on:
+  workflow_dispatch:
+
+concurrency: release
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          # changeset version reads git history to find the commit behind each changeset.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Require pending changesets
+        run: |
+          if ! find .changeset -maxdepth 1 -name '*.md' ! -name README.md | grep -q .; then
+            echo "::error::No pending changesets on main. Add one with \`npx changeset\` and push it before releasing."
+            exit 1
+          fi
+
+      - name: Version
+        run: npm run version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit version
+        id: version
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: version skills v$version"
+          git push origin HEAD:main
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          awk -v heading="## $VERSION" '$0 == heading { found = 1; next } found && /^## / { exit } found' CHANGELOG.md > release-notes.md
+          gh release create "v$VERSION" --target "$(git rev-parse HEAD)" --title "v$VERSION" --notes-file release-notes.md

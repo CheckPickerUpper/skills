@@ -102,3 +102,27 @@ Publish skills, catalog entries, and plugin registrations directly to `main`
 from a task worktree after validation. Routine releases do not use GitHub issues
 or pull requests. If GitHub rejects a direct push, report the exact restriction
 instead of routing the change through an issue or pull request.
+
+Every pushed change to a published skill, catalog entry, or plugin
+registration carries a changeset: run `npx changeset`, choose the bump
+(`major` for a removed or renamed skill or a breaking contract, `minor` for a
+new skill, `patch` for a fix or wording change), and describe what changed for
+someone who uses the skill. Commit the generated `.changeset/*.md` with the
+change.
+
+## Releases
+
+Pending changesets on `main` become a release when you run:
+
+```bash
+npm ci
+npm run release
+```
+
+This starts the Release workflow, waits for it, and prints the release page.
+The workflow consumes the changesets into `CHANGELOG.md`, bumps the version in
+`package.json` and `.claude-plugin/plugin.json`, commits
+`chore: version skills vX.Y.Z` to `main`, and publishes the
+[GitHub Release](https://github.com/CheckPickerUpper/skills/releases) `vX.Y.Z`
+with that version's changelog as its notes. Pull `main` afterwards. With no
+pending changesets, the workflow fails without changing anything.
