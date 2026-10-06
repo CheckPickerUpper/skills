@@ -149,6 +149,11 @@ Reply with the absolute path to the file, which change you explained (ref
 range or PR), and one line on what you read beyond the diff. Do not paste the
 explanation into chat.
 
+If the reader cannot open a local path (a cloud or remote session followed
+from another device), also send the file through the session's file-sharing
+tool when one exists, and offer `--quiz chat` in case the page's buttons do
+not run where they read it.
+
 For `--quiz chat`: after the handoff, ask 2–3 free-response questions, one at
 a time. Grade each answer against the code, say what was right and what was
 missing, and point to the `path:line` that settles it. Ask a follow-up when an
