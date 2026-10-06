@@ -35,9 +35,9 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .meta { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
 nav.toc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; font-size: .95rem; }
 nav.toc ol { margin: 4px 0; padding-left: 20px; }
-code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
 pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; line-height: 1.45; }
-pre code { background: none; padding: 0; font-size: .85rem; }
+pre code { background: none; padding: 0; font-size: .85rem; overflow-wrap: normal; }
 table { border-collapse: collapse; width: 100%; font-size: .92rem; display: block; overflow-x: auto; }
 th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
 th { background: var(--code-bg); font-family: system-ui, sans-serif; }
