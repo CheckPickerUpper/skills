@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+:root {
+  --bg: #fbfaf7; --fg: #1d1d1f; --muted: #5f6368; --line: #dedbd2;
+  --card: #ffffff; --accent: #2457c5; --accent-bg: #e8eefb;
+  --edge: #8a5a00; --edge-bg: #fdf3dc; --warn: #b3261e; --warn-bg: #fce8e6;
+  --ok: #1e7b34; --ok-bg: #e6f4ea; --code-bg: #f3f1ec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #17181a; --fg: #e8e6e1; --muted: #a0a3a8; --line: #34363a;
+    --card: #1f2023; --accent: #8ab4f8; --accent-bg: #1e2a40;
+    --edge: #f2c46d; --edge-bg: #3a2f17; --warn: #f28b82; --warn-bg: #3c1f1d;
+    --ok: #81c995; --ok-bg: #1c3324; --code-bg: #232427;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 17px/1.65 Georgia, "Iowan Old Style", "Times New Roman", serif;
+}
+main { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+h1, h2, h3, h4, nav, .flow, .box, .quiz, .meta { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+h1 { font-size: 1.9rem; line-height: 1.25; margin: 0 0 8px; }
+h2 { font-size: 1.35rem; margin: 48px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.1rem; margin: 28px 0 8px; }
+h4 { font-size: .95rem; margin: 0 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.meta { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
+nav.toc { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 12px 18px; font-size: .95rem; }
+nav.toc ol { margin: 4px 0; padding-left: 20px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; background: var(--code-bg); padding: 1px 4px; border-radius: 4px; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; white-space: pre; line-height: 1.45; }
+pre code { background: none; padding: 0; font-size: .85rem; }
+table { border-collapse: collapse; width: 100%; font-size: .92rem; display: block; overflow-x: auto; }
+th, td { border: 1px solid var(--line); padding: 6px 10px; text-align: left; vertical-align: top; }
+th { background: var(--code-bg); font-family: system-ui, sans-serif; }
+.callout { border-left: 4px solid var(--accent); background: var(--accent-bg); padding: 10px 14px; border-radius: 0 8px 8px 0; margin: 16px 0; }
+.callout.edge { border-color: var(--edge); background: var(--edge-bg); }
+.callout.warn { border-color: var(--warn); background: var(--warn-bg); }
+.callout > :first-child { margin-top: 0; } .callout > :last-child { margin-bottom: 0; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 20px 0; font-size: .92rem; }
+.box { background: var(--card); border: 1.5px solid var(--line); border-radius: 8px; padding: 8px 12px; max-width: 100%; overflow-wrap: anywhere; }
+.box.hl { border-color: var(--accent); background: var(--accent-bg); }
+.box.new { border-color: var(--ok); background: var(--ok-bg); }
+.box.gone { border-color: var(--warn); background: var(--warn-bg); text-decoration: line-through; }
+.arrow { color: var(--muted); display: flex; flex-direction: column; align-items: center; line-height: 1.1; }
+.arrow .label { font-size: .75rem; }
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+.compare > div { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+@media (max-width: 600px) { .compare { grid-template-columns: 1fr; } body { font-size: 16px; } }
+.quiz .q { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 16px 0; }
+.quiz .q p.stem { margin: 0 0 10px; font-weight: 600; }
+.quiz button.opt { display: block; width: 100%; text-align: left; font: inherit; color: var(--fg); background: var(--bg); border: 1.5px solid var(--line); border-radius: 8px; padding: 9px 12px; margin: 6px 0; cursor: pointer; }
+.quiz button.opt:hover:not(:disabled) { border-color: var(--accent); }
+.quiz button.opt:disabled { cursor: default; }
+.quiz button.opt.right { border-color: var(--ok); background: var(--ok-bg); }
+.quiz button.opt.wrong { border-color: var(--warn); background: var(--warn-bg); }
+.quiz .why { margin-top: 10px; font-size: .95rem; }
+.quiz .score { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+<h1>{{TITLE}}</h1>
+<div class="meta">{{META}}</div>
+<nav class="toc" id="xd-toc" aria-label="Contents"><strong>Contents</strong><ol></ol></nav>
+{{BODY}}
+{{QUIZ_SECTION}}
+</main>
+<script type="application/json" id="xd-quiz-data">{{QUIZ_JSON}}</script>
+<script>
+(function () {
+  "use strict";
+  var toc = document.querySelector("#xd-toc ol");
+  var n = 0;
+  document.querySelectorAll("main h2").forEach(function (h) {
+    if (!h.id) h.id = "s" + (++n);
+    var li = document.createElement("li"), a = document.createElement("a");
+    a.href = "#" + h.id; a.textContent = h.textContent;
+    li.appendChild(a); toc.appendChild(li);
+  });
+  var root = document.getElementById("xd-quiz");
+  if (!root) return;
+  var data = JSON.parse(document.getElementById("xd-quiz-data").textContent);
+  var answered = 0, right = 0;
+  var score = document.createElement("p");
+  score.className = "score";
+  function updateScore() { score.textContent = right + " of " + answered + " correct (" + data.length + " questions)"; }
+  data.forEach(function (q, qi) {
+    var box = document.createElement("div"); box.className = "q";
+    var stem = document.createElement("p"); stem.className = "stem";
+    stem.textContent = (qi + 1) + ". " + q.question; box.appendChild(stem);
+    var why = document.createElement("div"); why.className = "why"; why.setAttribute("aria-live", "polite");
+    var buttons = q.options.map(function (text, oi) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "opt"; b.textContent = String.fromCharCode(65 + oi) + ". " + text;
+      b.addEventListener("click", function () {
+        buttons.forEach(function (x) { x.disabled = true; });
+        buttons[q.answer].classList.add("right");
+        if (oi !== q.answer) b.classList.add("wrong"); else right++;
+        answered++; updateScore();
+        why.textContent = (oi === q.answer ? "✅ Correct. " : "❌ Not quite. ") + q.explanation;
+      });
+      box.appendChild(b); return b;
+    });
+    box.appendChild(why); root.appendChild(box);
+  });
+  root.appendChild(score); updateScore();
+})();
+</script>
+</body>
+</html>
