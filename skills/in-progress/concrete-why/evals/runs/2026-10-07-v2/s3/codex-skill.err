@@ -1,0 +1,36 @@
+exit 0 after 21s
+rs.yaml` has `failureThreshold: 12, periodSeconds: 10` (pod marked unready after 120s) and the liveness probe restarts a pod after 180s of failures.
+- Incident [INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212), 2026-09-14: migration `20260914_add_orders_customer_idx` took 4m10s. All three pods were killed by the liveness probe mid-migration, restarted, re-waited on the lock; orders API was down 19 minutes.
+- Most migrations in the last 6 months took under 5 seconds; 2 of 41 took over 2 minutes (both index builds).
+- The deploy pipeline (`.github/workflows/deploy.yml`) can run a one-off Kubernetes Job before rolling the Deployment.
+
+## Conversation so far
+**User:** set up the deploy for the new orders schema change
+**Assistant:** I'll move migrations out of the pod entrypoint into a pre-deploy Job. It's the cleaner, more robust pattern.
+**User:** whats the actual benefit tho it works fine now
+
+</scenario>
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+2026-10-07T18:45:25.458067Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.canva.com/.well-known/oauth-protected-resource/mcp\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+2026-10-07T18:45:25.506196Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Missing Authorization header\", scope=\"email profile\", resource_metadata=\"https://api.fireflies.ai/.well-known/oauth-protected-resource/mcp\"" })
+2026-10-07T18:45:25.608196Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://api.mobbin.com/.well-known/oauth-protected-resource/mcp\"" })
+hook: SessionStart
+hook: SessionStart Completed
+codex
+The benefit is keeping a long migration from repeatedly restarting all three orders pods. My earlier “cleaner, more robust” wording wasn’t a reason; the recorded outage is.
+
+**[INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212)**: on September 14, an index migration took 4m10s, exceeding the liveness probe’s 180-second limit. All three pods were killed mid-migration, restarted and waited on the lock again. The orders API was down for 19 minutes.
+
+- **With a pre-deploy Job:** the pipeline runs the migration before rolling the server pods. I infer that this removes the restart loop seen in INC-212, because the migration no longer runs inside pods subject to that server liveness probe. Deployment still waits for the migration to finish.
+- **With migrations on boot:** Prisma’s lock prevents duplicate application, but the waiting pods still face the restart deadline. A migration exceeding three minutes can hit the same failure again.
+
+Most migrations finish under five seconds, so this adds a separate deployment step with little benefit for those. But two of the last 41 exceeded two minutes, both index builds.
+
+**What decides it:** migration time can exceed the server’s startup deadline. The pipeline already supports a Job before rollout, so I recommend using it. This addresses the observed restart loop; it doesn’t prove the migration itself cannot disrupt database traffic.
+tokens used
+14,135

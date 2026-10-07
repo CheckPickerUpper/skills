@@ -1,0 +1,194 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 2,
+   "economy": 1
+  },
+  "errors": [
+   "\"it double-fires under client prediction replay\" is not established by the verified evidence.",
+   "\"nothing since has moved the facts it rests on\" claims a historical check without evidence.",
+   "\"A listener cannot tell a replay from a first arrival\" assumes notifications cannot carry replay information or be deferred.",
+   "\"A 'tag count changed' broadcast cannot say either thing\" incorrectly treats a limited event payload as an inherent subscription limitation.",
+   "\"the missed-window bug is structurally impossible\" overstates what the unsupported publisher description proves.",
+   "\"which names the three failures above as its reason\" attributes unsupported rationale to the lint rule.",
+   "\"A listener is the one shape that does neither\" rules out subscriptions carrying detailed changes or prompting current-state reads without evidence."
+  ],
+  "note": "It explains visible failures well, but buries the documented rationale under unsupported implementation claims and categorical claims about subscriptions."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"subscribing is less wiring for a HUD\" is asserted without comparing the actual wiring; the ADR describes equivalent growth.",
+   "\"The ADR overstates matters when it says subscriptions cannot carry a change value or support logging\" misrepresents the documented argument about reactions consuming the change before control returns.",
+   "\"several systems call the container directly and discard removal results\" is not established by the supplied evidence.",
+   "\"The implementation does not fully establish that arrangement\" presents an unverified implementation diagnosis as fact."
+  ],
+  "note": "The distinction between a caller's result and HUD notification is useful, but its rejection of the ADR depends on unverified claims."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Removing a suppression can also make the underlying tag present again\" is not established by the verified evidence.",
+   "\"several callers\u2014including effect and ability code\u2014call RemoveGrantedTag directly and discard its result\" is unsupported.",
+   "\"the current code does not fully deliver the ADR's proposed alternative\" rests on that unsupported diagnosis.",
+   "\"I have no concrete reason to reject subscriptions that handle those conditions\" overlooks the documented compile-time failure when an outcome is dropped versus silent deletion of a subscriber."
+  ],
+  "note": "It makes startup and re-entrancy failures understandable, but its deciding rule omits the documented compile-time accountability argument."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\"the HUD reads current state\" and the specific polling publisher description are not established by the supplied evidence.",
+   "\"nothing else moved\" overstates what a removal outcome establishes.",
+   "\"One tag-level callback cannot say which grant ended\" assumes an event cannot carry the grant.",
+   "\"A 'removed' event either fires twice for one removal or never says nothing-happened\" presents an unsupported false choice.",
+   "\"a broadcast of something changed cannot carry that\" incorrectly makes payload limitations inherent to subscriptions.",
+   "\"subscribe only where the engine gives you no call to return from\" introduces a restriction not established by the verified ground truth."
+  ],
+  "note": "Its startup, re-entrancy, and constructor-cost explanations are strong, but the final rule relies on false limitations of event payloads."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 1
+  },
+  "errors": [
+   "\"enforced by plugins/nro-codestyle/rules/ban-a-list-of-callers-to-tell-later.rule.mjs\" gives an enforcement location not established by the verified inventory.",
+   "\"The returned value comes back only after the container is consistent\" overclaims when removal can occur inside an unfinished grant.",
+   "\"journal.Record(taken); screen.TagStandingChanged(...)\" is presented without identifying it as an illustrative ADR example rather than verified current APIs.",
+   "\"The value carries evidence a container event can't\" falsely assumes events cannot carry the same evidence.",
+   "\"The container doesn't know why\" is unsupported, particularly when the removal call accepts a reason.",
+   "\"Prediction would fire phantom events\" and the claimed HUD flicker are not established by the verified evidence.",
+   "\"that's the ADR's explicit exemption\" and the claimed replication listener implementation are unsupported.",
+   "\"Point at the thing, never at its name\" is introduced as an additional repository rule without supporting evidence."
+  ],
+  "note": "The documented costs are present, but extensive unsupported code, prediction, and exemption claims make the answer unreliable."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\"The HUD doesn't use GrantedTagRemoval at all\" and the specific publisher implementation are not established by the supplied evidence.",
+   "\"Subscribing would save only a few lines here\" supplies an unsupported estimate.",
+   "\"Removed means the tag came off\" conflates removal of one grant with loss of tag presence.",
+   "\"Only the code that removed the tag can use that answer\" contradicts the documented ability to forward, inspect, log, or batch the change.",
+   "\"A subscriber ... can't tell whether the grant it held was the one removed\" assumes the notification cannot include the grant.",
+   "\"Unreal code avoids this by reading the current tags right after subscribing\" is an unsupported claim about Unreal usage.",
+   "\"Most callers throw the removal result away\" and the claimed implementation gap are unverified.",
+   "\"the returned value protects removers from removing the wrong grant\" confuses the returned outcome with the grant handle supplied as input.",
+   "\"even though Unreal tolerates it\" makes an unsupported comparison about re-entrancy."
+  ],
+  "note": "It offers concrete subscription failure scenarios, but its central account of current HUD behavior and discarded outcomes lacks verified support."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"It cites Unreal's OnExactGameplayTagAdded by name\" is not established by the supplied evidence.",
+   "\"Roblox's own signals are exempt, and a message system is allowed\" introduces unsupported policy details.",
+   "\"What the HUD actually does today\" presents a specific counter and publisher path not verified in the supplied ground truth.",
+   "\"only that grant lifts it\" overstates exclusivity when blockers can end grants during another mutation.",
+   "\"The grant handle makes both of those impossible\" claims more than the verified evidence establishes.",
+   "\"which no longer exists\" and the asserted replacement rule directory are unsupported filesystem claims."
+  ],
+  "note": "It gives the clearest substantial account of the documented tradeoff, but unnecessary HUD, handle, and filesystem claims weaken honesty and economy."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"rejects ... OnGameplayTagAdded ... by name\" is not established by the verified evidence.",
+   "\"The HUD gets the change as a value at the call site\" claims current HUD delivery without supporting evidence.",
+   "\"ClaimGameplayTag calls the release path\" presents an ADR example name as a current API; ClaimGameplayTag does not exist in current src.",
+   "\"the HUD is a constructor parameter on that owner\" presents the proposed arrangement as verified implementation.",
+   "\"When that list gets hard to read\" attributes an unsupported extraction prescription to the ADR.",
+   "\"The ADR exempts Roblox's own signals\" and the permission for a later message system are not established by the supplied evidence."
+  ],
+  "note": "It directly answers why subscriptions cost something and admits constructor wiring, but confuses illustrative ADR APIs and intended architecture with current code."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"The caller ... then tells the screen directly\" claims a current delivery path not established by the evidence.",
+   "\"screen.TagStandingChanged(ended)\" presents an unverified API without marking the snippet as illustrative.",
+   "\"only the GrantedTag handle holder lifts that seat\" overstates exclusivity when other mutations can end blocked grants.",
+   "\"A tag-level broadcast can't say whose grant ended or what the standing now is\" falsely assumes those details cannot be included in an event.",
+   "\"TagGrants(tags, screen, analytics)\" presents an ADR example name as current wiring; TagGrants does not exist in current src.",
+   "\"The less wiring is inverted\" contradicts the ADR's admission of constructor wiring and equivalent growth without establishing a concrete comparison."
+  ],
+  "note": "It is compact and gives concrete failure cases, but invented-looking current wiring and absolute event-payload claims undermine its conclusion."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 2,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"NRO doesn't have to choose between them\" does not account for the accepted decision and lint rule forbidding the subscription shape.",
+   "\"found by object identity (indexOf(grant.Application))\" is an implementation claim not established by the supplied evidence.",
+   "\"such as ... a death\" adds an unverified removal cause.",
+   "\"The same holds for TagApplicationResult\" and the claimed result-naming rule are not established by the verified evidence.",
+   "\"The HUD can read the container directly\" and the named ParticipantTags interface are unsupported implementation claims.",
+   "\"it probably deserves an ADR\" overlooks the existing ADR that already decides this question."
+  ],
+  "note": "It candidly limits its HUD knowledge, but answers mostly what the return value does and misses the existing decision's concrete reasons against subscribing."
+ }
+}

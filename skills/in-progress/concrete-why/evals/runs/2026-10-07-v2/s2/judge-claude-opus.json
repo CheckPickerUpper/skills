@@ -1,0 +1,149 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Short and accurate: it admits the earlier answer was only a label and states a rule the reader can reuse, but it never says what happens to a null-customer event after it is rejected."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"any handler side effects that already ran\" \u2014 validation runs before any side effects",
+   "\"your existing clients get the error shape they already handle\" \u2014 the only client here is Stripe; this is unsupported",
+   "treats the null rejection as a problem only for hand-rolled code, though a zod z.string() would reject null too",
+   "\"built a worse zod\" is a label, not a consequence"
+  ],
+  "note": "The 500, retry and pager chain is strong, but it pads with labels and speculation and ends by asking the user a question in prose."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"logs show which path failed\" \u2014 the facts only cover the response body, not logs",
+   "\"bundle size\" does not matter for a server-side route"
+  ],
+  "note": "The most complete and accurate reply: it admits the earlier label, compares all three failure paths and shows that a null customer rejected with a 400 is silently lost, though it runs long."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"the other 14 routes would behave differently\" uses consistency as a reason without saying who would see the difference"
+  ],
+  "note": "It lays out both ways a wrongly rejected null event can fail (retried for 3 days or silently dropped), but it never admits that the earlier \"same as other routes\" answer was a label."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "leads with \"it's already the standard in this repo\", which is a label used as the reason",
+   "\"consistent with the other 14 routes\" is also a label"
+  ],
+  "note": "It repeats the convention label it was challenged on and mentions the null case without saying what happens to those events."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"enough of them page on-call\" leaves out the 5/min threshold",
+   "\"handle that deliberately\" names no consequence"
+  ],
+  "note": "Accurate and concise, but too thin: the null case gets no consequence and the paging threshold is missing."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"saves about a dozen lines\" is an invented number and is not marked as an estimate",
+   "the opening claims hand-rolling \"puts the endpoint on the error path that 500s\" as if that were certain",
+   "the <what-to-do> tags are malformed (duplicated closing tag)"
+  ],
+  "note": "It honestly calls both \"overkill\" and its own earlier answer labels, but it adds an unmarked invented number and has broken markup."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"A hand-written check would throw a plain Error\" states an assumption as fact"
+  ],
+  "note": "A clear, concrete chain of consequences plus the silent-loss point for null events, but it never names the rule that decides the choice and never admits the earlier label."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"Stripe ignores the body of a webhook response\" is not in the established facts"
+  ],
+  "note": "Its strongest point is that a bare property read throws a TypeError and becomes a 500, and it gives a sharp decision rule, but it rests one argument on an unverified Stripe claim."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "it opens with \"same as the other 14 routes\" again, repeating the label instead of admitting it",
+   "\"that order never reaches billing\" goes beyond the facts"
+  ],
+  "note": "It explains each file well, but it leads with the label the user challenged and never admits it was not a reason."
+ }
+}

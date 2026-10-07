@@ -1,0 +1,152 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "'Old pods keep serving until new pods start against the migrated schema' is an inference and is not marked as one"
+  ],
+  "note": "Admits that 'cleaner, more robust' was a label and gives a clear deciding rule: whether the migration outlasts the 180s liveness restart. Some phrasing is awkward ('what they are is the normal schema change')."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "Never admits that the earlier 'cleaner, more robust' was a label",
+   "'A failed migration also stops the deploy instead of putting pods into a restart loop' is an unmarked inference"
+  ],
+  "note": "Concrete and honest that this specific migration's duration is unknown, and it weighs a probe-change alternative. It never retracts the earlier label, and it doesn't name deploy.yml or the probe file."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'crash-looping against a half-migrated schema and serving errors' is invented",
+   "'~10 lines of YAML' is invented",
+   "'bump livenessProbe failure thresholds so 180s > worst-case migration' is garbled",
+   "The INC-212 link has no title",
+   "'couples your migration runtime to your probe budgets' / 'changes the failure model' are labels used as reasons"
+  ],
+  "note": "Confident and persuasive, but it invents details and never acknowledges that its earlier reason was a label."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'your schema change is the kind of migration that can repeat it' is unsupported, and the reply later asks which kind it is",
+   "Odd hedges such as 'I haven't checked whether raising the liveness failureThreshold would also stop the outage' contradict its own analysis"
+  ],
+  "note": "Thorough, with a good deciding question, but it is long and its opening claim about this change contradicts its own closing uncertainty."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "'Any migration over 2 minutes repeats INC-212' overreaches: the kill happens at 180s, not 120s"
+  ],
+  "note": "Plain-language mechanism, inferences explicitly marked, the earlier label admitted, and a clear threshold rule. The 2-minute line is slightly off from the 180s kill."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "The INC-212 link has no title",
+   "'existing pods keep serving' is an unmarked inference"
+  ],
+  "note": "Lean and correct, but it gives no frequency data (2 of 41) and no deciding rule or cost, so the reader cannot reuse the reasoning."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "The most carefully hedged: it marks its inference and notes what the Job does not prove. The deciding-rule sentence is clumsy, and deploy.yml is not named."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'schema changes with indexes are exactly the new orders work landing now' is invented",
+   "'on the current setup the same failure surfaces as pods crash-looping' is an unmarked inference",
+   "It wraps the reply in stray <what-to-do> tags",
+   "It never retracts the earlier 'cleaner, more robust' label"
+  ],
+  "note": "Strong cost/benefit structure and deciding rule, undermined by an invented claim about the current change."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "'All 3 pods blocked on the lock' is inaccurate: one pod held the lock and ran the migration",
+   "It never admits that the earlier reason was a label"
+  ],
+  "note": "Concise and accurate on the core case, but it offers no cost, no alternative and no explicit rule for next time."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'it will happen again' overstates the evidence",
+   "It never explicitly retracts the earlier 'cleaner, more robust' label"
+  ],
+  "note": "Clear consequences, a weighed alternative and a stated compatibility assumption, but it is longer than needed."
+ }
+}

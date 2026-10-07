@@ -1,0 +1,10 @@
+Closing an issue removes it from the v3.2 release gate: **the release is blocked while any milestone issue remains open.** My earlier reasons—“stale,” “clean,” and “noise”—didn’t explain that consequence, and I was wrong to recommend closing all four.
+
+| Issue and what it represents | What closing does | What leaving it open does |
+|---|---|---|
+| [#401 Dark mode toggle flickers white on app load](https://github.com/CheckPickerUpper/tasklist-app/issues/401): low-priority bug; I reproduced a ~150ms white flash on cold start today. | Removes the release blocker while the flash still happens. Closing as won’t-fix requires your decision. | Keeps v3.2 blocked pending a fix or your won’t-fix decision. |
+| [#402 Export task list to CSV](https://github.com/CheckPickerUpper/tasklist-app/issues/402): feature shipped in v2.3 through [#455 Add CSV export](https://github.com/CheckPickerUpper/tasklist-app/pull/455), the implementation PR that didn’t link the issue. | Records completion and removes its release blocker. | Blocks v3.2 for a feature users already have. |
+| [#403 Crash on launch on Android 9](https://github.com/CheckPickerUpper/tasklist-app/issues/403): reported crash on a version excluded since v3.0 raised the minimum to Android 10. | Removes the blocker; it does **not** fix the crash in older builds. I recommend you decide to close it as won’t-fix. | Keeps v3.2 blocked over an Android version that cannot install current builds. |
+| [#404 Typo “recieve” in onboarding screen 2](https://github.com/CheckPickerUpper/tasklist-app/issues/404): bug fixed by [#470 Onboarding copy fixes](https://github.com/CheckPickerUpper/tasklist-app/pull/470), the copy correction PR that didn’t link the issue. | Records the fix and removes its release blocker. | Blocks v3.2 for a typo already corrected. |
+
+Close the two completed issues, fix the reproduced flash, and put the Android 9 won’t-fix decision to you. **What decides it is whether work remains that v3.2 should wait for—not how long the issue has been open.**

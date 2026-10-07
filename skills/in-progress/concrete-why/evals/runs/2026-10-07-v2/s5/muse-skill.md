@@ -1,0 +1,19 @@
+**Short answer:** Keep the return. A tag subscription tells the HUD *a tag moved*; `GrantedTagRemoval` tells the remover *this exact grant seat ended, nothing else moved, and here is what is still on* — and the HUD reads current state instead of racing the grant.
+
+`GameplayTagContainer` ([GameplayTagContainer.ts](/home/ozzy-desktop/dev/NRO/src/Shared/ReplicatedStorage/GameplayTags/GameplayTagContainer.ts:266)) owns one participant's live tags on either machine. Its `RemoveGrantedTag(grant, endedAt, reason)` hands back `GrantedTagRemoval` ([AppliedTag.Types.ts](/home/ozzy-desktop/dev/NRO/src/Shared/ReplicatedStorage/GameplayTags/AppliedTag.Types.ts:212)): either `Removed` carrying that same `Grant` plus `Presence` after, or `NotActive/AlreadyRemoved` meaning nothing changed. This is the rule in [ADR 0003](docs/adr/0003-a-mutation-returns-its-change.md): a mutation changes its own state and returns what happened; nothing registers a listener.
+
+*If the HUD subscribed like Unreal's `OnGameplayTagAdded`:*
+
+- A bar that subscribes one frame after spawn setup grants `Stunned` never greys out, reproducing only when spawn ordering shifts. The ADR names exactly this case. The current publisher avoids it by polling: `ParticipantResourceBarsPublisher` ([ParticipantResourceBars.Server.ts](/home/ozzy-desktop/dev/NRO/src/Shared/Server/Participant/ParticipantResourceBars.Server.ts:71)) compares `tags.ReadTagVersion()` against the last published version and re-sends, so a late reader still sees the current state.
+- One tag-level callback cannot say *which* grant ended. Two stuns from the same cause are two grants, each lifted on its own ([GameplayTagContainer.ts](/home/ozzy-desktop/dev/NRO/src/Shared/ReplicatedStorage/GameplayTags/GameplayTagContainer.ts:11)). A subscriber sees "stun removed" while one helping is still holding the participant down; the return value carries the still-accurate `Presence` after only that seat was lifted.
+- A double hand-back becomes invisible. Today handing the same grant back twice returns `NotActive` and touches nothing (proven in the tag suites). A "removed" event either fires twice for one removal or never says nothing-happened, so the caller cannot tell a no-op from a real end.
+- Granting fire immunity ends burning mid-grant, while the table is half-updated. With subscribers that fires "burning removed" listeners in the middle of the immunity grant, and a listener that grants something else recurses into that half-updated table. With returns, the immunity applier finishes its own mutation first, then tells its collaborators in written order.
+
+*If we keep the return:*
+
+- The code that ends the tag learns the outcome on the next line, in order: log it, forward that exact `Presence` to the screen with a direct call, or discard it. There is no list to walk and no closure waking to check whether the change was its tag.
+- Forgetting the reaction fails the build (`unconsumed-outcome` refuses a dropped outcome); forgetting a subscription fails silently at runtime, on someone else's machine.
+
+On wiring: the subscription map (`Map<TagID, callbacks>`) does not say who reacts to a stun, and deleting the subscriber still compiles. The return-value shape puts each reader in the applier-owner's constructor, so adding a reader is one constructor parameter in one place — the same growth as a subscription, but type-checked with no startup window. That is also why router classes and event buses are forbidden here: fan out through direct calls on concrete collaborators.
+
+**What decides it:** whether the reactor needs to know *which seat ended and what remains*, decided by the code holding the grant — then return it; a broadcast of *something changed* cannot carry that, so subscribe only where the engine gives you no call to return from (Roblox signals), which tags do not need.

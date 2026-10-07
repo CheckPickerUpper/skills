@@ -1,0 +1,1833 @@
+{
+ "s1": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"They still have to be kept up to date with every change to checkout\" is unsupported for code nothing can reach"
+     ],
+     "note": "Corrects both earlier claims with evidence and gives a safe order for the removal.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\u201cturning the flag off fixes checkout in about 1 minute\u201d presents historical success as a future guarantee.",
+      "\u201cCheckout would stay broken for roughly 11 more minutes per incident\u201d omits preparation and assumes every incident is resolved by the fallback.",
+      "\u201cThey still have to be kept up to date with every change to checkout\u201d invents a universal maintenance requirement.",
+      "\u201cthat risk is small\u201d is stronger than three incident-free weeks establish."
+     ],
+     "note": "It explains the relevant evidence well, but turns historical mitigation times into guarantees about future incidents.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      3
+     ],
+     "total": 23
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"the condition you set in #882\" assumes the user wrote the issue"
+     ],
+     "note": "Complete and concrete with a clear deciding question, but somewhat repetitive about #882.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      3
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\u201cToday a broken checkout can be turned off in about 1 minute\u201d overgeneralizes the two historical mitigations.",
+      "\u201ccustomers unable to pay\u201d invents the incidents\u2019 customer impact; the facts establish checkout incidents, not complete payment failure."
+     ],
+     "note": "It accounts for revert preparation and explains every reference, but adds an unsupported outage impact and repeats the deciding condition.",
+     "scores": [
+      5,
+      5,
+      5,
+      3,
+      4,
+      3
+     ],
+     "total": 25
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"the less anyone remembers how the legacy path worked, so the safety net gets less useful over time\" is speculation with no evidence behind it"
+     ],
+     "note": "Clear 1-to-12-minute tradeoff and a concrete PR plan, weakened by an invented argument about fading memory.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      5,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\u201cmitigation goes from ~1 minute to ~12\u201d assumes future incidents can be resolved by the same fallback and omits preparation time.",
+      "\u201cthe less anyone remembers how the legacy path worked\u201d invents a deterioration not established by the evidence.",
+      "\u201ca revert is a single commit\u201d is not guaranteed by putting changes in one PR."
+     ],
+     "note": "The tradeoff is well explained, but speculative reasons and an unasked implementation plan dilute it.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"keep the revert PR ready... recovers most of the lost rollback speed\" contradicts itself: the 12-minute deploy is most of the delay",
+      "a bracket artifact \"[the two in the month before 2026-09-15]\" is left in",
+      "\"Anyone changing checkout has to work out which of two paths\" is an inference, not something observed"
+     ],
+     "note": "Thorough, but long, and its suggested middle step makes a false claim about speed.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\u201cif checkout breaks \u2026 customers are back on the old path in about 1 minute\u201d assumes the fallback resolves any future checkout failure.",
+      "\u201ca checkout incident would last roughly 11 minutes longer\u201d omits preparation and generalizes beyond the two historical incidents.",
+      "\u201cAnyone changing checkout has to work out which of two paths a change touches\u201d asserts an unverified burden for every checkout change.",
+      "\u201cThat recovers most of the lost rollback speed\u201d is unsupported; the proposed ready revert still requires the measured 12-minute deployment."
+     ],
+     "note": "The final fallback proposal contradicts its own timing evidence, and the answer spends too long repeating the tradeoff.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      3,
+      2
+     ],
+     "total": 21
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"meets #882's cleanup criteria\" links the issue but never states what the criteria are",
+      "does not retract the earlier claim that the legacy code \"isn't hurting anything\", though it lists the costs"
+     ],
+     "note": "Tight and accurate, but the deciding rule rests on an issue it never explains.",
+     "scores": [
+      5,
+      4,
+      3,
+      4,
+      3,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\u201ca code rollback would take about 12 minutes\u201d treats measured deployment time as total rollback time, omitting preparation."
+     ],
+     "note": "It answers the downside directly and corrects the earlier recommendation, but leaves the issue\u2019s removal condition unstated.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      4,
+      5
+     ],
+     "total": 27
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Concise and accurate, and it explicitly corrects \"isn't hurting anything\" with the 40s CI cost; it only lacks a next action.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      4,
+      5
+     ],
+     "total": 29
+    },
+    "codex": {
+     "errors": [],
+     "note": "It distinguishes preparation from deployment time, corrects the earlier claim, and gives a removal condition the reader can reuse.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 29
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "does not acknowledge that the earlier answer was labels or wrong"
+     ],
+     "note": "Gives the bare facts efficiently, but does not retract the earlier stance or state a rule to apply next time.",
+     "scores": [
+      4,
+      4,
+      4,
+      3,
+      3,
+      5
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [],
+     "note": "It conveys the tradeoff economically, but does not explicitly correct the earlier false claim that keeping the legacy path costs nothing.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      4,
+      5
+     ],
+     "total": 27
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Introduces every file, flag and issue it relies on, admits the earlier labels and gives a reusable deciding rule.",
+     "scores": [
+      5,
+      4,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\u201cThe next new-flow break would need a code revert\u201d assumes a particular recovery method.",
+      "\u201ccheckout stays broken ~11 minutes longer\u201d treats deployment timing as a complete outage estimate and assumes the fallback would resolve the incident."
+     ],
+     "note": "It clearly explains the removal condition and ongoing costs, but overstates what the deployment measurements prove.",
+     "scores": [
+      5,
+      5,
+      5,
+      3,
+      4,
+      3
+     ],
+     "total": 25
+    }
+   }
+  },
+  "pi": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"There's no other cost to keeping it\" contradicts its own later point that the legacy tests cost ~40s per CI run",
+      "\"an hour of broken checkout\" is invented",
+      "\"stale flag\" is used as a label instead of a reason",
+      "#882 appears as a bare number with no link"
+     ],
+     "note": "The conditional delete-or-keep guidance is useful, but it contradicts itself about the cost of keeping the flag and invents a figure.",
+     "scores": [
+      5,
+      3,
+      3,
+      2,
+      4,
+      3
+     ],
+     "total": 20
+    },
+    "codex": {
+     "errors": [
+      "\u201cThere's no other cost to keeping it\u201d contradicts the verified 40-second CI cost and the reply\u2019s own ending.",
+      "\u201cflipping it off mitigates in ~1 minute\u201d assumes future failures respond like the two historical incidents.",
+      "\u201can hour of broken checkout\u201d introduces an unsupported outage duration.",
+      "\u201cthat's the only scenario where the flag still earns its keep\u201d excludes other possible reasons without evidence."
+     ],
+     "note": "It introduces speculative event-based conditions while contradicting the known cost of keeping the flag.",
+     "scores": [
+      4,
+      3,
+      4,
+      2,
+      3,
+      2
+     ],
+     "total": 18
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"the kit's 11 minutes\" is unexplained jargon",
+      "\"412 lines stay maintained whenever checkout changes\" is unsupported, since the legacy path is unreachable",
+      "\"Waiting past the stated bar means the bar wasn't the reason to wait\" is a non-sequitur",
+      "a stray <what-to-do> wrapper tag is left in the reply"
+     ],
+     "note": "Puts a number on the tradeoff well but is padded and contains odd phrasing and leftover markup.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\u201cThe next checkout incident gets mitigated by a fix or revert deploy\u201d assumes the recovery method and omits preparation time.",
+      "\u201c~11 extra minutes of broken checkout per incident that happens\u201d generalizes the historical fallback to every future incident.",
+      "\u201c412 lines stay maintained whenever checkout changes\u201d asserts an unsupported maintenance requirement."
+     ],
+     "note": "It supplies concrete numbers, but repeats them and makes the decision depend on predicting whether the flag will ever be needed.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      3,
+      2
+     ],
+     "total": 21
+    }
+   }
+  }
+ },
+ "s2": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"A hand-written check would throw a plain Error\" states an assumption as fact"
+     ],
+     "note": "A clear, concrete chain of consequences plus the silent-loss point for null events, but it never names the rule that decides the choice and never admits the earlier label.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      4,
+      4
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"A hand-written check would throw a plain Error\" assumes an implementation choice.",
+      "\"Zod costs nothing extra here\" overstates the established fact that no new dependency is needed.",
+      "\"we'd silently lose those events\" assumes no visibility or recovery beyond automatic retries."
+     ],
+     "note": "It explains the operational consequences and supplies the corrected schema, but presents avoidable handwritten behavior as the default certainty.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      4,
+      3
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"logs show which path failed\" \u2014 the facts only cover the response body, not logs",
+      "\"bundle size\" does not matter for a server-side route"
+     ],
+     "note": "The most complete and accurate reply: it admits the earlier label, compares all three failure paths and shows that a null customer rejected with a 400 is silently lost, though it runs long.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      3
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\"the logs show which path failed\" is not established.",
+      "\"Stripe keeps resending it for 3 days\" turns an upper limit into a fixed duration.",
+      "\"pushes past 5 per minute\" assumes an unverified delivery rate.",
+      "\"it's now a second 400 format, different\" assumes handwritten validation cannot reproduce the existing response.",
+      "\"nothing new\" and \"no added ... bundle size\" overstate what having an existing dependency proves.",
+      "\"about the same length as three typeof checks\" is an unverified code-size comparison.",
+      "\"lost without anyone noticing\" assumes an absence of monitoring or other recovery."
+     ],
+     "note": "It introduces the relevant machinery well but repeats the argument and treats several possible consequences as inevitable.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"the other 14 routes would behave differently\" uses consistency as a reason without saying who would see the difference"
+     ],
+     "note": "It lays out both ways a wrongly rejected null event can fail (retried for 3 days or silently dropped), but it never admits that the earlier \"same as other routes\" answer was a label.",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      4,
+      4
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"the other 14 routes would behave differently from this one\" assumes handwritten validation would return a different response.",
+      "\"retry for 3 days\" replaces the verified maximum with a fixed duration.",
+      "\"dropped silently\" assumes no visibility into rejected deliveries.",
+      "\"about the same length as the hand-rolled version\" compares against an implementation that has not been shown."
+     ],
+     "note": "It gives a clear failure-path explanation and usable nullable schema, but exaggerates differences that handwritten validation could avoid.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      4,
+      3
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"Stripe ignores the body of a webhook response\" is not in the established facts"
+     ],
+     "note": "Its strongest point is that a bare property read throws a TypeError and becomes a 500, and it gives a sharp decision rule, but it rests one argument on an unverified Stripe claim.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      5,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"fine only if it returns 400 itself\" excludes other possible ways to use recognized errors or shared response handling.",
+      "\"every guest-checkout event\" overstates the documented null case.",
+      "\"resend each one for 3 days\" turns an upper limit into a guaranteed duration.",
+      "\"Stripe ignores the body of a webhook response\" is not among the verified facts.",
+      "\"using it adds nothing\" overstates what an existing dependency proves.",
+      "\"Neither choice saves effort\" asserts an unverified implementation comparison."
+     ],
+     "note": "The missing-parent TypeError example makes the risk tangible, but unsupported Stripe behavior and effort claims weaken the judgment.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"enough of them page on-call\" leaves out the 5/min threshold",
+      "\"handle that deliberately\" names no consequence"
+     ],
+     "note": "Accurate and concise, but too thin: the null case gets no consequence and the paging threshold is missing.",
+     "scores": [
+      4,
+      3,
+      3,
+      4,
+      3,
+      5
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\"it's less code to get that behavior\" is a plausible inference presented without a demonstrated implementation comparison."
+     ],
+     "note": "It answers the objection directly and preserves the viable handwritten option, though it leaves the paging threshold and response shape unspecified.",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      5,
+      5
+     ],
+     "total": 27
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Short and accurate: it admits the earlier answer was only a label and states a rule the reader can reuse, but it never says what happens to a null-customer event after it is rejected.",
+     "scores": [
+      5,
+      4,
+      4,
+      5,
+      5,
+      5
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [],
+     "note": "Explains the cost of throwing ordinary errors while acknowledging that handwritten validation can return the same 400 and must accept null.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 29
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "leads with \"it's already the standard in this repo\", which is a label used as the reason",
+      "\"consistent with the other 14 routes\" is also a label"
+     ],
+     "note": "It repeats the convention label it was challenged on and mentions the null case without saying what happens to those events.",
+     "scores": [
+      3,
+      2,
+      3,
+      3,
+      2,
+      4
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "\"Hand-rolled checks ... so a bad body would fall through as a 500\" assumes the checks throw an ordinary Error rather than return 400."
+     ],
+     "note": "It is concise, but leads with a convention label and omits the condition under which handwritten validation actually causes a 500.",
+     "scores": [
+      4,
+      3,
+      4,
+      3,
+      3,
+      5
+     ],
+     "total": 22
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "it opens with \"same as the other 14 routes\" again, repeating the label instead of admitting it",
+      "\"that order never reaches billing\" goes beyond the facts"
+     ],
+     "note": "It explains each file well, but it leads with the label the user challenged and never admits it was not a reason.",
+     "scores": [
+      3,
+      4,
+      5,
+      3,
+      4,
+      4
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"a guest-checkout event gets 400\" also covers handwritten rejection, whose status depends on how it reports failure.",
+      "\"that order never reaches billing\" invents an order-processing consequence and rules out unverified recovery paths.",
+      "\"errors.ts only maps ZodError to 400\" extends the verified behavior beyond the specified thrown Error cases."
+     ],
+     "note": "It clearly conditions the main handwritten-error risk, but invents a billing outcome and opens with the same convention-based justification the user challenged.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      3
+     ],
+     "total": 23
+    }
+   }
+  },
+  "pi": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"any handler side effects that already ran\" \u2014 validation runs before any side effects",
+      "\"your existing clients get the error shape they already handle\" \u2014 the only client here is Stripe; this is unsupported",
+      "treats the null rejection as a problem only for hand-rolled code, though a zod z.string() would reject null too",
+      "\"built a worse zod\" is a label, not a consequence"
+     ],
+     "note": "The 500, retry and pager chain is strong, but it pads with labels and speculation and ends by asking the user a question in prose.",
+     "scores": [
+      5,
+      3,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"The only error that becomes a 400\" extends the verified behavior beyond the specified thrown Error cases.",
+      "\"persistent retry flood\" and effects on \"any handler side effects that already ran\" are not established by the facts.",
+      "\"every guest-checkout webhook\" overstates customer nullability, which applies to some event types.",
+      "\"your existing clients get the error shape they already handle\" invents client behavior.",
+      "\"throwing a ZodError-shaped error\" is not established as sufficient for middleware that catches ZodError.",
+      "\"you've built a worse zod\" is an unsupported judgment."
+     ],
+     "note": "The concrete status-code explanation is buried under invented consequences and an unnecessarily restricted account of handwritten alternatives.",
+     "scores": [
+      4,
+      3,
+      5,
+      1,
+      3,
+      1
+     ],
+     "total": 17
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"saves about a dozen lines\" is an invented number and is not marked as an estimate",
+      "the opening claims hand-rolling \"puts the endpoint on the error path that 500s\" as if that were certain",
+      "the <what-to-do> tags are malformed (duplicated closing tag)"
+     ],
+     "note": "It honestly calls both \"overkill\" and its own earlier answer labels, but it adds an unmarked invented number and has broken markup.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      4,
+      2
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"saves about a dozen lines\" invents a numerical comparison.",
+      "\"puts the endpoint on the error path that 500s\" assumes handwritten validation throws ordinary errors.",
+      "\"three days of repeated deliveries\" treats the retry maximum as a guaranteed duration.",
+      "\"any client-side handling ... sees two shapes\" assumes response-format divergence and client behavior.",
+      "\"adds no measurable per-request work\" is unsupported by measurements.",
+      "\"ZodError is the only thing ... turns into a 400; anything else is a 500\" exceeds the verified claim about other thrown Errors."
+     ],
+     "note": "It repeats a useful error-path argument while adding unsupported measurements, client behavior, and distracting markup.",
+     "scores": [
+      4,
+      3,
+      5,
+      2,
+      3,
+      1
+     ],
+     "total": 18
+    }
+   }
+  }
+ },
+ "s3": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'it will happen again' overstates the evidence",
+      "It never explicitly retracts the earlier 'cleaner, more robust' label"
+     ],
+     "note": "Clear consequences, a weighed alternative and a stated compatibility assumption, but it is longer than needed.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"A slow migration can no longer take the orders API down\" overstates protection against database disruption.",
+      "\"39 ... under 5 seconds\" is not established.",
+      "\"Got killed again\" adds an explicit repeated killing not stated in the incident facts.",
+      "\"It will happen again\" asserts certainty about future slow index migrations.",
+      "\"Nothing kills the migration partway through\" is an unsupported guarantee.",
+      "\"deploy.yml fails with the Job's logs\" invents pipeline failure and log behavior.",
+      "\"Which we can't reliably [predict]\" asserts a capability limitation not established by the evidence.",
+      "\"The cheaper alternative\" lacks a verified cost comparison."
+     ],
+     "note": "It usefully states the old-code compatibility assumption, but surrounds that caution with absolute promises and invented pipeline behavior.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      4,
+      2
+     ],
+     "total": 21
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'Any migration over 2 minutes repeats INC-212' overreaches: the kill happens at 180s, not 120s"
+     ],
+     "note": "Plain-language mechanism, inferences explicitly marked, the earlier label admitted, and a clear threshold rule. The 2-minute line is slightly off from the 180s kill.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\"When one runs longer [than 2 minutes] ... takes the orders API down\" confuses the readiness timing with the 180-second restart limit.",
+      "\"39 took under 5 seconds\" is not established.",
+      "\"Any migration in that slow group is where the current setup fails\" is not established.",
+      "\"Has no health checks\" is an unverified proposed Job configuration, not an inherent Job property.",
+      "\"Nothing kills it halfway and nothing waits on the lock\" is an unsupported guarantee.",
+      "\"Any migration over 2 minutes repeats INC-212\" uses the wrong threshold and guarantees an identical incident.",
+      "\"Likely to be in the slow group\" is not established from two index builds without table or migration details."
+     ],
+     "note": "Its deciding rule uses the wrong timeout, so the otherwise concrete explanation would lead the user to misclassify migrations.",
+     "scores": [
+      5,
+      4,
+      5,
+      1,
+      2,
+      2
+     ],
+     "total": 19
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "Never admits that the earlier 'cleaner, more robust' was a label",
+      "'A failed migration also stops the deploy instead of putting pods into a restart loop' is an unmarked inference"
+     ],
+     "note": "Concrete and honest that this specific migration's duration is unknown, and it weighs a probe-change alternative. It never retracts the earlier label, and it doesn't name deploy.yml or the probe file.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      4,
+      4
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"The other 39 took under 5 seconds\" is not established.",
+      "\"A slow migration means no healthy pods\" assumes no existing serving pods remain during rollout.",
+      "\"The old pods keep serving traffic\" assumes database availability and compatibility during the migration.",
+      "\"The cheaper alternative\" is not supported by an implementation or cost comparison.",
+      "\"Still blocks all three pods\" is not established for every rollout."
+     ],
+     "note": "It offers actionable alternatives and admits uncertainty about the new migration, but adds substantial unasked discussion and unsupported rollout assumptions.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      4,
+      2
+     ],
+     "total": 23
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'your schema change is the kind of migration that can repeat it' is unsupported, and the reply later asks which kind it is",
+      "Odd hedges such as 'I haven't checked whether raising the liveness failureThreshold would also stop the outage' contradict its own analysis"
+     ],
+     "note": "Thorough, with a good deciding question, but it is long and its opening claim about this change contradicts its own closing uncertainty.",
+     "scores": [
+      5,
+      5,
+      5,
+      3,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"Your schema change is the kind of migration that can repeat it\" invents the new migration's characteristics.",
+      "\"How often this will happen ... about 1 in 20\" treats migrations exceeding 120 seconds as evidence of failures at 180 seconds and as a future frequency.",
+      "\"Works fine now ... true for about 95%\" is not established by the timing distribution.",
+      "\"Running pods keep serving\" assumes database availability and compatibility.",
+      "\"A migration over 180s takes all three pods down at once\" overstates what is guaranteed for future rollouts.",
+      "\"Outage lasts as long as the migration plus the restart cycles\" is not an established duration rule.",
+      "\"A one-line change\" is an unverified implementation estimate.",
+      "\"A plain column add (under 5s)\" assumes an operation's duration without inspecting it."
+     ],
+     "note": "It supplies useful incident context but is repetitive and makes an unsupported claim about the current schema change.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      3,
+      1
+     ],
+     "total": 20
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "The INC-212 link has no title",
+      "'existing pods keep serving' is an unmarked inference"
+     ],
+     "note": "Lean and correct, but it gives no frequency data (2 of 41) and no deciding rule or cost, so the reader cannot reuse the reasoning.",
+     "scores": [
+      5,
+      5,
+      3,
+      4,
+      3,
+      5
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"Existing pods keep serving\" assumes the migration preserves their database access and compatibility."
+     ],
+     "note": "It gives the benefit, the failure mechanism, and the incident's magnitude concisely, with only an unstated assumption about continued service.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      4,
+      5
+     ],
+     "total": 28
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "The most carefully hedged: it marks its inference and notes what the Job does not prove. The deciding-rule sentence is clumsy, and deploy.yml is not named.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      4,
+      4
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [],
+     "note": "It connects the recommendation to the actual restart deadline and explicitly limits the claim to the observed failure mechanism.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 29
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'All 3 pods blocked on the lock' is inaccurate: one pod held the lock and ran the migration",
+      "It never admits that the earlier reason was a label"
+     ],
+     "note": "Concise and accurate on the core case, but it offers no cost, no alternative and no explicit rule for next time.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      3,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"All 3 pods blocked on the lock\" is inaccurate: one pod applies the migration while the other two wait.",
+      "\"Runs the migration once to completion\" implies successful completion without stating failure handling.",
+      "\"No probe kills on index builds\" requires configuring the Job without the server liveness probe and does not address other termination causes."
+     ],
+     "note": "It is concise and grounded in the incident, but misdescribes which pods hold versus wait on the lock.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      4,
+      5
+     ],
+     "total": 26
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'Old pods keep serving until new pods start against the migrated schema' is an inference and is not marked as one"
+     ],
+     "note": "Admits that 'cleaner, more robust' was a label and gives a clear deciding rule: whether the migration outlasts the 180s liveness restart. Some phrasing is awkward ('what they are is the normal schema change').",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 ... under 5 seconds\" is not established; the facts say most were under 5 seconds.",
+      "\"2 index builds over 2 minutes ... outlast the probes\" does not establish that both exceeded the 180-second liveness limit.",
+      "\"Old pods keep serving\" assumes the migration does not disrupt database traffic or compatibility.",
+      "\"Under it, location doesn't matter; over it, entrypoint repeats INC-212\" overstates both the absence of other benefits and the certainty of an identical outage."
+     ],
+     "note": "It explains the observed failure thoroughly, but turns limited timing evidence into categorical rules.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      3,
+      2
+     ],
+     "total": 21
+    }
+   }
+  },
+  "pi": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'crash-looping against a half-migrated schema and serving errors' is invented",
+      "'~10 lines of YAML' is invented",
+      "'bump livenessProbe failure thresholds so 180s > worst-case migration' is garbled",
+      "The INC-212 link has no title",
+      "'couples your migration runtime to your probe budgets' / 'changes the failure model' are labels used as reasons"
+     ],
+     "note": "Confident and persuasive, but it invents details and never acknowledges that its earlier reason was a label.",
+     "scores": [
+      5,
+      3,
+      3,
+      2,
+      4,
+      3
+     ],
+     "total": 20
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 ... sub-5s\" is not established.",
+      "\"The two that weren't are the ones that hurt\" invents an adverse outcome for the other slow migration.",
+      "\"Migration runs to completion regardless of duration\" is an unsupported guarantee.",
+      "\"The 2-minute index migrations stop being dangerous\" ignores database disruption and other failure causes.",
+      "\"Pods crash-looping against a half-migrated schema and serving errors\" is not in the evidence.",
+      "\"~10 lines of YAML\" is an invented implementation estimate.",
+      "\"Bump ... thresholds so 180s > worst-case migration\" contradicts the known 250-second migration and does not describe raising the limit correctly.",
+      "\"The next 4-minute index build is still three concurrent restarts away\" does not follow after raising the liveness limit."
+     ],
+     "note": "Its concrete incident explanation is undermined by invented details, absolute guarantees, and a contradictory alternative.",
+     "scores": [
+      4,
+      3,
+      4,
+      1,
+      2,
+      2
+     ],
+     "total": 16
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'schema changes with indexes are exactly the new orders work landing now' is invented",
+      "'on the current setup the same failure surfaces as pods crash-looping' is an unmarked inference",
+      "It wraps the reply in stray <what-to-do> tags",
+      "It never retracts the earlier 'cleaner, more robust' label"
+     ],
+     "note": "Strong cost/benefit structure and deciding rule, undermined by an invented claim about the current change.",
+     "scores": [
+      5,
+      5,
+      5,
+      3,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"39 fast migrations\" is not established.",
+      "\"A process Kubernetes won't kill\" is an unsupported guarantee.",
+      "\"It still beats the cost\" asserts a cost comparison without establishing it.",
+      "\"Deploys get slower by the migration's duration\" ignores that migrations already delay startup today.",
+      "\"Roughly 1 deploy in 20 is exposed\" conflates exceeding 120 seconds with exceeding the 180-second restart limit.",
+      "\"Schema changes with indexes are exactly the new orders work landing now\" invents the new migration's contents.",
+      "\"A Job doesn't [get killed mid-migration]\" overstates protection beyond removal of the server liveness probe."
+     ],
+     "note": "It explains the timeout mechanism but invents the current change's contents and overstates both risk frequency and Job guarantees.",
+     "scores": [
+      5,
+      4,
+      5,
+      1,
+      3,
+      2
+     ],
+     "total": 20
+    }
+   }
+  }
+ },
+ "s4": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It names the release gate as the cost and gives a clear default plan, but it never spells out a reusable rule beyond 'close only if that's true'.",
+     "scores": [
+      4,
+      4,
+      5,
+      5,
+      4,
+      5
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\"Each one should only be closed\" when its work is finished contradicts the permitted won't-fix outcome.",
+      "\"That PR never referenced the issue, so it didn't close it\" assumes the precise closure history.",
+      "\"Android 9 users ... can't hit this crash\" overlooks users running older builds.",
+      "\"Closing it as stale would only make the release gate pass\" ignores the other open milestone issues."
+     ],
+     "note": "Provides an actionable fix plan, but inaccurately describes closure as necessarily recording finished work.",
+     "scores": [
+      4,
+      4,
+      5,
+      3,
+      4,
+      4
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It sets the cost of leaving each issue open against the cost of closing it, admits that 'stale' was a label, and ends with a deciding rule the reader can reuse; the only weakness is some repetition of the release-gate point.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 29
+    },
+    "codex": {
+     "errors": [
+      "\"Neither PR linked its issue, so neither issue closed when the PR merged\" asserts an unverified closure history.",
+      "\"A crash that can't happen on any build you ship\" extends the evidence about current builds to older builds.",
+      "\"Nothing tracks the bug any more\" overlooks the retained closed issue."
+     ],
+     "note": "Explains each release blocker, but repeats the gate explanation and overstates what closing erases.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "The per-issue handling and correction are solid, but it uses the labels 'effectively obsolete' and 'not stale' and gives no general deciding rule.",
+     "scores": [
+      4,
+      4,
+      5,
+      5,
+      4,
+      4
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"Closing it would only hide it\" overstates the effect on a retained, readable issue.",
+      "\"The release gate would pass with a known bug in it\" ignores the other open milestone issues."
+     ],
+     "note": "Offers a clear next action for each issue, though the live bug's closure consequences are overstated.",
+     "scores": [
+      4,
+      4,
+      4,
+      3,
+      5,
+      4
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is thorough, with concrete costs for each issue, an explicit correction and a clear deciding rule, but it is longer than it needs to be.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      3
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\"That PR never referenced #402, so GitHub never closed it\" asserts an unverified closure history.",
+      "\"A real bug disappears from the tracker\" incorrectly describes a closed issue as disappearing.",
+      "\"No fix is planned\" is not among the verified facts.",
+      "\"V3.0 removed on purpose\" asserts intent beyond the verified minimum-version change."
+     ],
+     "note": "Makes the release costs explicit, but invents planning information and parks a reproducible bug awaiting a decision.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      3,
+      3
+     ],
+     "total": 22
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is honest and short, but reasons like 'records completed work' and 'support decision' stay abstract, and it gives no concrete action for #401 or #403.",
+     "scores": [
+      4,
+      3,
+      4,
+      5,
+      3,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [],
+     "note": "Gives a concise, accurate explanation of the release gate and the different closure decisions.",
+     "scores": [
+      4,
+      5,
+      4,
+      5,
+      4,
+      5
+     ],
+     "total": 27
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "A compact table gives the cost of closing and the cost of leaving open for every issue, followed by a clear deciding rule, though 'records completion' leans slightly toward a label.",
+     "scores": [
+      5,
+      4,
+      5,
+      5,
+      5,
+      5
+     ],
+     "total": 29
+    },
+    "codex": {
+     "errors": [],
+     "note": "Clearly compares the consequences for each issue and distinguishes unsupported old builds from a fixed crash.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      4,
+      4
+     ],
+     "total": 28
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'Checked against the code and history' suggests new verification this turn that did not happen"
+     ],
+     "note": "It leads with the cost of leaving the issues open and gives correct per-issue actions, but it has no explicit deciding rule.",
+     "scores": [
+      4,
+      4,
+      5,
+      4,
+      4,
+      5
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"While #401-#404 are in it, release stays blocked\" omits that they must remain open.",
+      "\"There's nothing to fix on supported versions\" goes beyond evidence that Android 9 cannot install current builds."
+     ],
+     "note": "Connects open issues to the release gate, but unnecessarily makes authorized fixes and completed closures await confirmation.",
+     "scores": [
+      4,
+      4,
+      4,
+      4,
+      3,
+      4
+     ],
+     "total": 23
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It gives concrete costs for each issue and a clear deciding rule, but quoting the earlier labels and restating the milestone for every issue adds length.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      3
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "\"Neither PR referenced its issue, so both stayed open\" asserts an unverified causal closure history.",
+      "\"No session picks it up\" is an unsupported prediction.",
+      "\"Closing as 'stale' would imply it went away on its own\" assigns an unsupported meaning to that closure.",
+      "\"The real consequence is you are dropping Android 9\" incorrectly attributes an existing v3.0 support change to closing the issue."
+     ],
+     "note": "Explains the cost of leaving completed work open, but adds speculative consequences and repeats the correction.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      3,
+      2
+     ],
+     "total": 20
+    }
+   }
+  },
+  "pi": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "the per-issue list uses bare '#402', '#404', '#455', '#470' with no titles or links",
+      "'the only real cost is #2' plays down that closing #401 would hide a live bug"
+     ],
+     "note": "It answers what closing does on GitHub, but the per-issue section relies on bare numbers the reader has to look up.",
+     "scores": [
+      4,
+      4,
+      2,
+      4,
+      4,
+      4
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\"Nobody treats it as actionable work anymore\" is not established by removal from open filters.",
+      "\"Leaving them open costs nothing else\" is unsupported and contradicts the other consequences it lists.",
+      "\"The crash was never fixed\" is not established by raising the minimum Android version.",
+      "\"This one isn't stale at all\" confuses inactivity with whether the bug still occurs."
+     ],
+     "note": "Names the release cost, but leaves issue identities unexplained and substitutes unsupported absolutes for evidence.",
+     "scores": [
+      4,
+      4,
+      2,
+      2,
+      3,
+      3
+     ],
+     "total": 18
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'nobody has filed it in 8 months, so no second report is coming' is an unsupported inference",
+      "a stray <what-to-do> wrapper tag is left in the reply"
+     ],
+     "note": "The cost-of-each-option breakdown is strong, but an unsupported prediction and confusing 'fail the test' wording weaken it.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      4,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"Neither PR referenced its issue, so the issues never got closed\" asserts an unverified closure history.",
+      "\"The crash can't occur on an installable build anymore\" overlooks older builds.",
+      "\"No current user can hit\" overlooks users still running older builds.",
+      "\"The flash ships to every dark-mode user on cold start\" generalizes one reproduction to every user.",
+      "\"The tracker loses the only record of it\" invents record exclusivity and ignores the retained closed issue.",
+      "\"Nobody has filed it in 8 months, so no second report is coming\" invents reporting history and predicts future reports without evidence."
+     ],
+     "note": "Answers the requested comparison, but severely undermines it with invented evidence and predictions.",
+     "scores": [
+      5,
+      4,
+      5,
+      1,
+      3,
+      2
+     ],
+     "total": 20
+    }
+   }
+  }
+ },
+ "s5": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'The effects code calls ParticipantResourceBarsPublisher.PublishParticipantEffects() directly after its changes' is unverified",
+      "it does not concede the cost of editing the owner's constructor"
+     ],
+     "note": "It lays out the ADR's four reasons concretely and accurately, but tacks on unasked sections (ADR 0008, the stale path note).",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      4,
+      3
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"It cites Unreal's OnExactGameplayTagAdded by name\" is not established by the supplied evidence.",
+      "\"Roblox's own signals are exempt, and a message system is allowed\" introduces unsupported policy details.",
+      "\"What the HUD actually does today\" presents a specific counter and publisher path not verified in the supplied ground truth.",
+      "\"only that grant lifts it\" overstates exclusivity when blockers can end grants during another mutation.",
+      "\"The grant handle makes both of those impossible\" claims more than the verified evidence establishes.",
+      "\"which no longer exists\" and the asserted replacement rule directory are unsupported filesystem claims."
+     ],
+     "note": "It gives the clearest substantial account of the documented tradeoff, but unnecessary HUD, handle, and filesystem claims weaken honesty and economy.",
+     "scores": [
+      4,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 21
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "it attributes the listener ban to CLAUDE.md, where the ground truth puts it in AGENTS.md",
+      "it leaves out the unconsumed-outcome compile-time guarantee"
+     ],
+     "note": "It correctly separates what the return value does from how the HUD actually updates, and is honest that the code does not yet match the ADR.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      4,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"The HUD doesn't use GrantedTagRemoval at all\" and the specific publisher implementation are not established by the supplied evidence.",
+      "\"Subscribing would save only a few lines here\" supplies an unsupported estimate.",
+      "\"Removed means the tag came off\" conflates removal of one grant with loss of tag presence.",
+      "\"Only the code that removed the tag can use that answer\" contradicts the documented ability to forward, inspect, log, or batch the change.",
+      "\"A subscriber ... can't tell whether the grant it held was the one removed\" assumes the notification cannot include the grant.",
+      "\"Unreal code avoids this by reading the current tags right after subscribing\" is an unsupported claim about Unreal usage.",
+      "\"Most callers throw the removal result away\" and the claimed implementation gap are unverified.",
+      "\"the returned value protects removers from removing the wrong grant\" confuses the returned outcome with the grant handle supplied as input.",
+      "\"even though Unreal tolerates it\" makes an unsupported comparison about re-entrancy."
+     ],
+     "note": "It offers concrete subscription failure scenarios, but its central account of current HUD behavior and discarded outcomes lacks verified support.",
+     "scores": [
+      4,
+      4,
+      4,
+      1,
+      2,
+      2
+     ],
+     "total": 17
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "it argues against subscription mainly with 'the repo forbids' and leaves out the startup-window, re-entrancy and compile-time costs",
+      "it suggests a subscription surface without knowing that ADR 0003 already decided against it"
+     ],
+     "note": "Honest about what it did not check, but it never finds the ADR's actual reasons, so it cannot answer 'why not subscribe'.",
+     "scores": [
+      2,
+      3,
+      3,
+      4,
+      2,
+      3
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "\"NRO doesn't have to choose between them\" does not account for the accepted decision and lint rule forbidding the subscription shape.",
+      "\"found by object identity (indexOf(grant.Application))\" is an implementation claim not established by the supplied evidence.",
+      "\"such as ... a death\" adds an unverified removal cause.",
+      "\"The same holds for TagApplicationResult\" and the claimed result-naming rule are not established by the verified evidence.",
+      "\"The HUD can read the container directly\" and the named ParticipantTags interface are unsupported implementation claims.",
+      "\"it probably deserves an ADR\" overlooks the existing ADR that already decides this question."
+     ],
+     "note": "It candidly limits its HUD knowledge, but answers mostly what the return value does and misses the existing decision's concrete reasons against subscribing.",
+     "scores": [
+      2,
+      3,
+      3,
+      3,
+      3,
+      3
+     ],
+     "total": 17
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "it presents 'ClaimGameplayTag calls the release path' as current code, but that is an ADR example name that does not exist in src",
+      "'The HUD gets the change as a value at the call site' and 'the HUD is a constructor parameter on that owner' are presented as current code, which is false"
+     ],
+     "note": "Well structured and concedes the cost honestly, but it presents the ADR's examples as the actual implementation.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      4,
+      4
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"rejects ... OnGameplayTagAdded ... by name\" is not established by the verified evidence.",
+      "\"The HUD gets the change as a value at the call site\" claims current HUD delivery without supporting evidence.",
+      "\"ClaimGameplayTag calls the release path\" presents an ADR example name as a current API; ClaimGameplayTag does not exist in current src.",
+      "\"the HUD is a constructor parameter on that owner\" presents the proposed arrangement as verified implementation.",
+      "\"When that list gets hard to read\" attributes an unsupported extraction prescription to the ADR.",
+      "\"The ADR exempts Roblox's own signals\" and the permission for a later message system are not established by the supplied evidence."
+     ],
+     "note": "It directly answers why subscriptions cost something and admits constructor wiring, but confuses illustrative ADR APIs and intended architecture with current code.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      4,
+      3
+     ],
+     "total": 22
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "'The ADR overstates matters when it says subscriptions cannot carry a change value or support logging' misstates the ADR, whose point is that reactions consume the change before control returns",
+      "it calls the risks 'manageable' and ignores the compile-time unconsumed-outcome check"
+     ],
+     "note": "It gives the reasons as labels ('visible dependencies, explicit reaction order'), argues mostly for the subscription, and misreads the ADR.",
+     "scores": [
+      2,
+      2,
+      2,
+      2,
+      2,
+      4
+     ],
+     "total": 14
+    },
+    "codex": {
+     "errors": [
+      "\"subscribing is less wiring for a HUD\" is asserted without comparing the actual wiring; the ADR describes equivalent growth.",
+      "\"The ADR overstates matters when it says subscriptions cannot carry a change value or support logging\" misrepresents the documented argument about reactions consuming the change before control returns.",
+      "\"several systems call the container directly and discard removal results\" is not established by the supplied evidence.",
+      "\"The implementation does not fully establish that arrangement\" presents an unverified implementation diagnosis as fact."
+     ],
+     "note": "The distinction between a caller's result and HUD notification is useful, but its rejection of the ADR depends on unverified claims.",
+     "scores": [
+      3,
+      3,
+      4,
+      2,
+      3,
+      4
+     ],
+     "total": 19
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'I have no concrete reason to reject subscriptions' overlooks the ADR's compile-time argument (unconsumed-outcome, a deleted subscriber still compiles)",
+      "'Removing a suppression can also make the underlying tag present again' is unverified"
+     ],
+     "note": "Clear and candid about the gap in the code, but it leaves out the strongest cost of subscribing, so its conclusion is skewed.",
+     "scores": [
+      3,
+      4,
+      4,
+      3,
+      3,
+      4
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"Removing a suppression can also make the underlying tag present again\" is not established by the verified evidence.",
+      "\"several callers\u2014including effect and ability code\u2014call RemoveGrantedTag directly and discard its result\" is unsupported.",
+      "\"the current code does not fully deliver the ADR's proposed alternative\" rests on that unsupported diagnosis.",
+      "\"I have no concrete reason to reject subscriptions that handle those conditions\" overlooks the documented compile-time failure when an outcome is dropped versus silent deletion of a subscriber."
+     ],
+     "note": "It makes startup and re-entrancy failures understandable, but its deciding rule omits the documented compile-time accountability argument.",
+     "scores": [
+      4,
+      4,
+      4,
+      2,
+      3,
+      3
+     ],
+     "total": 20
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "the snippet 'screen.TagStandingChanged(ended); // no listener list' is presented as what the caller does, which is invented",
+      "'TagGrants(tags, screen, analytics)' is an ADR example presented as current code",
+      "'Subscription spreads that wiring across N dynamic registrations' is asserted without evidence"
+     ],
+     "note": "Terse and on point, but it invents current code to make the case.",
+     "scores": [
+      4,
+      3,
+      3,
+      1,
+      3,
+      4
+     ],
+     "total": 18
+    },
+    "codex": {
+     "errors": [
+      "\"The caller ... then tells the screen directly\" claims a current delivery path not established by the evidence.",
+      "\"screen.TagStandingChanged(ended)\" presents an unverified API without marking the snippet as illustrative.",
+      "\"only the GrantedTag handle holder lifts that seat\" overstates exclusivity when other mutations can end blocked grants.",
+      "\"A tag-level broadcast can't say whose grant ended or what the standing now is\" falsely assumes those details cannot be included in an event.",
+      "\"TagGrants(tags, screen, analytics)\" presents an ADR example name as current wiring; TagGrants does not exist in current src.",
+      "\"The less wiring is inverted\" contradicts the ADR's admission of constructor wiring and equivalent growth without establishing a concrete comparison."
+     ],
+     "note": "It is compact and gives concrete failure cases, but invented-looking current wiring and absolute event-payload claims undermine its conclusion.",
+     "scores": [
+      4,
+      4,
+      3,
+      1,
+      3,
+      4
+     ],
+     "total": 19
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "'proven in the tag suites' is vague and gives no reference",
+      "the forbidden-router/event-bus rule is cited without naming where it comes from"
+     ],
+     "note": "Covers the startup window, which-grant, double hand-back, re-entrancy and the compile-time check concretely, though it never concedes the constructor-edit cost.",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      4,
+      3
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"the HUD reads current state\" and the specific polling publisher description are not established by the supplied evidence.",
+      "\"nothing else moved\" overstates what a removal outcome establishes.",
+      "\"One tag-level callback cannot say which grant ended\" assumes an event cannot carry the grant.",
+      "\"A 'removed' event either fires twice for one removal or never says nothing-happened\" presents an unsupported false choice.",
+      "\"a broadcast of something changed cannot carry that\" incorrectly makes payload limitations inherent to subscriptions.",
+      "\"subscribe only where the engine gives you no call to return from\" introduces a restriction not established by the verified ground truth."
+     ],
+     "note": "Its startup, re-entrancy, and constructor-cost explanations are strong, but the final rule relies on false limitations of event payloads.",
+     "scores": [
+      4,
+      4,
+      4,
+      2,
+      2,
+      2
+     ],
+     "total": 18
+    }
+   }
+  },
+  "pi": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "it cites 'plugins/nro-codestyle/rules/ban-a-list-of-callers-to-tell-later.rule.mjs' as the enforcer, a path that reportedly no longer exists",
+      "the prediction 'phantom events' claim is the reply's own inference, not marked as such",
+      "'journal.Record(taken); screen.TagStandingChanged(...)' is ADR example code that reads as if it were current code",
+      "it attributes the rule to AGENTS.md without the ADR rationale, and the opening leans on 'deliberate, documented, lint-enforced' as the reason"
+     ],
+     "note": "Thorough, but it opens with bare paths as the justification and runs long with speculative extra arguments.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      4,
+      2
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"enforced by plugins/nro-codestyle/rules/ban-a-list-of-callers-to-tell-later.rule.mjs\" gives an enforcement location not established by the verified inventory.",
+      "\"The returned value comes back only after the container is consistent\" overclaims when removal can occur inside an unfinished grant.",
+      "\"journal.Record(taken); screen.TagStandingChanged(...)\" is presented without identifying it as an illustrative ADR example rather than verified current APIs.",
+      "\"The value carries evidence a container event can't\" falsely assumes events cannot carry the same evidence.",
+      "\"The container doesn't know why\" is unsupported, particularly when the removal call accepts a reason.",
+      "\"Prediction would fire phantom events\" and the claimed HUD flicker are not established by the verified evidence.",
+      "\"that's the ADR's explicit exemption\" and the claimed replication listener implementation are unsupported.",
+      "\"Point at the thing, never at its name\" is introduced as an additional repository rule without supporting evidence."
+     ],
+     "note": "The documented costs are present, but extensive unsupported code, prediction, and exemption claims make the answer unreliable.",
+     "scores": [
+      4,
+      4,
+      3,
+      1,
+      2,
+      1
+     ],
+     "total": 15
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "prediction replay 'HUD reactions fire twice' is the reply's own inference, presented as fact and not marked as inferred",
+      "'the compiled rule ... names the three failures above as its reason' is unsupported",
+      "'nothing since has moved the facts it rests on' is unverified",
+      "'missed-window bug is structurally impossible' overstates the case"
+     ],
+     "note": "Very concrete, covers the costs well and admits the honest cost, but it is long and adds a speculative prediction-replay argument as if it were established.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"it double-fires under client prediction replay\" is not established by the verified evidence.",
+      "\"nothing since has moved the facts it rests on\" claims a historical check without evidence.",
+      "\"A listener cannot tell a replay from a first arrival\" assumes notifications cannot carry replay information or be deferred.",
+      "\"A 'tag count changed' broadcast cannot say either thing\" incorrectly treats a limited event payload as an inherent subscription limitation.",
+      "\"the missed-window bug is structurally impossible\" overstates what the unsupported publisher description proves.",
+      "\"which names the three failures above as its reason\" attributes unsupported rationale to the lint rule.",
+      "\"A listener is the one shape that does neither\" rules out subscriptions carrying detailed changes or prompting current-state reads without evidence."
+     ],
+     "note": "It explains visible failures well, but buries the documented rationale under unsupported implementation claims and categorical claims about subscriptions.",
+     "scores": [
+      4,
+      4,
+      4,
+      1,
+      2,
+      1
+     ],
+     "total": 16
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,130 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It sets the cost of leaving each issue open against the cost of closing it, admits that 'stale' was a label, and ends with a deciding rule the reader can reuse; the only weakness is some repetition of the release-gate point."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "the per-issue list uses bare '#402', '#404', '#455', '#470' with no titles or links",
+   "'the only real cost is #2' plays down that closing #401 would hide a live bug"
+  ],
+  "note": "It answers what closing does on GitHub, but the per-issue section relies on bare numbers the reader has to look up."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "A compact table gives the cost of closing and the cost of leaving open for every issue, followed by a clear deciding rule, though 'records completion' leans slightly toward a label."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "It is honest and short, but reasons like 'records completed work' and 'support decision' stay abstract, and it gives no concrete action for #401 or #403."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "It gives concrete costs for each issue and a clear deciding rule, but quoting the earlier labels and restating the milestone for every issue adds length."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "It names the release gate as the cost and gives a clear default plan, but it never spells out a reusable rule beyond 'close only if that's true'."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "'Checked against the code and history' suggests new verification this turn that did not happen"
+  ],
+  "note": "It leads with the cost of leaving the issues open and gives correct per-issue actions, but it has no explicit deciding rule."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "The per-issue handling and correction are solid, but it uses the labels 'effectively obsolete' and 'not stale' and gives no general deciding rule."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "It is thorough, with concrete costs for each issue, an explicit correction and a clear deciding rule, but it is longer than it needs to be."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'nobody has filed it in 8 months, so no second report is coming' is an unsupported inference",
+   "a stray <what-to-do> wrapper tag is left in the reply"
+  ],
+  "note": "The cost-of-each-option breakdown is strong, but an unsupported prediction and confusing 'fail the test' wording weaken it."
+ }
+}

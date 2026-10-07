@@ -1,0 +1,157 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "prediction replay 'HUD reactions fire twice' is the reply's own inference, presented as fact and not marked as inferred",
+   "'the compiled rule ... names the three failures above as its reason' is unsupported",
+   "'nothing since has moved the facts it rests on' is unverified",
+   "'missed-window bug is structurally impossible' overstates the case"
+  ],
+  "note": "Very concrete, covers the costs well and admits the honest cost, but it is long and adds a speculative prediction-replay argument as if it were established."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 2,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "'The ADR overstates matters when it says subscriptions cannot carry a change value or support logging' misstates the ADR, whose point is that reactions consume the change before control returns",
+   "it calls the risks 'manageable' and ignores the compile-time unconsumed-outcome check"
+  ],
+  "note": "It gives the reasons as labels ('visible dependencies, explicit reaction order'), argues mostly for the subscription, and misreads the ADR."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "'I have no concrete reason to reject subscriptions' overlooks the ADR's compile-time argument (unconsumed-outcome, a deleted subscriber still compiles)",
+   "'Removing a suppression can also make the underlying tag present again' is unverified"
+  ],
+  "note": "Clear and candid about the gap in the code, but it leaves out the strongest cost of subscribing, so its conclusion is skewed."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'proven in the tag suites' is vague and gives no reference",
+   "the forbidden-router/event-bus rule is cited without naming where it comes from"
+  ],
+  "note": "Covers the startup window, which-grant, double hand-back, re-entrancy and the compile-time check concretely, though it never concedes the constructor-edit cost."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "it cites 'plugins/nro-codestyle/rules/ban-a-list-of-callers-to-tell-later.rule.mjs' as the enforcer, a path that reportedly no longer exists",
+   "the prediction 'phantom events' claim is the reply's own inference, not marked as such",
+   "'journal.Record(taken); screen.TagStandingChanged(...)' is ADR example code that reads as if it were current code",
+   "it attributes the rule to AGENTS.md without the ADR rationale, and the opening leans on 'deliberate, documented, lint-enforced' as the reason"
+  ],
+  "note": "Thorough, but it opens with bare paths as the justification and runs long with speculative extra arguments."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "it attributes the listener ban to CLAUDE.md, where the ground truth puts it in AGENTS.md",
+   "it leaves out the unconsumed-outcome compile-time guarantee"
+  ],
+  "note": "It correctly separates what the return value does from how the HUD actually updates, and is honest that the code does not yet match the ADR."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'The effects code calls ParticipantResourceBarsPublisher.PublishParticipantEffects() directly after its changes' is unverified",
+   "it does not concede the cost of editing the owner's constructor"
+  ],
+  "note": "It lays out the ADR's four reasons concretely and accurately, but tacks on unasked sections (ADR 0008, the stale path note)."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "it presents 'ClaimGameplayTag calls the release path' as current code, but that is an ADR example name that does not exist in src",
+   "'The HUD gets the change as a value at the call site' and 'the HUD is a constructor parameter on that owner' are presented as current code, which is false"
+  ],
+  "note": "Well structured and concedes the cost honestly, but it presents the ADR's examples as the actual implementation."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "the snippet 'screen.TagStandingChanged(ended); // no listener list' is presented as what the caller does, which is invented",
+   "'TagGrants(tags, screen, analytics)' is an ADR example presented as current code",
+   "'Subscription spreads that wiring across N dynamic registrations' is asserted without evidence"
+  ],
+  "note": "Terse and on point, but it invents current code to make the case."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 2,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "it argues against subscription mainly with 'the repo forbids' and leaves out the startup-window, re-entrancy and compile-time costs",
+   "it suggests a subscription surface without knowing that ADR 0003 already decided against it"
+  ],
+  "note": "Honest about what it did not check, but it never finds the ADR's actual reasons, so it cannot answer 'why not subscribe'."
+ }
+}
