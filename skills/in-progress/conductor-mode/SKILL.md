@@ -15,7 +15,7 @@ it works, asks, and reports.
 ## Before anything else: your settings
 
 <what-to-do>
-Your first action, before step 1, is reading your three settings. Run this from
+Your first action, before step 1, is reading your settings. Run this from
 the effort's repository; it needs no path lookup:
 
 ~~~sh
@@ -25,7 +25,8 @@ for f in "${XDG_CONFIG_HOME:-$HOME/.config}/checkpickerupper/conductor-mode.toml
 ~~~
 
 The first file is global and the second is this repository's; a key in the
-second overrides the first.
+second overrides the first. A project `usage.<kind>` table replaces the global
+table for that kind whole; its keys never merge across files.
 
 - **`max_implementers`:** how many implementers you keep running at once.
   It is a target as well as a limit: while that many independent issues are
@@ -42,16 +43,26 @@ second overrides the first.
   accepted or merged. The implementer runs them once as a self-check, and a
   fresh subagent runs them once more for you in step 7. An empty list means no
   declared reviews. A project list replaces the global one.
+- **`usage`:** one table per agent kind (`codex`, `claude`, `pi`), with a
+  required `mode`. Read its live state with `conductor_config.py usage --kind K`:
+  - `ignore`: usage never changes the work; the effort runs until finished.
+  - `finish-in-flight`: at `at_percent`, assign nothing new; in-flight issues finish fully, through PR merge.
+  - `stop-at-commit`: at `at_percent`, implementers stop at their next verified commit, push and report.
+  - `finish-in-flight-then-stop`: wind down at `wind_down_at_percent`, then stop at `stop_at_percent`; the first must be lower.
+  Percentages are ints in 1..100. Each mode allows only its named thresholds.
+  Codex also requires `spend_credits = true|false`; Claude and Pi reject it.
 
-**When any key is in neither file, ask the user now**, before any other
+**When any top-level key is in neither file, ask the user now**, before any other
 work, with `AskUserQuestion` where the client has it. Ask only for the missing
-keys, plus where to save:
+top-level keys, plus where to save. Ask for a kind's usage only for the kind
+chosen in step 3:
 
 | Question | Options |
 |---|---|
 | How many implementers should run at once under one conductor, given this machine's memory and build load? | 1, 2, 3, 4 |
 | Who merges an implementer's PR? | The conductor, after its review; the implementer, once the conductor sends acceptance |
 | Which skills must review every PR before it is accepted or merged? | The review skills installed in this client, found by their names and descriptions, plus "None" (multi-select) |
+| When an agent kind's usage fills, what should happen? | `ignore`; `finish-in-flight` with `at_percent`; `stop-at-commit` with `at_percent`; `finish-in-flight-then-stop` with `wind_down_at_percent` and `stop_at_percent`; for Codex, also choose whether to spend credits |
 | Save for every project or only this repository? | Every project (global); this repository only (committed project file) |
 
 Save the answers with `scripts/conductor_config.py`, which sits beside this
@@ -62,6 +73,11 @@ skill loads). It validates the values and creates the folder and its README:
 python3 <folder of this SKILL.md>/scripts/conductor_config.py write --scope global|project --max-implementers N --merge conductor|implementer --review-skills name,name
 ~~~
 
+Save that kind's policy with `write --usage-kind K --usage-mode M`, adding
+`--at-percent N` or `--wind-down-at-percent N --stop-at-percent N` as its mode
+requires, and `--spend-credits true|false` for Codex. Use the same `--scope` and
+`--project-dir` options as for the top-level settings.
+
 A project file is a change to the repository; land it like any other change.
 The channel and the agent kind are not settings: they depend on what the user
 can use at the time, so step 3 asks for them each effort.
@@ -70,6 +86,10 @@ can use at the time, so step 3 asks for them each effort.
 ## 1. Settle the job
 
 <what-to-do>
+- Before assigning an issue, check for an open PR that closes it, a worktree
+  named for it, or a Codex rollout written in the last few minutes whose `cwd`
+  is that worktree. When any exists, start no implementer: review that work and
+  send findings through its channel.
 - Reconstruct the actual state from authoritative sources: repository
   instructions, code and history, issue and PR state, logs, and worktree status.
   Verify every inherited summary the job depends on.
@@ -123,13 +143,17 @@ conditions yet". The implementer caught the contradiction; the log prevents it.
 ## 3. Choose the channel
 
 <what-to-do>
-Ask the user, once per effort, whether implementers run as native subagents or
-as agents driven through herdr, and for herdr, which agent kind (Codex, Claude,
-Pi, or another kind herdr supports). Use the answers for the whole effort. When
+Ask the user, once per effort, whether implementers run as native subagents,
+agents driven through herdr, or existing Codex Desktop threads, and for herdr,
+which agent kind (Codex, Claude or Pi). Use the answers for the whole effort. When
 the effort already has implementers running, their channel and kind are the
 answer; ask only when no implementer exists yet.
+For the chosen kind, run `conductor_config.py show --kind <kind>` and ask for
+its usage policy if missing, using the settings questions above. Before each
+start, run `conductor_config.py usage --kind <kind>`; start nothing whose state
+is `wind-down`, `stop`, `exhausted` or `unknown`.
 Never run more implementers at once than `max_implementers`, and never fewer
-while independent issues are waiting.
+while independent issues are waiting and that kind's usage state is `normal`.
 
 - **Native subagents:** dispatch in the background on the strongest model the
   client exposes. Continue an implementer by messaging the same agent, which
@@ -162,7 +186,9 @@ while independent issues are waiting.
   The agent name follows the label in lowercase, such as `nro-input-buffering`;
   it must match `[a-z][a-z0-9_-]{0,31}` and be unique among live agents. A
   Codex start can outlast herdr's 30-second default, so pass the timeout above.
-  Send the brief only after `agent start` returns ready.
+  Send the brief only after `agent start` returns ready and `herdr pane read`
+  shows the agent's input box rather than a shell prompt: `agent start -- resume`
+  reports ready even when the resume failed.
 
   **Label what you own** with the repository name plus what it does, so the
   user can read the sidebar at a glance. Your own pane carries your standing
@@ -191,11 +217,16 @@ while independent issues are waiting.
   and take `.result.root_pane.pane_id`. Start
   `herdr agent start <name> --kind codex --pane <pane_id> --timeout 120000 -- resume <thread id>`
   (for another kind, use that agent's own resume argument). Once it returns
-  ready, re-send your last instruction: a resumed thread does not receive a
-  prompt sent before it was ready.
+  ready and `herdr pane read` shows its input box, re-send your last instruction:
+  a resumed thread does not receive a prompt sent before it was ready. A Desktop
+  sub-agent cannot be resumed on its own; resume or message its parent.
 
-The issue tracker is the durable record in both: issues are the work units, PRs
-the hand-back, and the decisions log the shared memory.
+- **Codex Desktop:** used for implementers the user already runs in the app;
+  you cannot start one. Reach them as the shared rules' "Codex Desktop threads"
+  section describes.
+
+The issue tracker is the durable record in every channel: issues are the work
+units, PRs the hand-back, and the decisions log the shared memory.
 </what-to-do>
 
 <supporting-info>
@@ -278,6 +309,22 @@ states:
 For a rebase, name what each side's changes must keep, and require both kept.
 </what-to-do>
 
+## Usage state changes
+
+<what-to-do>
+Re-read `conductor_config.py usage --kind <kind>` whenever an implementer
+reports:
+
+- `wind-down`: let in-flight issues finish fully, through PR merge; queue the rest.
+- `stop` or `exhausted`: tell each implementer of that kind to stop at its next
+  verified commit, push and report state. Record that state, and resume once
+  usage returns to `normal`.
+- `unknown`: assign nothing new until the reading is available.
+
+A thread stopped by its limit resumes by itself once usage returns; check its
+rollout before replacing it.
+</what-to-do>
+
 ## 7. Accept and land
 
 <what-to-do>
@@ -305,7 +352,8 @@ An implementer's report is a claim. Before accepting:
    With `merge = "implementer"`, send the implementer acceptance and let it
    merge. Either way, run branch and worktree cleanup only after `state` reads
    `MERGED`.
-6. Release the implementer. When its PR reads `MERGED` and no follow-up is
+6. Release the implementer, then start the next queued issue only if that kind's
+   usage state is `normal`. When its PR reads `MERGED` and no follow-up is
    pending, or its job was dropped or reassigned, remove a worktree workspace
    you created with `herdr worktree remove --workspace <workspace_id>`, which
    deletes the checkout and closes the workspace and its panes, then delete the
