@@ -288,6 +288,16 @@ Make the options concrete and mutually distinguishable. Keep the choice open in 
 
 Do not prepend the generic `Outcome` and `Done when` sections to a decision issue. `Why we need this decision` explains the consequence of waiting, and its own `Done when` defines the decision's completion.
 
+#### Recording a decision
+
+When the choice is made, edit the decision issue itself:
+- Add a `## Decision` section at the top of the body: the chosen option and its terms, who decided, and the date.
+- Tick the satisfied `Done when` boxes.
+- Link the build issue.
+- Close the issue as completed.
+
+Never record the decision only in a comment. The body and the open or closed state are the record that every reader checks, and an open decision issue reads as undecided.
+
 #### Defect, capability, and refactor issues
 
 ~~~markdown
@@ -348,6 +358,7 @@ Apply this pass to every issue, and apply it especially when the source is a tec
 2. Define each repo-specific noun where it first appears: file plus one-line meaning, in prose.
 3. Remove YAML keys, route-map scaffolding, and implementation guesses from the main prose. Keep a machine-readable key only when known repository automation requires it.
 4. Preserve issue links and established terms when they carry useful context; explain an unavoidable term the first time it appears.
+   Never copy a fact another issue owns, such as its decision, scope or status; link to that issue instead, so the fact has one place to change.
 5. Translate competitor, reference-product, or screenshot analysis into behavior and constraints. Omit the reference brand, palette, and route-map detail unless it affects the decision or belongs in Evidence.
 6. Turn unresolved choices into explicit options and questions. Never hide a decision inside the outcome or resolve it by implication.
 7. Add only facts grounded in the source or evidence. A useful new boundary question is allowed; an invented rule is not.
@@ -430,7 +441,7 @@ The REST equivalent takes the blocker's database id: `gh api repos/OWNER/REPO/is
 **When one issue replaces another**, record it natively:
 
 - One-to-one, same outcome: `gh issue close OLD --repo OWNER/REPO --duplicate-of NEW`. GitHub shows the duplicate link on both issues.
-- Split into several, or reshaped beyond the same outcome: GitHub has no "replaced by" edge. Open each replacement with `Replaces #OLD` in its body, so the old issue's timeline lists every replacement, then `gh issue close OLD --repo OWNER/REPO --reason "not planned" --comment "Replaced by #A and #B"`. Move any sub-issues and blocked-by edges from the old issue onto the replacements.
+- Split into several, or reshaped beyond the same outcome: GitHub has no "replaced by" edge. Open each replacement with `Replaces #OLD` in its body, so the old issue's timeline lists every replacement, then edit the old issue's body to open with `Replaced by #A and #B.` and close it with `gh issue close OLD --repo OWNER/REPO --reason "not planned"`. Move any sub-issues and blocked-by edges from the old issue onto the replacements.
 
 **Never close or edit a parent issue.** Wiring a child under it does not give you licence to touch it. If the parent's own text is wrong, say so in the report and let the user decide.
 
