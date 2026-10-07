@@ -313,11 +313,11 @@ def ignored_usage(kind: str) -> UsageRow:
     return UsageRow(kind, "ignore", None, None, None, "normal", "usage ignored by policy")
 
 
-def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavailable,
+def usage_state(kind: str, policy: UsagePolicy, reading: Reading | Unavailable,
                 spend_credits: bool | None = None) -> UsageRow:
     if isinstance(policy, IgnorePolicy):
         return ignored_usage(kind)
-    mode = policy.mode if policy else None
+    mode = policy.mode
     if isinstance(reading, Unavailable):
         return UsageRow(kind, mode, None, None, None, "unknown", reading.reason)
     state = "normal"
@@ -331,10 +331,6 @@ def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavai
             state, reason = "wind-down", "ordinary usage is blocked; finish in flight with usable credits"
         else:
             state, reason = "exhausted", "ordinary usage is full or blocked; cannot continue with usable credits"
-    elif policy is None:
-        state, reason = "unknown", f"usage.{kind} is not set; ask for this kind's usage policy"
-    elif kind == "codex" and isinstance(policy, FinishInFlightPolicy) and spend_credits is None:
-        state, reason = "unknown", "credits.codex is not set; ask whether to spend credits"
     elif isinstance(policy, FinishThenStopPolicy):
         if reading.used_percent >= policy.stop_at_percent:
             state, reason = "stop", "stop_at_percent reached"
@@ -349,8 +345,15 @@ def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavai
 def usage(project_dir: str, kind: str) -> None:
     settings, _, _ = resolve(project_dir)
     policy = settings.get("usage", {}).get(kind)
-    if isinstance(policy, IgnorePolicy):
+    spend_credits = settings.get("credits", {}).get("codex")
+    if policy is None:
+        row = UsageRow(kind, None, None, None, None, "unknown",
+                       f"usage.{kind} is not set; ask for this kind's usage policy")
+    elif isinstance(policy, IgnorePolicy):
         row = ignored_usage(kind)
+    elif kind == "codex" and isinstance(policy, FinishInFlightPolicy) and spend_credits is None:
+        row = UsageRow(kind, policy.mode, None, None, None, "unknown",
+                       "credits.codex is not set; ask whether to spend credits")
     else:
         if kind == "codex":
             reading = asyncio.run(read_codex(Path.home() / ".codex/app-server-control/app-server-control.sock"))
@@ -359,7 +362,7 @@ def usage(project_dir: str, kind: str) -> None:
             reading = read_claude(Path(base) / "dotfiles/usage/claude.json", datetime.now(timezone.utc))
         else:
             reading = Unavailable("pi has no usage reader")
-        row = usage_state(kind, policy, reading, settings.get("credits", {}).get("codex"))
+        row = usage_state(kind, policy, reading, spend_credits)
     print(json.dumps(asdict(row)))
 
 

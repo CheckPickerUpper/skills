@@ -253,17 +253,19 @@ class FilesTest(unittest.TestCase):
         self.assertEqual(result.returncode, 3)
         self.assertIn("max_implementers, merge, review_skills", result.stderr)
 
-    def test_ignore_never_reads_a_missing_socket_or_claude_file(self):
+    def test_ignore_and_missing_settings_never_read_usage(self):
+        cases = []
         for kind in ("codex", "claude", "pi"):
-            result = cli(self.root, "write", "--scope", "global", "--usage-kind", kind, "--usage-mode", "ignore")
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertFalse((self.root / ".codex/app-server-control/app-server-control.sock").exists())
-            # An audit hook rejects even an attempted socket or usage-file read.
-            program = """
+            cases.append((kind, f'[usage.{kind}]\nmode="ignore"', "ignore", "normal", "usage ignored by policy"))
+            cases.append((kind, "", None, "unknown", f"usage.{kind} is not set; ask for this kind's usage policy"))
+        cases.append(("codex", '[usage.codex]\nmode="finish-in-flight"\nat_percent=85', "finish-in-flight", "unknown", "credits.codex is not set; ask whether to spend credits"))
+        target = self.root / "config/checkpickerupper" / config.CONFIG_FILE
+        target.parent.mkdir(parents=True)
+        # An audit hook rejects even an attempted socket or usage-file read.
+        program = """
 import runpy, sys
-from pathlib import Path
-script = sys.argv[1]
-sys.argv = [script, 'usage', '--kind', sys.argv[2]]
+script, kind, project = sys.argv[1:]
+sys.argv = [script, 'usage', '--kind', kind, '--project-dir', project]
 def audit(event, arguments):
     if event == 'socket.connect':
         raise RuntimeError('reader attempted a connection')
@@ -272,11 +274,16 @@ def audit(event, arguments):
 sys.addaudithook(audit)
 runpy.run_path(script, run_name='__main__')
 """
-            result = subprocess.run([sys.executable, "-c", program, str(SCRIPT), kind], cwd=SCRIPT.parent,
-                                    env={**os.environ, "HOME": str(self.root), "XDG_CONFIG_HOME": str(self.root / "config"), "XDG_STATE_HOME": str(self.root / "state")},
-                                    capture_output=True, text=True)
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertEqual(json.loads(result.stdout), {"kind": kind, "mode": "ignore", "used_percent": None, "window_minutes": None, "resets_at": None, "state": "normal", "reason": "usage ignored by policy"})
+        for kind, content, mode, state, reason in cases:
+            with self.subTest(kind=kind, mode=mode):
+                target.write_text(content)
+                self.assertFalse((self.root / ".codex/app-server-control/app-server-control.sock").exists())
+                # Relative HOME keeps the Unix socket path within the OS limit.
+                result = subprocess.run([sys.executable, "-c", program, str(SCRIPT), kind, str(self.root)], cwd=self.root,
+                                        env={**os.environ, "HOME": ".", "PYTHONPATH": str(SCRIPT.parent), "XDG_CONFIG_HOME": str(self.root / "config"), "XDG_STATE_HOME": str(self.root / "state")},
+                                        capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(json.loads(result.stdout), {"kind": kind, "mode": mode, "used_percent": None, "window_minutes": None, "resets_at": None, "state": state, "reason": reason})
 
 
 
@@ -316,13 +323,6 @@ class StateTest(unittest.TestCase):
             self.assertEqual(row.reason, "usage ignored by policy" if mode == "ignore" else "no reader")
             self.assertIsNone(row.used_percent)
 
-    def test_missing_policy_is_unknown(self):
-        row = config.usage_state("codex", None, readers.Reading(50, 300, None))
-        self.assertEqual(row.state, "unknown")
-        self.assertIn("usage.codex", row.reason)
-        failed = config.usage_state("codex", None, readers.Unavailable("socket missing"))
-        self.assertEqual(failed.state, "unknown")
-        self.assertIn("socket missing", failed.reason)
 
 
 class ClaudeTest(unittest.TestCase):
