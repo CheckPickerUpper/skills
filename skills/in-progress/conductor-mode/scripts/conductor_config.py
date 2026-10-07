@@ -3,8 +3,9 @@
 Settings live in $XDG_CONFIG_HOME/checkpickerupper/conductor-mode.toml
 (default ~/.config/checkpickerupper) and the repository's .checkpickerupper/.
 Project settings replace global settings; each usage kind replaces its table
-whole. `show --kind K` exits 3 for missing top-level settings or that kind's
-usage policy. `usage --kind K` prints one JSON row, including failures.
+whole. Global [credits].codex owns the separate account spending choice.
+`show --kind K` exits 3 for missing settings, including credits.codex when
+Codex uses finish-in-flight. `usage --kind K` prints one JSON row, including failures.
 """
 
 import argparse
@@ -12,14 +13,15 @@ import asyncio
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 import json
-import math
 import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 import tomllib
-from typing import NoReturn, NotRequired, TypedDict
+from typing import ClassVar, Literal, NoReturn, TypedDict
+
+from usage_readers import Reading, Unavailable, read_claude, read_codex
 
 CONFIG_FILE = "conductor-mode.toml"
 MERGE_OWNERS = ("conductor", "implementer")
@@ -32,8 +34,6 @@ MODE_KEYS = {
     "finish-in-flight-then-stop": ("wind_down_at_percent", "stop_at_percent"),
 }
 EXIT_MISSING = 3
-READ_TIMEOUT_SECONDS = 5
-CLAUDE_MAX_AGE_SECONDS = 600
 SKILL_NAME = re.compile(r"[a-z0-9][a-z0-9_-]*(:[a-z0-9][a-z0-9_-]*)?")
 
 FOLDER_README = """# CheckPickerUpper skill config
@@ -51,12 +51,35 @@ https://github.com/CheckPickerUpper/skills/blob/main/LICENSE
 """
 
 
-class UsagePolicy(TypedDict):
-    mode: str
-    at_percent: NotRequired[int]
-    wind_down_at_percent: NotRequired[int]
-    stop_at_percent: NotRequired[int]
-    spend_credits: NotRequired[bool]
+@dataclass(frozen=True)
+class IgnorePolicy:
+    mode: ClassVar[Literal["ignore"]] = "ignore"
+
+
+@dataclass(frozen=True)
+class FinishInFlightPolicy:
+    at_percent: int
+    mode: ClassVar[Literal["finish-in-flight"]] = "finish-in-flight"
+
+
+@dataclass(frozen=True)
+class StopAtCommitPolicy:
+    at_percent: int
+    mode: ClassVar[Literal["stop-at-commit"]] = "stop-at-commit"
+
+
+@dataclass(frozen=True)
+class FinishThenStopPolicy:
+    wind_down_at_percent: int
+    stop_at_percent: int
+    mode: ClassVar[Literal["finish-in-flight-then-stop"]] = "finish-in-flight-then-stop"
+
+
+UsagePolicy = IgnorePolicy | FinishInFlightPolicy | StopAtCommitPolicy | FinishThenStopPolicy
+
+
+class CreditsSettings(TypedDict, total=False):
+    codex: bool
 
 
 class Settings(TypedDict, total=False):
@@ -64,19 +87,7 @@ class Settings(TypedDict, total=False):
     merge: str
     review_skills: list[str]
     usage: dict[str, UsagePolicy]
-
-
-@dataclass(frozen=True)
-class Reading:
-    used_percent: float
-    window_minutes: int | None
-    resets_at: str | None
-    credits_usable: bool = False
-
-
-@dataclass(frozen=True)
-class Unavailable:
-    reason: str
+    credits: CreditsSettings
 
 
 @dataclass(frozen=True)
@@ -115,35 +126,49 @@ def usage_policy(path: Path, kind: str, raw: object) -> UsagePolicy:
     if not isinstance(raw, dict):
         invalid(path, kind, kind, "a table")
     mode = raw.get("mode")
+    if kind == "pi" and mode != "ignore":
+        invalid(path, kind, "mode", "modes ['ignore'] (pi has no usage reader)")
     if not isinstance(mode, str) or mode not in MODE_KEYS:
         invalid(path, kind, "mode", f"modes {list(MODE_KEYS)} (required)")
     allowed = {"mode", *MODE_KEYS[mode]}
-    if kind == "codex":
-        allowed.add("spend_credits")
     for key in raw:
         if key not in allowed:
             invalid(path, kind, str(key), f"keys {sorted(allowed)} for mode {mode}")
-    policy: UsagePolicy = {"mode": mode}
+    thresholds: dict[str, int] = {}
     for key in MODE_KEYS[mode]:
         value = raw.get(key)
         if type(value) is not int or not 1 <= value <= 100:
             invalid(path, kind, key, "an int in 1..100 (required; bool is excluded)")
-        policy[key] = value
+        thresholds[key] = value
     if mode == "finish-in-flight-then-stop":
-        if policy["wind_down_at_percent"] >= policy["stop_at_percent"]:
+        if thresholds["wind_down_at_percent"] >= thresholds["stop_at_percent"]:
             invalid(path, kind, "wind_down_at_percent", "1..100 and wind_down_at_percent < stop_at_percent")
-    if kind == "codex":
-        credits = raw.get("spend_credits")
-        if type(credits) is not bool:
-            invalid(path, kind, "spend_credits", "true or false (required for codex)")
-        policy["spend_credits"] = credits
-    return policy
+    if mode == "ignore":
+        return IgnorePolicy()
+    if mode == "finish-in-flight":
+        return FinishInFlightPolicy(thresholds["at_percent"])
+    if mode == "stop-at-commit":
+        return StopAtCommitPolicy(thresholds["at_percent"])
+    return FinishThenStopPolicy(thresholds["wind_down_at_percent"], thresholds["stop_at_percent"])
 
 
-def validated(path: Path, raw: dict[str, object]) -> Settings:
-    unknown = sorted(set(raw) - {*SETTING_KEYS, "usage"})
+def policy_values(policy: UsagePolicy) -> dict[str, object]:
+    return {"mode": policy.mode, **asdict(policy)}
+
+
+def settings_values(settings: Settings) -> dict[str, object]:
+    raw: dict[str, object] = {key: settings[key] for key in SETTING_KEYS if key in settings}
+    if "credits" in settings:
+        raw["credits"] = settings["credits"]
+    if "usage" in settings:
+        raw["usage"] = {kind: policy_values(policy) for kind, policy in settings["usage"].items()}
+    return raw
+
+
+def validated(path: Path, raw: dict[str, object], scope: Literal["global", "project"] = "global") -> Settings:
+    unknown = sorted(set(raw) - {*SETTING_KEYS, "usage", "credits"})
     if unknown:
-        sys.exit(f"{path}: unknown settings {unknown}; known settings are {[*SETTING_KEYS, 'usage']}")
+        sys.exit(f"{path}: unknown settings {unknown}; known settings are {[*SETTING_KEYS, 'usage', 'credits']}")
     settings: Settings = {}
     if "max_implementers" in raw:
         value = raw["max_implementers"]
@@ -167,17 +192,28 @@ def validated(path: Path, raw: dict[str, object]) -> Settings:
         if not isinstance(tables, dict):
             invalid(path, "<kind>", "usage", f"a table of kinds {list(AGENT_KINDS)}")
         settings["usage"] = {kind: usage_policy(path, kind, table) for kind, table in tables.items()}
+    if "credits" in raw:
+        if scope == "project":
+            sys.exit(f"{path}: credits: allowed only in the global file")
+        credits = raw["credits"]
+        if not isinstance(credits, dict):
+            sys.exit(f"{path}: credits: allowed a table with codex = true|false")
+        if any(key != "codex" for key in credits):
+            sys.exit(f"{path}: credits: unknown keys {list(credits)}; allowed keys ['codex']")
+        if "codex" in credits and type(credits["codex"]) is not bool:
+            sys.exit(f"{path}: credits.codex: allowed true or false")
+        settings["credits"] = {"codex": credits["codex"]} if "codex" in credits else {}
     return settings
 
 
-def read_settings(path: Path) -> Settings:
+def read_settings(path: Path, scope: Literal["global", "project"] = "global") -> Settings:
     if not path.is_file():
         return {}
     try:
         with path.open("rb") as handle:
-            return validated(path, tomllib.load(handle))
-    except (OSError, tomllib.TOMLDecodeError) as error:
-        sys.exit(f"{path}: {error}")
+            return validated(path, tomllib.load(handle), scope)
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as error:
+        sys.exit(f"{path}: config error {type(error).__name__}: {error}")
 
 
 def render(settings: Settings) -> str:
@@ -188,9 +224,13 @@ def render(settings: Settings) -> str:
         lines.append(f'merge = "{settings["merge"]}"')
     if "review_skills" in settings:
         lines.append("review_skills = [" + ", ".join(json.dumps(name) for name in settings["review_skills"]) + "]")
+    if "credits" in settings:
+        lines.extend(("", "[credits]"))
+        if "codex" in settings["credits"]:
+            lines.append(f"codex = {json.dumps(settings['credits']['codex'])}")
     for kind, policy in settings.get("usage", {}).items():
         lines.extend(("", f"[usage.{kind}]"))
-        for key, value in policy.items():
+        for key, value in policy_values(policy).items():
             lines.append(f"{key} = {json.dumps(value)}")
     return "\n".join(lines) + "\n"
 
@@ -205,8 +245,11 @@ def resolve(project_dir: str) -> tuple[Settings, dict[str, Path], list[Path]]:
     raw: dict[str, object] = {}
     sources: dict[str, Path] = {}
     usage: dict[str, UsagePolicy] = {}
-    for path in layers:
-        settings = read_settings(path)
+    for index, path in enumerate(layers):
+        settings = read_settings(path, "global" if index == 0 else "project")
+        if "credits" in settings:
+            raw["credits"] = settings["credits"]
+            sources["credits"] = path
         for key in SETTING_KEYS:
             if key in settings:
                 raw[key] = settings[key]
@@ -215,7 +258,7 @@ def resolve(project_dir: str) -> tuple[Settings, dict[str, Path], list[Path]]:
             usage[kind] = policy
             sources[f"usage.{kind}"] = path
     if any(key.startswith("usage.") for key in sources):
-        raw["usage"] = usage
+        raw["usage"] = {kind: policy_values(policy) for kind, policy in usage.items()}
     return validated(Path("resolved conductor-mode.toml"), raw), sources, layers
 
 
@@ -226,33 +269,38 @@ def show(project_dir: str, kind: str | None = None) -> None:
         for key in SETTING_KEYS if key in settings
     }
     resolved["usage"] = {
-        agent: {"value": policy, "from": str(sources[f"usage.{agent}"])}
+        agent: {"value": policy_values(policy), "from": str(sources[f"usage.{agent}"])}
         for agent, policy in settings.get("usage", {}).items()
     }
+    if "credits" in settings:
+        resolved["credits"] = {"value": settings["credits"], "from": str(sources["credits"])}
     print(json.dumps(resolved, indent=2))
     missing = [key for key in SETTING_KEYS if key not in settings]
     if kind is not None and kind not in settings.get("usage", {}):
         missing.append(f"usage.{kind}")
+    if kind == "codex" and isinstance(settings.get("usage", {}).get(kind), FinishInFlightPolicy):
+        if "codex" not in settings.get("credits", {}):
+            missing.append("credits.codex")
     if missing:
         searched = ", ".join(str(path) for path in layers)
         print(f"not set: {', '.join(missing)} (searched {searched})", file=sys.stderr)
         sys.exit(EXIT_MISSING)
 
 
-def write(scope: str, project_dir: str, changes: dict[str, object], kind: str | None,
+def write(scope: Literal["global", "project"], project_dir: str, changes: dict[str, object], kind: str | None,
           policy: dict[str, object]) -> None:
     folder = global_folder() if scope == "global" else project_folder(project_dir)
     path = folder / CONFIG_FILE
-    settings = read_settings(path)
-    raw: dict[str, object] = dict(settings)
+    settings = read_settings(path, scope)
+    raw = settings_values(settings)
     raw.update(changes)
     if kind is not None:
-        tables = dict(settings.get("usage", {}))
-        tables[kind] = usage_policy(path, kind, policy)
+        tables = {agent: policy_values(saved) for agent, saved in settings.get("usage", {}).items()}
+        tables[kind] = policy
         raw["usage"] = tables
-    checked = validated(path, raw)
+    checked = validated(path, raw, scope)
     rendered = render(checked)
-    validated(path, tomllib.loads(rendered))
+    validated(path, tomllib.loads(rendered), scope)
     folder.mkdir(parents=True, exist_ok=True)
     readme = folder / "README.md"
     if not readme.exists():
@@ -261,148 +309,58 @@ def write(scope: str, project_dir: str, changes: dict[str, object], kind: str | 
     print(path)
 
 
-def mapping(value: object, label: str) -> dict[str, object]:
-    if not isinstance(value, dict) or any(not isinstance(key, str) for key in value):
-        raise ValueError(f"{label} must be an object")
-    return value
+def ignored_usage(kind: str) -> UsageRow:
+    return UsageRow(kind, "ignore", None, None, None, "normal", "usage ignored by policy")
 
 
-def percentage(value: object, label: str) -> float:
-    if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 100:
-        raise ValueError(f"{label} must be a number in 0..100")
-    return float(value)
-
-
-def iso_time(value: object, label: str) -> datetime:
-    if not isinstance(value, str):
-        raise ValueError(f"{label} must be an ISO 8601 timestamp")
-    parsed = datetime.fromisoformat(value)
-    if parsed.tzinfo is None:
-        raise ValueError(f"{label} must include a timezone")
-    return parsed
-
-
-def epoch_time(value: object, label: str) -> str:
-    if type(value) not in (int, float) or not math.isfinite(value):
-        raise ValueError(f"{label} must be epoch seconds")
-    return datetime.fromtimestamp(value, timezone.utc).isoformat()
-
-
-def codex_reading(result: object) -> Reading:
-    limits = mapping(mapping(result, "result").get("rateLimits"), "rateLimits")
-    windows = [mapping(limits[key], key) for key in ("primary", "secondary") if limits.get(key) is not None]
-    if not windows:
-        raise ValueError("rateLimits has no primary or secondary window")
-    readings = []
-    for window in windows:
-        used = percentage(window.get("usedPercent"), "usedPercent")
-        minutes = window.get("windowDurationMins")
-        if type(minutes) is not int or minutes <= 0:
-            raise ValueError("windowDurationMins must be a positive int")
-        reset = epoch_time(window.get("resetsAt"), "resetsAt")
-        readings.append(Reading(used, minutes, reset))
-    credits = mapping(limits.get("credits"), "credits")
-    if any(type(credits.get(key)) is not bool for key in ("hasCredits", "unlimited")):
-        raise ValueError("credits.hasCredits and credits.unlimited must be bools")
-    highest = max(readings, key=lambda reading: reading.used_percent)
-    return Reading(highest.used_percent, highest.window_minutes, highest.resets_at,
-                   credits["hasCredits"] or credits["unlimited"])
-
-
-async def read_codex(socket_path: Path, timeout_seconds: float = READ_TIMEOUT_SECONDS) -> Reading | Unavailable:
-    try:
-        from websockets.asyncio.client import unix_connect
-        from websockets.exceptions import WebSocketException
-    except ImportError as error:
-        return Unavailable(f"websockets library unavailable: {error}")
-    try:
-        async with asyncio.timeout(timeout_seconds):
-            async with unix_connect(str(socket_path), open_timeout=timeout_seconds, close_timeout=1) as connection:
-                await connection.send(json.dumps({"id": 1, "method": "initialize", "params": {
-                    "clientInfo": {"name": "conductor-mode", "version": "1"}}}))
-                for request_id in (1, 2):
-                    while True:
-                        reply = mapping(json.loads(await connection.recv()), "JSON-RPC response")
-                        if reply.get("id") == request_id:
-                            break
-                    if "error" in reply:
-                        raise ValueError(f"{('initialize' if request_id == 1 else 'account/rateLimits/read')} error response: {reply['error']}")
-                    if "result" not in reply:
-                        raise ValueError("JSON-RPC response missing result")
-                    if request_id == 1:
-                        await connection.send(json.dumps({"method": "initialized"}))
-                        await connection.send(json.dumps({"id": 2, "method": "account/rateLimits/read", "params": {}}))
-                return codex_reading(reply["result"])
-    except TimeoutError:
-        return Unavailable(f"Codex socket {socket_path}: timeout after {timeout_seconds}s")
-    except (OSError, WebSocketException, ValueError, OverflowError) as error:
-        return Unavailable(f"Codex socket {socket_path}: {type(error).__name__}: {error}")
-
-
-def read_claude(path: Path, now: datetime) -> Reading | Unavailable:
-    try:
-        with path.open() as handle:
-            data = mapping(json.load(handle), "Claude usage")
-        received = iso_time(data.get("received_at"), "received_at")
-        age = (now - received).total_seconds()
-        if age > CLAUDE_MAX_AGE_SECONDS:
-            return Unavailable(f"Claude usage {path}: stale reading ({int(age)} seconds old)")
-        if age < 0:
-            raise ValueError("received_at is in the future")
-        limits = mapping(data.get("rate_limits"), "rate_limits")
-        readings = []
-        for key, minutes in (("five_hour", 300), ("seven_day", 10080)):
-            if limits.get(key) is None:
-                continue
-            window = mapping(limits[key], key)
-            used = percentage(window.get("used_percentage"), f"{key}.used_percentage")
-            reset = window.get("resets_at")
-            resets_at = epoch_time(reset, f"{key}.resets_at") if reset is not None else None
-            readings.append(Reading(used, minutes, resets_at))
-        if not readings:
-            raise ValueError("rate_limits has no five_hour or seven_day window")
-        return max(readings, key=lambda reading: reading.used_percent)
-    except (OSError, ValueError, OverflowError) as error:
-        return Unavailable(f"Claude usage {path}: {type(error).__name__}: {error}")
-
-
-def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavailable) -> UsageRow:
-    mode = policy["mode"] if policy else None
-    used = reading.used_percent if isinstance(reading, Reading) else None
-    minutes = reading.window_minutes if isinstance(reading, Reading) else None
-    reset = reading.resets_at if isinstance(reading, Reading) else None
+def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavailable,
+                spend_credits: bool | None = None) -> UsageRow:
+    if isinstance(policy, IgnorePolicy):
+        return ignored_usage(kind)
+    mode = policy.mode if policy else None
+    if isinstance(reading, Unavailable):
+        return UsageRow(kind, mode, None, None, None, "unknown", reading.reason)
     state = "normal"
     reason = "below usage thresholds"
-    can_continue = kind == "codex" and policy is not None and policy.get("spend_credits") is True and isinstance(reading, Reading) and reading.credits_usable
-    if used is not None and used >= 100 and not can_continue:
-        state, reason = "exhausted", "usage is full; this kind cannot continue with usable credits"
-    elif mode == "ignore":
-        reason = reading.reason if isinstance(reading, Unavailable) else "usage policy is ignore"
-    elif isinstance(reading, Unavailable):
-        state, reason = "unknown", reading.reason
+    can_continue = (kind == "codex" and isinstance(policy, FinishInFlightPolicy)
+                    and spend_credits is True and reading.credit_status == "usable")
+    if reading.credit_status == "spend-control-reached":
+        state, reason = "exhausted", "spendControlReached prevents credit spending"
+    elif reading.used_percent >= 100 or reading.ordinary_usage == "blocked":
+        if can_continue:
+            state, reason = "wind-down", "ordinary usage is blocked; finish in flight with usable credits"
+        else:
+            state, reason = "exhausted", "ordinary usage is full or blocked; cannot continue with usable credits"
     elif policy is None:
         state, reason = "unknown", f"usage.{kind} is not set; ask for this kind's usage policy"
-    elif mode == "finish-in-flight-then-stop":
-        if reading.used_percent >= policy["stop_at_percent"]:
+    elif kind == "codex" and isinstance(policy, FinishInFlightPolicy) and spend_credits is None:
+        state, reason = "unknown", "credits.codex is not set; ask whether to spend credits"
+    elif isinstance(policy, FinishThenStopPolicy):
+        if reading.used_percent >= policy.stop_at_percent:
             state, reason = "stop", "stop_at_percent reached"
-        elif reading.used_percent >= policy["wind_down_at_percent"]:
+        elif reading.used_percent >= policy.wind_down_at_percent:
             state, reason = "wind-down", "wind_down_at_percent reached"
-    elif reading.used_percent >= policy["at_percent"]:
-        state = "wind-down" if mode == "finish-in-flight" else "stop"
+    elif reading.used_percent >= policy.at_percent:
+        state = "wind-down" if isinstance(policy, FinishInFlightPolicy) else "stop"
         reason = "at_percent reached"
-    return UsageRow(kind, mode, used, minutes, reset, state, reason)
+    return UsageRow(kind, mode, reading.used_percent, reading.window_minutes, reading.resets_at, state, reason)
 
 
 def usage(project_dir: str, kind: str) -> None:
     settings, _, _ = resolve(project_dir)
-    if kind == "codex":
-        reading = asyncio.run(read_codex(Path.home() / ".codex/app-server-control/app-server-control.sock"))
-    elif kind == "claude":
-        base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local/state")
-        reading = read_claude(Path(base) / "dotfiles/usage/claude.json", datetime.now(timezone.utc))
+    policy = settings.get("usage", {}).get(kind)
+    if isinstance(policy, IgnorePolicy):
+        row = ignored_usage(kind)
     else:
-        reading = Unavailable("pi has no usage reader")
-    print(json.dumps(asdict(usage_state(kind, settings.get("usage", {}).get(kind), reading))))
+        if kind == "codex":
+            reading = asyncio.run(read_codex(Path.home() / ".codex/app-server-control/app-server-control.sock"))
+        elif kind == "claude":
+            base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local/state")
+            reading = read_claude(Path(base) / "dotfiles/usage/claude.json", datetime.now(timezone.utc))
+        else:
+            reading = Unavailable("pi has no usage reader")
+        row = usage_state(kind, policy, reading, settings.get("credits", {}).get("codex"))
+    print(json.dumps(asdict(row)))
 
 
 def main() -> None:
@@ -422,7 +380,7 @@ def main() -> None:
     write_command.add_argument("--usage-mode", choices=tuple(MODE_KEYS))
     for key in ("at-percent", "wind-down-at-percent", "stop-at-percent"):
         write_command.add_argument(f"--{key}", type=int)
-    write_command.add_argument("--spend-credits", choices=("true", "false"))
+    write_command.add_argument("--codex-spend-credits", choices=("true", "false"))
     arguments = parser.parse_args()
     if arguments.command == "show":
         show(arguments.project_dir, arguments.kind)
@@ -435,8 +393,8 @@ def main() -> None:
         policy = {key: getattr(arguments, key) for key in ("at_percent", "wind_down_at_percent", "stop_at_percent") if getattr(arguments, key) is not None}
         if arguments.usage_mode is not None:
             policy["mode"] = arguments.usage_mode
-        if arguments.spend_credits is not None:
-            policy["spend_credits"] = arguments.spend_credits == "true"
+        if arguments.codex_spend_credits is not None:
+            changes["credits"] = {"codex": arguments.codex_spend_credits == "true"}
         if policy and arguments.usage_kind is None:
             parser.error("usage options require --usage-kind")
         if not changes and arguments.usage_kind is None:
