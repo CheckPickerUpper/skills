@@ -52,10 +52,10 @@ table for that kind whole; its keys never merge across files.
   Percentages are ints in 1..100. Each mode allows only its named thresholds.
   Codex also requires `spend_credits = true|false`; Claude and Pi reject it.
 
-**When any top-level key is in neither file, ask the user now**, before any other
-work, with `AskUserQuestion` where the client has it. Ask only for the missing
-top-level keys, plus where to save. Ask for a kind's usage only for the kind
-chosen in step 3:
+**When `max_implementers`, `merge` or `review_skills` is in neither file, ask
+the user now**, before any other work, with `AskUserQuestion` where the client
+has it. Ask only for the missing settings, plus where to save. Ask for a kind's
+usage only for the kind chosen in step 3:
 
 | Question | Options |
 |---|---|

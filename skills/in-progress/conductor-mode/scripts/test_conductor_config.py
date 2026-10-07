@@ -243,6 +243,9 @@ class StateTest(unittest.TestCase):
         row = config.usage_state("codex", None, config.Reading(50, 300, None))
         self.assertEqual(row.state, "unknown")
         self.assertIn("usage.codex", row.reason)
+        failed = config.usage_state("codex", None, config.Unavailable("socket missing"))
+        self.assertEqual(failed.state, "unknown")
+        self.assertIn("socket missing", failed.reason)
 
 
 class ClaudeTest(unittest.TestCase):
