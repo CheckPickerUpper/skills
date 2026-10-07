@@ -31,6 +31,8 @@ Answering "why not move them" with "the benefit of moving is small" answers a di
 
 Each reason says **who or what sees a difference, where, and when**: a progress bar that drops an item, a session that no longer finds the bug, a build that takes 40 seconds longer, a user who loses a save.
 
+A consequence comes from the facts, at the size the facts give it. When you project one forward, say what it rests on and write "can", not "will". Never upgrade a fact into a worse one: a "checkout incident" is not "customers unable to pay", and "most migrations" is not "39 of 41".
+
 These words never stand alone as a reason. Use one only after stating the consequence it summarises:
 
 stale · live · old · cleaner · simpler · consistent · best practice · idiomatic · no real gain · not worth it · for tracking · proper · defining · canonical · risky · overkill · just cosmetic
@@ -73,7 +75,7 @@ When the items in the question do not all come out the same way, split them and 
 3. **What decides it**: one line naming the fact that separates the options, so the reader can apply it themselves next time. It must give the right answer for every item above; if no single fact does, name one per group or leave the line out.
 </what-to-do>
 
-Keep it as short as the decision allows:
+Keep it as short as the decision allows. A single decision usually fits in under 200 words; each further item adds about 60. Introducing an item takes one line, not a paragraph. The reply is plain prose and lists: never copy this skill's tags or section names into it.
 
 - Group items whose reasoning is identical ("#402 and #404 both shipped through PRs that never linked them") instead of repeating a block.
 - Write both *If we do* and *If we don't* only when both sides have a consequence worth stating. For three or more items with the same shape, a table (item, what it is, what each option does) is shorter.
