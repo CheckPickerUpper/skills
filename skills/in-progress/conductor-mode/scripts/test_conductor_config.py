@@ -386,6 +386,8 @@ class CodexSocketTest(unittest.IsolatedAsyncioTestCase):
         initialize = json.loads(await connection.recv())
         self.requests.append(initialize)
         if self.behavior == "closed":
+            # A slow close must remain distinct from the old 0.3s timeout.
+            await asyncio.sleep(0.4)
             await connection.close()
             return
         if self.behavior == "timeout":

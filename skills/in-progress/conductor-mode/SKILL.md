@@ -45,12 +45,17 @@ table for that kind whole; its keys never merge across files.
   declared reviews. A project list replaces the global one.
 - **`usage`:** one table per agent kind (`codex`, `claude`, `pi`), with a
   required `mode`. Read its live state with `conductor_config.py usage --kind K`:
-  - `ignore`: usage never changes the work; the effort runs until finished.
+  - `ignore`: usage is never read; the effort runs until finished.
   - `finish-in-flight`: at `at_percent`, assign nothing new; in-flight issues finish fully, through PR merge.
   - `stop-at-commit`: at `at_percent`, implementers stop at their next verified commit, push and report.
   - `finish-in-flight-then-stop`: wind down at `wind_down_at_percent`, then stop at `stop_at_percent`; the first must be lower.
   Percentages are ints in 1..100. Each mode allows only its named thresholds.
-  Codex also requires `spend_credits = true|false`; Claude and Pi reject it.
+  Pi allows only `ignore` until it has a usage reader.
+- **`credits.codex`:** whether Codex may spend account credits to finish in-flight
+  work. Save it as `codex = true|false` in a global `[credits]` table; project
+  files reject `[credits]`. Ask for it only when Codex uses `finish-in-flight`
+  and the global choice is missing. Other modes leave it unused. Credit
+  continuation requires usable credits and no reached spend control.
 
 **When `max_implementers`, `merge` or `review_skills` is in neither file, ask
 the user now**, before any other work, with `AskUserQuestion` where the client
@@ -62,7 +67,7 @@ usage only for the kind chosen in step 3:
 | How many implementers should run at once under one conductor, given this machine's memory and build load? | 1, 2, 3, 4 |
 | Who merges an implementer's PR? | The conductor, after its review; the implementer, once the conductor sends acceptance |
 | Which skills must review every PR before it is accepted or merged? | The review skills installed in this client, found by their names and descriptions, plus "None" (multi-select) |
-| When an agent kind's usage fills, what should happen? | `ignore`; `finish-in-flight` with `at_percent`; `stop-at-commit` with `at_percent`; `finish-in-flight-then-stop` with `wind_down_at_percent` and `stop_at_percent`; for Codex, also choose whether to spend credits |
+| When an agent kind's usage fills, what should happen? | `ignore`; `finish-in-flight` with `at_percent`; `stop-at-commit` with `at_percent`; `finish-in-flight-then-stop` with `wind_down_at_percent` and `stop_at_percent`; Pi allows only `ignore`; for Codex `finish-in-flight`, also choose global `[credits].codex = true|false` |
 | Save for every project or only this repository? | Every project (global); this repository only (committed project file) |
 
 Save the answers with `scripts/conductor_config.py`, which sits beside this
@@ -75,8 +80,10 @@ python3 <folder of this SKILL.md>/scripts/conductor_config.py write --scope glob
 
 Save that kind's policy with `write --usage-kind K --usage-mode M`, adding
 `--at-percent N` or `--wind-down-at-percent N --stop-at-percent N` as its mode
-requires, and `--spend-credits true|false` for Codex. Use the same `--scope` and
-`--project-dir` options as for the top-level settings.
+requires. Use the same `--scope` and `--project-dir` options as for the other
+settings. Save the separate account choice with
+`write --scope global --codex-spend-credits true|false`; usage tables contain
+policy only and reject `spend_credits`.
 
 A project file is a change to the repository; land it like any other change.
 The channel and the agent kind are not settings: they depend on what the user
@@ -149,17 +156,18 @@ which agent kind (Codex, Claude or Pi). Use the answers for the whole effort. Wh
 the effort already has implementers running, their channel and kind are the
 answer; ask only when no implementer exists yet.
 For the chosen kind, run `conductor_config.py show --kind <kind>` and ask for
-its usage policy if missing, using the settings questions above. Before each
-start, run `conductor_config.py usage --kind <kind>`; start nothing whose state
+the missing settings, using the questions above. Before each start, run
+`conductor_config.py usage --kind <kind>`; start nothing whose state
 is `wind-down`, `stop`, `exhausted` or `unknown`.
 Never run more implementers at once than `max_implementers`, and never fewer
 while independent issues are waiting and that kind's usage state is `normal`.
 
-- **Native subagents:** dispatch in the background on the strongest model the
-  client exposes. Continue an implementer by messaging the same agent, which
-  keeps its context; start a fresh one only for a new issue.
-- **herdr:** follow `herdr --skill` for command syntax; it requires
-  `HERDR_ENV=1`. Address every pane by its `pane_id`: prompt with
+- **Native subagents:** use the conductor's own agent kind; dispatch in the
+  background on the strongest model the client exposes. Continue an implementer
+  by messaging the same agent, which keeps its context; start a fresh one only
+  for a new issue.
+- **herdr:** use the chosen agent kind. Follow `herdr --skill` for command
+  syntax; it requires `HERDR_ENV=1`. Address every pane by its `pane_id`: prompt with
   `herdr agent prompt <pane_id> "<text>"`, read with `herdr pane read <pane_id>`,
   and put your own `pane_id` (`$HERDR_PANE_ID`) in the brief so replies come
   back as `herdr agent prompt <conductor pane_id> "<implementer>: ..."`. Record
@@ -218,12 +226,11 @@ while independent issues are waiting and that kind's usage state is `normal`.
   `herdr agent start <name> --kind codex --pane <pane_id> --timeout 120000 -- resume <thread id>`
   (for another kind, use that agent's own resume argument). Once it returns
   ready and `herdr pane read` shows its input box, re-send your last instruction:
-  a resumed thread does not receive a prompt sent before it was ready. A Desktop
-  sub-agent cannot be resumed on its own; resume or message its parent.
+  a resumed thread does not receive a prompt sent before it was ready.
 
-- **Codex Desktop:** used for implementers the user already runs in the app;
-  you cannot start one. Reach them as the shared rules' "Codex Desktop threads"
-  section describes.
+- **Codex Desktop:** the agent kind is `codex`. Used for implementers the user
+  already runs in the app; you cannot start one. Reach them as the shared rules'
+  "Codex Desktop threads" section describes.
 
 The issue tracker is the durable record in every channel: issues are the work
 units, PRs the hand-back, and the decisions log the shared memory.
@@ -313,15 +320,16 @@ For a rebase, name what each side's changes must keep, and require both kept.
 
 <what-to-do>
 Re-read `conductor_config.py usage --kind <kind>` whenever an implementer
-reports:
+reports and while watching it through rollout or pane checks:
 
 - `wind-down`: let in-flight issues finish fully, through PR merge; queue the rest.
 - `stop` or `exhausted`: tell each implementer of that kind to stop at its next
   verified commit, push and report state. Record that state, and resume once
   usage returns to `normal`.
-- `unknown`: assign nothing new until the reading is available.
+- `unknown`: assign nothing new until the reading is available. If it persists,
+  ask the user whether to proceed.
 
-A thread stopped by its limit resumes by itself once usage returns; check its
+A thread stopped by its limit may resume by itself once usage returns; check its
 rollout before replacing it.
 </what-to-do>
 
