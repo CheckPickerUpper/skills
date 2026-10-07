@@ -1,0 +1,182 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of 41 ... under 5 seconds\" is not established; the facts say most were under 5 seconds.",
+   "\"2 index builds over 2 minutes ... outlast the probes\" does not establish that both exceeded the 180-second liveness limit.",
+   "\"Old pods keep serving\" assumes the migration does not disrupt database traffic or compatibility.",
+   "\"Under it, location doesn't matter; over it, entrypoint repeats INC-212\" overstates both the absence of other benefits and the certainty of an identical outage."
+  ],
+  "note": "It explains the observed failure thoroughly, but turns limited timing evidence into categorical rules."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"The other 39 took under 5 seconds\" is not established.",
+   "\"A slow migration means no healthy pods\" assumes no existing serving pods remain during rollout.",
+   "\"The old pods keep serving traffic\" assumes database availability and compatibility during the migration.",
+   "\"The cheaper alternative\" is not supported by an implementation or cost comparison.",
+   "\"Still blocks all three pods\" is not established for every rollout."
+  ],
+  "note": "It offers actionable alternatives and admits uncertainty about the new migration, but adds substantial unasked discussion and unsupported rollout assumptions."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of 41 ... sub-5s\" is not established.",
+   "\"The two that weren't are the ones that hurt\" invents an adverse outcome for the other slow migration.",
+   "\"Migration runs to completion regardless of duration\" is an unsupported guarantee.",
+   "\"The 2-minute index migrations stop being dangerous\" ignores database disruption and other failure causes.",
+   "\"Pods crash-looping against a half-migrated schema and serving errors\" is not in the evidence.",
+   "\"~10 lines of YAML\" is an invented implementation estimate.",
+   "\"Bump ... thresholds so 180s > worst-case migration\" contradicts the known 250-second migration and does not describe raising the limit correctly.",
+   "\"The next 4-minute index build is still three concurrent restarts away\" does not follow after raising the liveness limit."
+  ],
+  "note": "Its concrete incident explanation is undermined by invented details, absolute guarantees, and a contradictory alternative."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"Your schema change is the kind of migration that can repeat it\" invents the new migration's characteristics.",
+   "\"How often this will happen ... about 1 in 20\" treats migrations exceeding 120 seconds as evidence of failures at 180 seconds and as a future frequency.",
+   "\"Works fine now ... true for about 95%\" is not established by the timing distribution.",
+   "\"Running pods keep serving\" assumes database availability and compatibility.",
+   "\"A migration over 180s takes all three pods down at once\" overstates what is guaranteed for future rollouts.",
+   "\"Outage lasts as long as the migration plus the restart cycles\" is not an established duration rule.",
+   "\"A one-line change\" is an unverified implementation estimate.",
+   "\"A plain column add (under 5s)\" assumes an operation's duration without inspecting it."
+  ],
+  "note": "It supplies useful incident context but is repetitive and makes an unsupported claim about the current schema change."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 1,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\"When one runs longer [than 2 minutes] ... takes the orders API down\" confuses the readiness timing with the 180-second restart limit.",
+   "\"39 took under 5 seconds\" is not established.",
+   "\"Any migration in that slow group is where the current setup fails\" is not established.",
+   "\"Has no health checks\" is an unverified proposed Job configuration, not an inherent Job property.",
+   "\"Nothing kills it halfway and nothing waits on the lock\" is an unsupported guarantee.",
+   "\"Any migration over 2 minutes repeats INC-212\" uses the wrong threshold and guarantees an identical incident.",
+   "\"Likely to be in the slow group\" is not established from two index builds without table or migration details."
+  ],
+  "note": "Its deciding rule uses the wrong timeout, so the otherwise concrete explanation would lead the user to misclassify migrations."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"Existing pods keep serving\" assumes the migration preserves their database access and compatibility."
+  ],
+  "note": "It gives the benefit, the failure mechanism, and the incident's magnitude concisely, with only an unstated assumption about continued service."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It connects the recommendation to the actual restart deadline and explicitly limits the claim to the observed failure mechanism."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 fast migrations\" is not established.",
+   "\"A process Kubernetes won't kill\" is an unsupported guarantee.",
+   "\"It still beats the cost\" asserts a cost comparison without establishing it.",
+   "\"Deploys get slower by the migration's duration\" ignores that migrations already delay startup today.",
+   "\"Roughly 1 deploy in 20 is exposed\" conflates exceeding 120 seconds with exceeding the 180-second restart limit.",
+   "\"Schema changes with indexes are exactly the new orders work landing now\" invents the new migration's contents.",
+   "\"A Job doesn't [get killed mid-migration]\" overstates protection beyond removal of the server liveness probe."
+  ],
+  "note": "It explains the timeout mechanism but invents the current change's contents and overstates both risk frequency and Job guarantees."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"All 3 pods blocked on the lock\" is inaccurate: one pod applies the migration while the other two wait.",
+   "\"Runs the migration once to completion\" implies successful completion without stating failure handling.",
+   "\"No probe kills on index builds\" requires configuring the Job without the server liveness probe and does not address other termination causes."
+  ],
+  "note": "It is concise and grounded in the incident, but misdescribes which pods hold versus wait on the lock."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"A slow migration can no longer take the orders API down\" overstates protection against database disruption.",
+   "\"39 ... under 5 seconds\" is not established.",
+   "\"Got killed again\" adds an explicit repeated killing not stated in the incident facts.",
+   "\"It will happen again\" asserts certainty about future slow index migrations.",
+   "\"Nothing kills the migration partway through\" is an unsupported guarantee.",
+   "\"deploy.yml fails with the Job's logs\" invents pipeline failure and log behavior.",
+   "\"Which we can't reliably [predict]\" asserts a capability limitation not established by the evidence.",
+   "\"The cheaper alternative\" lacks a verified cost comparison."
+  ],
+  "note": "It usefully states the old-code compatibility assumption, but surrounds that caution with absolute promises and invented pipeline behavior."
+ }
+}

@@ -1,0 +1,37 @@
+exit 0 after 16s
+`. Shipped in v2.3 by PR [#455 Add CSV export](https://github.com/CheckPickerUpper/tasklist-app/pull/455), which did not reference #402.
+- [#403 Crash on launch on Android 9](https://github.com/CheckPickerUpper/tasklist-app/issues/403): label `bug`. v3.0 raised `minSdkVersion` to 29 (Android 10); Android 9 users cannot install current builds.
+- [#404 Typo "recieve" in onboarding screen 2](https://github.com/CheckPickerUpper/tasklist-app/issues/404): label `bug`, fixed by PR [#470 Onboarding copy fixes](https://github.com/CheckPickerUpper/tasklist-app/pull/470), which did not reference #404.
+- The milestone "v3.2" is used as the release gate: release is blocked while any issue in it is open. #401, #402, #403, #404 are all in v3.2.
+
+## Conversation so far
+**User:** clean up the old issues in v3.2
+**Assistant:** I'll close #401–#404 as stale; they're old and keeping them open just adds noise.
+**User:** why close them, why not just leave them open
+**Assistant:** Closing them keeps the tracker clean and reflects reality. They're stale, so leaving them open has no real benefit.
+**User:** thats not an answer, im asking why not leave them open. what does closing actualy do
+
+</scenario>
+2026-10-07T18:46:57.573810Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.canva.com/.well-known/oauth-protected-resource/mcp\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+2026-10-07T18:46:57.615501Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://api.mobbin.com/.well-known/oauth-protected-resource/mcp\"" })
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+2026-10-07T18:46:57.716241Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Missing Authorization header\", scope=\"email profile\", resource_metadata=\"https://api.fireflies.ai/.well-known/oauth-protected-resource/mcp\"" })
+hook: SessionStart
+hook: SessionStart Completed
+codex
+Closing an issue removes it from the open work count. Here, that has a concrete effect: **v3.2 cannot release while any issue in its milestone is open.** Closing all four would clear that gate, even though one bug still reproduces. It would not fix anything in the app.
+
+My “stale” explanation was wrong. These need different decisions:
+
+- [CSV export](https://github.com/CheckPickerUpper/tasklist-app/issues/402) and the [onboarding typo](https://github.com/CheckPickerUpper/tasklist-app/issues/404) are already resolved. Closing them records completed work.
+- [Android 9 launch crash](https://github.com/CheckPickerUpper/tasklist-app/issues/403) needs a support decision: current builds require Android 10, but that doesn’t establish that the old crash was fixed.
+- [Dark-mode white flash](https://github.com/CheckPickerUpper/tasklist-app/issues/401) still happens. Leaving it open accurately records unfinished work and keeps the release gate blocked. Under your rule, it needs a fix unless you decide it’s too marginal and close it as won’t-fix.
+
+Age alone is no reason to close them. The reason to close each is that its work is complete or you’ve explicitly decided against doing it.
+tokens used
+12,685

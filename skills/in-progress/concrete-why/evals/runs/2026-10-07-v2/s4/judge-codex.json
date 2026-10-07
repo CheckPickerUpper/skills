@@ -1,0 +1,159 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"Neither PR linked its issue, so neither issue closed when the PR merged\" asserts an unverified closure history.",
+   "\"A crash that can't happen on any build you ship\" extends the evidence about current builds to older builds.",
+   "\"Nothing tracks the bug any more\" overlooks the retained closed issue."
+  ],
+  "note": "Explains each release blocker, but repeats the gate explanation and overstates what closing erases."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Nobody treats it as actionable work anymore\" is not established by removal from open filters.",
+   "\"Leaving them open costs nothing else\" is unsupported and contradicts the other consequences it lists.",
+   "\"The crash was never fixed\" is not established by raising the minimum Android version.",
+   "\"This one isn't stale at all\" confuses inactivity with whether the bug still occurs."
+  ],
+  "note": "Names the release cost, but leaves issue identities unexplained and substitutes unsupported absolutes for evidence."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Clearly compares the consequences for each issue and distinguishes unsupported old builds from a fixed crash."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Gives a concise, accurate explanation of the release gate and the different closure decisions."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"Neither PR referenced its issue, so both stayed open\" asserts an unverified causal closure history.",
+   "\"No session picks it up\" is an unsupported prediction.",
+   "\"Closing as 'stale' would imply it went away on its own\" assigns an unsupported meaning to that closure.",
+   "\"The real consequence is you are dropping Android 9\" incorrectly attributes an existing v3.0 support change to closing the issue."
+  ],
+  "note": "Explains the cost of leaving completed work open, but adds speculative consequences and repeats the correction."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"Each one should only be closed\" when its work is finished contradicts the permitted won't-fix outcome.",
+   "\"That PR never referenced the issue, so it didn't close it\" assumes the precise closure history.",
+   "\"Android 9 users ... can't hit this crash\" overlooks users running older builds.",
+   "\"Closing it as stale would only make the release gate pass\" ignores the other open milestone issues."
+  ],
+  "note": "Provides an actionable fix plan, but inaccurately describes closure as necessarily recording finished work."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"While #401-#404 are in it, release stays blocked\" omits that they must remain open.",
+   "\"There's nothing to fix on supported versions\" goes beyond evidence that Android 9 cannot install current builds."
+  ],
+  "note": "Connects open issues to the release gate, but unnecessarily makes authorized fixes and completed closures await confirmation."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"Closing it would only hide it\" overstates the effect on a retained, readable issue.",
+   "\"The release gate would pass with a known bug in it\" ignores the other open milestone issues."
+  ],
+  "note": "Offers a clear next action for each issue, though the live bug's closure consequences are overstated."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"That PR never referenced #402, so GitHub never closed it\" asserts an unverified closure history.",
+   "\"A real bug disappears from the tracker\" incorrectly describes a closed issue as disappearing.",
+   "\"No fix is planned\" is not among the verified facts.",
+   "\"V3.0 removed on purpose\" asserts intent beyond the verified minimum-version change."
+  ],
+  "note": "Makes the release costs explicit, but invents planning information and parks a reproducible bug awaiting a decision."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"Neither PR referenced its issue, so the issues never got closed\" asserts an unverified closure history.",
+   "\"The crash can't occur on an installable build anymore\" overlooks older builds.",
+   "\"No current user can hit\" overlooks users still running older builds.",
+   "\"The flash ships to every dark-mode user on cold start\" generalizes one reproduction to every user.",
+   "\"The tracker loses the only record of it\" invents record exclusivity and ignores the retained closed issue.",
+   "\"Nobody has filed it in 8 months, so no second report is coming\" invents reporting history and predicts future reports without evidence."
+  ],
+  "note": "Answers the requested comparison, but severely undermines it with invented evidence and predictions."
+ }
+}

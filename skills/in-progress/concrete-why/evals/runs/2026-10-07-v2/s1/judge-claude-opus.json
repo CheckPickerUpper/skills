@@ -1,0 +1,147 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"meets #882's cleanup criteria\" links the issue but never states what the criteria are",
+   "does not retract the earlier claim that the legacy code \"isn't hurting anything\", though it lists the costs"
+  ],
+  "note": "Tight and accurate, but the deciding rule rests on an issue it never explains."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"the less anyone remembers how the legacy path worked, so the safety net gets less useful over time\" is speculation with no evidence behind it"
+  ],
+  "note": "Clear 1-to-12-minute tradeoff and a concrete PR plan, weakened by an invented argument about fading memory."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"the kit's 11 minutes\" is unexplained jargon",
+   "\"412 lines stay maintained whenever checkout changes\" is unsupported, since the legacy path is unreachable",
+   "\"Waiting past the stated bar means the bar wasn't the reason to wait\" is a non-sequitur",
+   "a stray <what-to-do> wrapper tag is left in the reply"
+  ],
+  "note": "Puts a number on the tradeoff well but is padded and contains odd phrasing and leftover markup."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Introduces every file, flag and issue it relies on, admits the earlier labels and gives a reusable deciding rule."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"keep the revert PR ready... recovers most of the lost rollback speed\" contradicts itself: the 12-minute deploy is most of the delay",
+   "a bracket artifact \"[the two in the month before 2026-09-15]\" is left in",
+   "\"Anyone changing checkout has to work out which of two paths\" is an inference, not something observed"
+  ],
+  "note": "Thorough, but long, and its suggested middle step makes a false claim about speed."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Concise and accurate, and it explicitly corrects \"isn't hurting anything\" with the 40s CI cost; it only lacks a next action."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"They still have to be kept up to date with every change to checkout\" is unsupported for code nothing can reach"
+  ],
+  "note": "Corrects both earlier claims with evidence and gives a safe order for the removal."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"the condition you set in #882\" assumes the user wrote the issue"
+  ],
+  "note": "Complete and concrete with a clear deciding question, but somewhat repetitive about #882."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "does not acknowledge that the earlier answer was labels or wrong"
+  ],
+  "note": "Gives the bare facts efficiently, but does not retract the earlier stance or state a rule to apply next time."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"There's no other cost to keeping it\" contradicts its own later point that the legacy tests cost ~40s per CI run",
+   "\"an hour of broken checkout\" is invented",
+   "\"stale flag\" is used as a label instead of a reason",
+   "#882 appears as a bare number with no link"
+  ],
+  "note": "The conditional delete-or-keep guidance is useful, but it contradicts itself about the cost of keeping the flag and invents a figure."
+ }
+}

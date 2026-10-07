@@ -1,0 +1,153 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\u201ca code rollback would take about 12 minutes\u201d treats measured deployment time as total rollback time, omitting preparation."
+  ],
+  "note": "It answers the downside directly and corrects the earlier recommendation, but leaves the issue\u2019s removal condition unstated."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cmitigation goes from ~1 minute to ~12\u201d assumes future incidents can be resolved by the same fallback and omits preparation time.",
+   "\u201cthe less anyone remembers how the legacy path worked\u201d invents a deterioration not established by the evidence.",
+   "\u201ca revert is a single commit\u201d is not guaranteed by putting changes in one PR."
+  ],
+  "note": "The tradeoff is well explained, but speculative reasons and an unasked implementation plan dilute it."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cThe next checkout incident gets mitigated by a fix or revert deploy\u201d assumes the recovery method and omits preparation time.",
+   "\u201c~11 extra minutes of broken checkout per incident that happens\u201d generalizes the historical fallback to every future incident.",
+   "\u201c412 lines stay maintained whenever checkout changes\u201d asserts an unsupported maintenance requirement."
+  ],
+  "note": "It supplies concrete numbers, but repeats them and makes the decision depend on predicting whether the flag will ever be needed."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\u201cThe next new-flow break would need a code revert\u201d assumes a particular recovery method.",
+   "\u201ccheckout stays broken ~11 minutes longer\u201d treats deployment timing as a complete outage estimate and assumes the fallback would resolve the incident."
+  ],
+  "note": "It clearly explains the removal condition and ongoing costs, but overstates what the deployment measurements prove."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cif checkout breaks \u2026 customers are back on the old path in about 1 minute\u201d assumes the fallback resolves any future checkout failure.",
+   "\u201ca checkout incident would last roughly 11 minutes longer\u201d omits preparation and generalizes beyond the two historical incidents.",
+   "\u201cAnyone changing checkout has to work out which of two paths a change touches\u201d asserts an unverified burden for every checkout change.",
+   "\u201cThat recovers most of the lost rollback speed\u201d is unsupported; the proposed ready revert still requires the measured 12-minute deployment."
+  ],
+  "note": "The final fallback proposal contradicts its own timing evidence, and the answer spends too long repeating the tradeoff."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It distinguishes preparation from deployment time, corrects the earlier claim, and gives a removal condition the reader can reuse."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\u201cturning the flag off fixes checkout in about 1 minute\u201d presents historical success as a future guarantee.",
+   "\u201cCheckout would stay broken for roughly 11 more minutes per incident\u201d omits preparation and assumes every incident is resolved by the fallback.",
+   "\u201cThey still have to be kept up to date with every change to checkout\u201d invents a universal maintenance requirement.",
+   "\u201cthat risk is small\u201d is stronger than three incident-free weeks establish."
+  ],
+  "note": "It explains the relevant evidence well, but turns historical mitigation times into guarantees about future incidents."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\u201cToday a broken checkout can be turned off in about 1 minute\u201d overgeneralizes the two historical mitigations.",
+   "\u201ccustomers unable to pay\u201d invents the incidents\u2019 customer impact; the facts establish checkout incidents, not complete payment failure."
+  ],
+  "note": "It accounts for revert preparation and explains every reference, but adds an unsupported outage impact and repeats the deciding condition."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "It conveys the tradeoff economically, but does not explicitly correct the earlier false claim that keeping the legacy path costs nothing."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cThere's no other cost to keeping it\u201d contradicts the verified 40-second CI cost and the reply\u2019s own ending.",
+   "\u201cflipping it off mitigates in ~1 minute\u201d assumes future failures respond like the two historical incidents.",
+   "\u201can hour of broken checkout\u201d introduces an unsupported outage duration.",
+   "\u201cthat's the only scenario where the flag still earns its keep\u201d excludes other possible reasons without evidence."
+  ],
+  "note": "It introduces speculative event-based conditions while contradicting the known cost of keeping the flag."
+ }
+}

@@ -1,0 +1,10 @@
+exit 0 after 297s
+muse: workspace root: /home/ozzy-desktop/dev/NRO (explicit)
+muse: workspace trust: trusted source=user-config
+muse: Skills: 231 loaded · 11 warnings · 63 details hidden
+muse:   `skills_catalog` was trimmed to fit its size limit (32 KB): 230 descriptions compacted, 10 skill ids omitted
+muse:   vsl: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   wait-what: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   wayfinder: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   Run `muse skills list --source all` for full diagnostics.
+muse: runtime host shutdown timed out after 2s

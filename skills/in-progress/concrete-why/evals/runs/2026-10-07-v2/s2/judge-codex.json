@@ -1,0 +1,168 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Explains the cost of throwing ordinary errors while acknowledging that handwritten validation can return the same 400 and must accept null."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 5,
+   "honest": 1,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"The only error that becomes a 400\" extends the verified behavior beyond the specified thrown Error cases.",
+   "\"persistent retry flood\" and effects on \"any handler side effects that already ran\" are not established by the facts.",
+   "\"every guest-checkout webhook\" overstates customer nullability, which applies to some event types.",
+   "\"your existing clients get the error shape they already handle\" invents client behavior.",
+   "\"throwing a ZodError-shaped error\" is not established as sufficient for middleware that catches ZodError.",
+   "\"you've built a worse zod\" is an unsupported judgment."
+  ],
+  "note": "The concrete status-code explanation is buried under invented consequences and an unnecessarily restricted account of handwritten alternatives."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"the logs show which path failed\" is not established.",
+   "\"Stripe keeps resending it for 3 days\" turns an upper limit into a fixed duration.",
+   "\"pushes past 5 per minute\" assumes an unverified delivery rate.",
+   "\"it's now a second 400 format, different\" assumes handwritten validation cannot reproduce the existing response.",
+   "\"nothing new\" and \"no added ... bundle size\" overstate what having an existing dependency proves.",
+   "\"about the same length as three typeof checks\" is an unverified code-size comparison.",
+   "\"lost without anyone noticing\" assumes an absence of monitoring or other recovery."
+  ],
+  "note": "It introduces the relevant machinery well but repeats the argument and treats several possible consequences as inevitable."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"the other 14 routes would behave differently from this one\" assumes handwritten validation would return a different response.",
+   "\"retry for 3 days\" replaces the verified maximum with a fixed duration.",
+   "\"dropped silently\" assumes no visibility into rejected deliveries.",
+   "\"about the same length as the hand-rolled version\" compares against an implementation that has not been shown."
+  ],
+  "note": "It gives a clear failure-path explanation and usable nullable schema, but exaggerates differences that handwritten validation could avoid."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"Hand-rolled checks ... so a bad body would fall through as a 500\" assumes the checks throw an ordinary Error rather than return 400."
+  ],
+  "note": "It is concise, but leads with a convention label and omits the condition under which handwritten validation actually causes a 500."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [
+   "\"it's less code to get that behavior\" is a plausible inference presented without a demonstrated implementation comparison."
+  ],
+  "note": "It answers the objection directly and preserves the viable handwritten option, though it leaves the paging threshold and response shape unspecified."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"saves about a dozen lines\" invents a numerical comparison.",
+   "\"puts the endpoint on the error path that 500s\" assumes handwritten validation throws ordinary errors.",
+   "\"three days of repeated deliveries\" treats the retry maximum as a guaranteed duration.",
+   "\"any client-side handling ... sees two shapes\" assumes response-format divergence and client behavior.",
+   "\"adds no measurable per-request work\" is unsupported by measurements.",
+   "\"ZodError is the only thing ... turns into a 400; anything else is a 500\" exceeds the verified claim about other thrown Errors."
+  ],
+  "note": "It repeats a useful error-path argument while adding unsupported measurements, client behavior, and distracting markup."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"A hand-written check would throw a plain Error\" assumes an implementation choice.",
+   "\"Zod costs nothing extra here\" overstates the established fact that no new dependency is needed.",
+   "\"we'd silently lose those events\" assumes no visibility or recovery beyond automatic retries."
+  ],
+  "note": "It explains the operational consequences and supplies the corrected schema, but presents avoidable handwritten behavior as the default certainty."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"fine only if it returns 400 itself\" excludes other possible ways to use recognized errors or shared response handling.",
+   "\"every guest-checkout event\" overstates the documented null case.",
+   "\"resend each one for 3 days\" turns an upper limit into a guaranteed duration.",
+   "\"Stripe ignores the body of a webhook response\" is not among the verified facts.",
+   "\"using it adds nothing\" overstates what an existing dependency proves.",
+   "\"Neither choice saves effort\" asserts an unverified implementation comparison."
+  ],
+  "note": "The missing-parent TypeError example makes the risk tangible, but unsupported Stripe behavior and effort claims weaken the judgment."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"a guest-checkout event gets 400\" also covers handwritten rejection, whose status depends on how it reports failure.",
+   "\"that order never reaches billing\" invents an order-processing consequence and rules out unverified recovery paths.",
+   "\"errors.ts only maps ZodError to 400\" extends the verified behavior beyond the specified thrown Error cases."
+  ],
+  "note": "It clearly conditions the main handwritten-error risk, but invents a billing outcome and opens with the same convention-based justification the user challenged."
+ }
+}

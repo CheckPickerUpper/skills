@@ -1,0 +1,12 @@
+{
+ "R01": "muse-skill",
+ "R02": "claude-sonnet-baseline",
+ "R03": "pi-baseline",
+ "R04": "claude-sonnet-skill",
+ "R05": "claude-opus-skill",
+ "R06": "codex-baseline",
+ "R07": "codex-skill",
+ "R08": "pi-skill",
+ "R09": "muse-baseline",
+ "R10": "claude-opus-baseline"
+}

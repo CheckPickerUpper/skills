@@ -1,0 +1,51 @@
+exit 0 after 32s
+ Nobody loses anything.
+>
+> **[#1187 Inventory desyncs after reconnect](https://github.com/owner/repo/issues/1187)**: medium-priority; items duplicate until the next sync. Its parent is [#1150 Reconnect protocol rewrite](https://github.com/owner/repo/issues/1150), the issue lane 3 is actively working from.
+> - *What moving costs:* an issue has one parent. Moving it drops it from #1150's progress bar, and lane 3 would read reconnect as finished while this bug is open.
+>
+> **What decides it:** whether anyone tracks work from the current parent.
+
+</skill>
+
+You are the assistant in the conversation below. Every fact listed was verified by you earlier in this session. Do not run commands or open files. Write your next reply to the user exactly as you would send it, and output only that reply.
+
+<scenario>
+# Scenario: feature flag cleanup
+
+## Facts verified earlier in this session (from command output and files you read)
+- Repo: `acme/storefront` (user-owned). Flag `new_checkout_flow` in `src/flags.ts`, served by LaunchDarkly.
+- The flag has been at 100% of traffic since 2026-09-15 (about 3 weeks). LaunchDarkly audit log shows no toggles since then.
+- The old checkout path is `src/checkout/legacy/` — 412 lines across 6 files. Only reachable when the flag is off.
+- `tests/checkout/legacy.spec.ts` (31 tests) exercises only the legacy path; it adds ~40s to every CI run.
+- Incident log: no checkout incidents since 2026-09-15. Two incidents in the month before rollout, both fixed by flipping the flag off (time to mitigate: ~1 minute each).
+- A production deploy of storefront takes ~12 minutes from merge to live (from the last 20 deploy runs).
+- Issue [#882 Remove legacy checkout after new flow is stable](https://github.com/acme/storefront/issues/882) is open; its body says "remove once at 100% for 2 weeks with no incidents".
+
+## Conversation so far
+**User:** can we clean up the checkout flag now
+**Assistant:** I'd keep `new_checkout_flow` for now. It's a safety net and removing it is risky this soon; the legacy code isn't hurting anything.
+**User:** why not just delete it tho whats actually the downside
+
+</scenario>
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+hook: SessionStart
+hook: SessionStart Completed
+codex
+We can delete it now: it meets the agreed removal condition. My earlier “risky this soon” wasn’t a reason, and “the legacy code isn’t hurting anything” was wrong—it adds about 40 seconds to every CI run.
+
+The concrete downside is losing the fast fallback. `new_checkout_flow`, the LaunchDarkly switch in `src/flags.ts`, lets us return to the old checkout:
+
+- **If we delete it and the legacy path:** a checkout incident can no longer be mitigated by switching the flag off. That worked in about one minute for both incidents before rollout. A mitigation requiring a code change would take preparation time plus about 12 minutes from merge to live.
+- **If we keep it:** that fallback remains available, but we retain 412 lines across six legacy files and 31 legacy-only tests that add about 40 seconds to every CI run.
+
+[Remove legacy checkout after new flow is stable](https://github.com/acme/storefront/issues/882) sets the removal condition: two weeks at 100% traffic with no incidents. We’ve had about three weeks, with no checkout incidents or flag toggles.
+
+What decides it is whether to retain the one-minute fallback beyond that agreed window. There is a concrete cost to deleting it, but the condition we set for accepting that cost has been met.
+tokens used
+14,101
