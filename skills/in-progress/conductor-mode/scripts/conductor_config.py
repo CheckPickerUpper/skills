@@ -378,10 +378,10 @@ def usage_state(kind: str, policy: UsagePolicy | None, reading: Reading | Unavai
         state, reason = "exhausted", "usage is full; this kind cannot continue with usable credits"
     elif mode == "ignore":
         reason = reading.reason if isinstance(reading, Unavailable) else "usage policy is ignore"
-    elif policy is None:
-        state, reason = "unknown", f"usage.{kind} is not set; ask for this kind's usage policy"
     elif isinstance(reading, Unavailable):
         state, reason = "unknown", reading.reason
+    elif policy is None:
+        state, reason = "unknown", f"usage.{kind} is not set; ask for this kind's usage policy"
     elif mode == "finish-in-flight-then-stop":
         if reading.used_percent >= policy["stop_at_percent"]:
             state, reason = "stop", "stop_at_percent reached"
