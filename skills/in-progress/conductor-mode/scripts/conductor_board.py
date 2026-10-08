@@ -1,17 +1,19 @@
-"""Read an effort's board from GitHub, git and herdr, and print what needs action.
+"""Read an effort's board from GitHub, git, herdr and Codex, and print what needs action.
 
 `check-in` reads the effort's open issues (sub-issues of --parent, recursively,
 or the open issues of --milestone), their native blocked-by edges and
-`## Blocked by` reason lines, the repository's open PRs, and the herdr agents
-running in the checkout's worktrees, fresh on every run. It prints one line per
-finding plus, once per kind, the rule that says what to do about it.
+`## Blocked by` reason lines, the repository's open PRs, the herdr agents
+running in the checkout's worktrees, and the Codex threads (Desktop, TUI and
+exec, which herdr does not list) whose rollouts name the checkout or one of its
+worktrees, fresh on every run. It prints one line per finding plus, once per
+kind, the rule that says what to do about it.
 Exit 0: nothing needs action. Exit 1: something does. Exit 2: a read failed.
 """
 
 import argparse
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import os
 from pathlib import Path
@@ -27,6 +29,9 @@ READ_WORKERS = 8
 PASSED_CONCLUSIONS = {"SUCCESS", "NEUTRAL", "SKIPPED"}
 PENDING_STATES = {"PENDING", "EXPECTED", "QUEUED", "IN_PROGRESS", "WAITING", "REQUESTED"}
 WORKING_STATUS = "working"
+CODEX_RUNNING_WINDOW = timedelta(minutes=10)
+CODEX_TURN_STARTED = "task_started"
+CODEX_TURN_ENDED = {"task_complete", "turn_aborted"}
 
 BLOCKED_BY_HEADING = re.compile(r"^##\s+Blocked by\s*$", re.IGNORECASE)
 ANY_HEADING = re.compile(r"^#{1,6}\s")
@@ -89,6 +94,25 @@ class Worktree:
     path: str
     branch: str
     issue: int | None
+
+
+@dataclass(frozen=True)
+class CodexThread:
+    id: str
+    cwd: str
+    originator: str
+    parent: str | None
+    written: datetime
+    last_turn_event: str | None
+
+
+@dataclass(frozen=True)
+class Implementer:
+    place: str
+    worktree: Worktree
+    working: bool
+    status: str
+    detail: dict
 
 
 @dataclass(frozen=True)
@@ -211,7 +235,7 @@ def read_prs(repo: str) -> list[dict]:
                     "open PRs")
 
 
-def read_worktrees(checkout: str, repo: str) -> tuple[str, list[Worktree]]:
+def read_worktrees(checkout: str, repo: str) -> tuple[Worktree, list[Worktree]]:
     origin = run_text(["git", "-C", checkout, "remote", "get-url", "origin"], "checkout origin").strip()
     if not re.search(rf"[:/]{re.escape(repo)}(\.git)?/?$", origin):
         raise ReadFailed("checkout origin", f"{checkout} is a clone of {origin}, not {repo}; pass --checkout")
@@ -220,8 +244,8 @@ def read_worktrees(checkout: str, repo: str) -> tuple[str, list[Worktree]]:
     for block in porcelain.strip().split("\n\n"):
         values = dict(line.split(" ", 1) for line in block.splitlines() if " " in line)
         entries.append((values["worktree"], values.get("branch", "").removeprefix("refs/heads/")))
-    # The first entry is the primary checkout, which holds no implementer.
-    return entries[0][0], [Worktree(path, branch, None) for path, branch in entries[1:]]
+    # The first entry is the primary checkout, which maps to no issue.
+    return Worktree(*entries[0], None), [Worktree(path, branch, None) for path, branch in entries[1:]]
 
 
 def issue_for(worktree: Worktree, primary: str, effort: dict[int, Issue]) -> int | None:
@@ -234,6 +258,55 @@ def issue_for(worktree: Worktree, primary: str, effort: dict[int, Issue]) -> int
 def read_agents() -> list[dict]:
     listed = run_json(["herdr", "agent", "list"], "herdr agents")
     return listed["result"]["agents"]
+
+
+def last_turn_event(path: Path) -> str | None:
+    found = None
+    with path.open(encoding="utf-8", errors="replace") as rollout:
+        for line in rollout:
+            if '"task_' not in line and '"turn_aborted"' not in line:
+                continue
+            try:
+                payload = json.loads(line).get("payload")
+            except json.JSONDecodeError:
+                # The thread may be writing this line right now.
+                continue
+            kind = payload.get("type") if isinstance(payload, dict) else None
+            if kind == CODEX_TURN_STARTED or kind in CODEX_TURN_ENDED:
+                found = kind
+    return found
+
+
+def read_codex_threads(roots: list[str], since: datetime) -> list[CodexThread]:
+    """Read every Codex rollout written since `since` whose thread started in one of `roots`.
+
+    Rollouts are selected by when they were last written, not by their date
+    folder, because a resumed thread keeps appending to the file of the day it started.
+    """
+    sessions = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex") / "sessions"
+    threads = []
+    for path in sorted(sessions.glob("*/*/*/rollout-*.jsonl")):
+        try:
+            written = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
+            if written < since:
+                continue
+            with path.open(encoding="utf-8", errors="replace") as rollout:
+                first = json.loads(rollout.readline())
+        except (OSError, json.JSONDecodeError):
+            # A rollout that vanished or has no complete first line yet names no thread to count.
+            continue
+        meta = first.get("payload") if first.get("type") == "session_meta" else None
+        if not isinstance(meta, dict) or not any(under(meta.get("cwd", ""), root) for root in roots):
+            continue
+        source = meta.get("source")
+        spawn = source.get("subagent", {}).get("thread_spawn", {}) if isinstance(source, dict) else {}
+        try:
+            turn = last_turn_event(path)
+        except OSError as error:
+            raise ReadFailed("Codex rollouts", f"{path} could not be read: {error}") from error
+        threads.append(CodexThread(meta["id"], meta["cwd"], meta.get("originator", "codex"),
+                                   spawn.get("parent_thread_id"), written, turn))
+    return threads
 
 
 def read_max_implementers(checkout: str) -> int:
@@ -350,8 +423,10 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
     read_edges(repo, issues)
     prs = read_prs(repo)
     primary, linked = read_worktrees(checkout, repo)
-    worktrees = [Worktree(w.path, w.branch, issue_for(w, primary, issues)) for w in linked]
+    worktrees = [Worktree(w.path, w.branch, issue_for(w, primary.path, issues)) for w in linked]
     agents = read_agents()
+    local_midnight = now.astimezone().replace(hour=0, minute=0, second=0, microsecond=0)
+    threads = read_codex_threads([primary.path] + [w.path for w in worktrees], local_midnight - timedelta(days=1))
 
     findings: list[Finding] = []
     for issue in issues.values():
@@ -379,23 +454,52 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
                       f"{ago(stamp, now)}, no review on this head",
             effort_issues[0], {"pr": pr["number"], "head": pr["headRefOid"], "checks": outcome}))
 
+    def worktree_of(cwd: str) -> Worktree | None:
+        return next((w for w in worktrees if under(cwd, w.path)), None)
+
+    def on_board(worktree: Worktree | None) -> bool:
+        return worktree is not None and (worktree.issue is None or worktree.issue in issues)
+
+    implementers: list[Implementer] = []
     own_pane = os.environ.get("HERDR_PANE_ID")
-    running = 0
+    herdr_threads: set[str] = set()
     for agent in agents:
-        if agent["pane_id"] == own_pane:
+        worktree = worktree_of(agent["cwd"])
+        if agent["pane_id"] == own_pane or not on_board(worktree):
             continue
-        worktree = next((w for w in worktrees if under(agent["cwd"], w.path)), None)
-        if worktree is None or (worktree.issue is not None and worktree.issue not in issues):
-            continue
-        running += 1
+        session = agent.get("agent_session") or {}
+        if session.get("source") == "herdr:codex":
+            herdr_threads.add(session.get("value"))
         status = agent["agent_status"]
-        place = f"pane {agent['pane_id']}, worktree {tilde(worktree.path)}"
-        detail = {"pane_id": agent["pane_id"], "worktree": worktree.path, "agent_status": status}
-        if worktree.issue is None:
-            findings.append(Finding("unmapped", f"{place}, branch {worktree.branch or '(detached)'}: "
-                                    f"agent_status {status}, maps to no issue", None, detail))
+        implementers.append(Implementer(
+            f"pane {agent['pane_id']}, worktree {tilde(worktree.path)}", worktree, status == WORKING_STATUS,
+            f"agent_status {status}", {"pane_id": agent["pane_id"], "worktree": worktree.path, "agent_status": status}))
+
+    # A thread that spawned sub-agents on this board is the conductor directing them, like the own pane.
+    directing = {thread.parent for thread in threads} | {os.environ.get("CODEX_THREAD_ID")}
+    for thread in threads:
+        if thread.id in directing or thread.id in herdr_threads:
             continue
-        if status == WORKING_STATUS or worktree.issue in awaiting_review:
+        worktree = worktree_of(thread.cwd) or primary
+        running = thread.last_turn_event == CODEX_TURN_STARTED and now - thread.written <= CODEX_RUNNING_WINDOW
+        ended = thread.last_turn_event in CODEX_TURN_ENDED
+        # An ended thread holds a slot only while its worktree's issue is open on this board: it can be resumed there.
+        if not (running and on_board(worktree) or ended and worktree.issue in issues):
+            continue
+        where = "checkout" if worktree is primary else "worktree"
+        turn = "turn running" if running else f"{thread.last_turn_event}{ago(thread.written.isoformat(), now)}"
+        implementers.append(Implementer(
+            f"{thread.originator} thread {thread.id}, {where} {tilde(worktree.path)}", worktree, running, turn,
+            {"thread_id": thread.id, "originator": thread.originator, "worktree": worktree.path,
+             "last_turn_event": thread.last_turn_event}))
+
+    for implementer in implementers:
+        worktree = implementer.worktree
+        if worktree.issue is None:
+            findings.append(Finding("unmapped", f"{implementer.place}, branch {worktree.branch or '(detached)'}: "
+                                    f"{implementer.status}, maps to no issue", None, implementer.detail))
+            continue
+        if implementer.working or worktree.issue in awaiting_review:
             continue
         open_prs = prs_by_issue.get(worktree.issue, [])
         outcomes = [check_state(pr)[0] for pr in open_prs]
@@ -405,8 +509,8 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
             f"PR #{pr['number']} " + ("draft" if pr["isDraft"] else "reviewed on head, no new commit"
                                       if reviewed_on_head(pr) else f"checks {outcome}")
             for pr, outcome in zip(open_prs, outcomes))
-        findings.append(Finding("idle", f"{issues[worktree.issue].ref} ({place}) agent_status {status}, {pr_state}",
-                                worktree.issue, detail))
+        findings.append(Finding("idle", f"{issues[worktree.issue].ref} ({implementer.place}) {implementer.status}, "
+                                f"{pr_state}", worktree.issue, implementer.detail))
 
     def blocked(number: int) -> bool:
         return any(edge.closed_at is None for edge in issues[number].edges)
@@ -427,6 +531,7 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
 
     for root in roots:
         walk(root)
+    running = len(implementers)
     free = max(0, max_implementers - running)
     for number in ready[:free]:
         issue = issues[number]

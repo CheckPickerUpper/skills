@@ -1,0 +1,3 @@
+{"timestamp": "2026-10-07T18:46:45.726Z", "type": "session_meta", "payload": {"id": "01a117b0-3760-7061-b886-57e213128bd8", "timestamp": "2026-10-07T18:46:26.985Z", "cwd": "~/dev/example-app", "originator": "Codex Desktop", "source": "vscode"}}
+{"timestamp": "2026-10-08T09:08:43.814Z", "type": "event_msg", "payload": {"type": "task_started"}}
+{"timestamp": "2026-10-08T09:10:29.574Z", "type": "response_item", "payload": {"type": "agent_message"}}

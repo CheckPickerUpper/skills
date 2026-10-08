@@ -100,8 +100,12 @@ effort's checkout, naming the effort's parent issue or milestone:
 python3 <folder of this SKILL.md>/scripts/conductor_board.py check-in --repo OWNER/REPO --parent N   # or --milestone "TITLE"
 ~~~
 
-It reads issues, blocked-by edges and their reason lines, PRs, and the herdr
-agents in the checkout's worktrees fresh on every run, prints one line per
+It reads issues, blocked-by edges and their reason lines, PRs, the herdr
+agents in the checkout's worktrees, and the Codex threads (Desktop, TUI and
+exec) whose rollouts start in the checkout or a worktree, fresh on every run.
+A Codex thread written to in the last 10 minutes and mid-turn holds a slot;
+one whose turn ended in an effort issue's worktree is `idle`; one in the
+primary checkout is `unmapped`. It prints one line per
 thing that needs action with the rule for each kind, and exits 1 while
 anything does (0 when nothing does, 2 when a read failed; `--json` prints the
 same findings for a loop).
