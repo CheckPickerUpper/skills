@@ -175,7 +175,9 @@ forecast what will not finish.
   - #1212 Idempotency-key binding: cannot pass "a retried charge with the same key is rejected" until it lands, because keys are not bound to charges yet.
   ~~~
 
-  The line starts with `- #N`, names an issue that is a blocked-by edge, and
+  The line starts with `- #N` (or `- owner/repo#N` for a blocker in another
+  repository; a bare `#N` always means this one), names an issue that is a
+  blocked-by edge, and
   says what this issue `cannot` start or meet until it lands, and why. On an
   issue with sub-issues, the reason says "cannot start until it lands";
   anything narrower belongs on the sub-issue.
