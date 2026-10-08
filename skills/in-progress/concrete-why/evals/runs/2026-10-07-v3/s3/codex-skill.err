@@ -1,0 +1,38 @@
+exit 0 after 32s
+, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.canva.com/.well-known/oauth-protected-resource/mcp\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+2026-10-08T02:15:45.833549Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Missing Authorization header\", scope=\"email profile\", resource_metadata=\"https://api.fireflies.ai/.well-known/oauth-protected-resource/mcp\"" })
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+2026-10-08T02:15:45.891890Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://api.mobbin.com/.well-known/oauth-protected-resource/mcp\"" })
+hook: SessionStart
+hook: SessionStart Completed
+**Summarizing code availability constraints**
+
+I’m clarifying that because the exact source code isn’t accessible, I can’t provide real snippets or YAML excerpts. Instead, I’ll explain the general mechanics and implications around pod availability, locking, and inference, highlighting typical fast behaviors without inventing details. It’s important to mention uncertainties about schema compatibility and backwards support since I can’t verify specifics, and I’ll avoid producing any code lines not grounded in verifiable sources.
+codex
+Today, each of the three `acme/orders` pods waits for `prisma migrate deploy` before starting its server. A pre-deploy Job lets migrations finish while the existing pods keep serving, then starts the rollout.
+
+My earlier “cleaner, more robust” wording did not explain that benefit.
+
+The concrete failure is recorded in [INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212), from September 14:
+
+1. All three pods started migration deployment. Prisma’s Postgres advisory lock let one apply the migration; the other two waited.
+2. The index migration, `20260914_add_orders_customer_idx`, took 4 minutes 10 seconds.
+3. The liveness probe restarted pods after 180 seconds of failures—before the migration could finish.
+4. All three pods were killed mid-migration, restarted, and waited on the lock again. The orders API was down for 19 minutes.
+
+The lock already prevents duplicate migration execution. Moving migrations does **not** improve that; it removes the migration wait from server startup, where the probe can interrupt it.
+
+The deployment workflow in `.github/workflows/deploy.yml` can run a Kubernetes Job before rolling the orders Deployment. With that ordering, a slow migration delays the rollout; a failed migration stops it before the existing pods are replaced. Most migrations took under five seconds, so the everyday benefit is small. The two index builds out of 41 migrations that exceeded two minutes are the reason to change it.
+
+I recommend the Job for that specific benefit.
+
+I haven’t confirmed whether the new schema remains compatible with the currently running orders server. That must hold for those pods to keep serving during migration. I also don’t have verified source excerpts or line numbers here to show the entrypoint and probe configuration verbatim.
+
+The deciding fact is whether migration duration can exceed the pod’s startup allowance; this service has already had an outage when it did.
+tokens used
+15,541

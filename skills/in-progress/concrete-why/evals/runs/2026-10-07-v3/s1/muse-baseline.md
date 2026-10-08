@@ -1,0 +1,3 @@
+We should clean it up — the only real downside is rollback goes from a ~1-minute flag flip to a ~12-minute deploy.
+
+`new_checkout_flow` has been at 100% since 2026-09-15 with no toggles and no incidents, so it meets [#882 Remove legacy checkout after new flow is stable](https://github.com/acme/storefront/issues/882)'s bar (2 weeks at 100%, no incidents). Keeping it preserves the 1-minute mitigation that saved us twice last month, but costs `src/checkout/legacy/` (412 lines in 6 files, flag-off only) and `tests/checkout/legacy.spec.ts` (31 tests, ~40s every CI run). I recommend deleting — want me to?

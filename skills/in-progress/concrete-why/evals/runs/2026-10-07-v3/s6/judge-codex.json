@@ -1,0 +1,203 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"misses the empty moment ... between the change and the next drain pulse\" does not establish a failure: another drain pulse need not remove the empty state.",
+   "\"a brand-new mechanism only Hora could use\" overclaims; an attribute-watching race could serve other abilities.",
+   "\"onTagAdded fires consistently on both machines\" is not established by shared attribute code.",
+   "\"would have to reimplement that prediction seam\" is not demonstrated for a direct attribute check."
+  ],
+  "note": "Identifies the missing attribute wait, but substitutes architectural labels and unsupported timing claims for shown code."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"Prediction is free\" overstates what shared container code proves.",
+   "\"races when the check runs between changes\" supplies no event sequence showing a wrong outcome or distinguishing tag evaluation.",
+   "\"A stamina == 0 check only helps Hora\" overstates the limitation; a reusable attribute condition could serve other abilities."
+  ],
+  "note": "Compactly names the implementation costs, but asks the reader to trust linked code and unexplained race claims."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"holding a phase it should leave, or starting when it should refuse\" describes hypothetical Health consumers rather than an observed repository failure.",
+   "\"the only code that knows where its floor is\" overstates exclusivity; the floor is available in the attribute declaration."
+  ],
+  "note": "Shows the code needed to assess both mechanisms and acknowledges one reader today, but greatly expands a stamina question into hypothetical Health behavior."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"For Hora alone ... a direct check needs less machinery\" is not established after including the runtime support that the reply says must be added."
+  ],
+  "note": "Makes the comparison reviewable with code and correctly separates tag maintenance from the runtime's presence checks."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"Nothing calls it from gameplay code\" contradicts Hora's demonstrated use through Resources.Stamina.WhileEmpty.EmptyTag.",
+   "\"made at the same moment a stamina read would be\" assumes the scheduling of an unimplemented alternative.",
+   "\"a second trigger kind that only works for bars whose floor is 0\" conflates a zero comparison with the proposed onAttributeEmpty trigger, which could inspect the declared floor.",
+   "\"my earlier reasoning\" refers to an earlier answer absent from the supplied conversation."
+  ],
+  "note": "Shows concrete runtime changes and challenges the timing rationale, but undermines that care with contradictory and overly narrow claims."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"For Hora alone, checking stamina === 0 would be simpler\" does not account for adding a place in the runtime to execute that check.",
+   "\"reuse across NRO's gameplay systems\" leaves unstated that Hora is the only current Empty Tag reader."
+  ],
+  "note": "Avoids the false immediate-callback argument, but omits the code and concrete runtime cost needed to judge the proposed simplification."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"The repo bans guessing state by polling\" broadens the stated prohibition against inferring state from side effects into a general polling ban.",
+   "\"can miss the moment ... or see it a step late\" does not establish that current tag checks avoid the same timing issue.",
+   "\"Prediction comes free\" overstates the evidence and omits whether Hora uses prediction."
+  ],
+  "note": "Shows Hora's race and admits its sole-reader status, but its timing and prediction reasons remain unproven."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"go to sleep\" and \"stops executing until one happens\" misdescribe the runtime's repeated evaluation of waits.",
+   "\"Wakes up and strikes the exact moment the tag goes on\" incorrectly presents a tag-presence check as an immediate callback.",
+   "\"read by abilities that drain it\" implies multiple current consumers; Hora is the only one.",
+   "\"wake up 20 times a second\" is an unsupported performance comparison with the existing tag wait.",
+   "\"instead of letting the ability sleep\" invents a CPU-saving distinction absent from the shown implementation."
+  ],
+  "note": "Its central argument depends on an event-driven execution model that the runtime code in the candidates contradicts."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 1,
+   "honest": 2,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"every system can instantly react\" overclaims immediate reaction and omits that no other gameplay consumer reads Empty Tags today.",
+   "\"would require ... poll ... every tick\" omits the attribute-watching race alternative until a later point.",
+   "\"polling can go wrong if the check runs between changes\" asserts failure without showing how it occurs.",
+   "\"instantly predictable on both client and server\" is not established by shared container code.",
+   "\"without any extra wiring\" omits per-bar declarations and tag settlement after every attribute change."
+  ],
+  "note": "Mostly relays architectural verdicts without code, costs, or a concrete failure sequence."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"It's an event, not a poll\" misrepresents the runtime's current tag-presence checks.",
+   "\"onTagAdded fires the instant it happens\" is not supported by the implementation.",
+   "\"Anything else ... reads the same tag\" implies existing gates, cues, and other held abilities consume Empty Tags; only Hora does.",
+   "\"CLAUDE.md ... pushes toward this shape\" relies on a Claude-only instruction surface that does not govern Codex.",
+   "\"would have to live in the flurry's tick or in the drain effect\" omits adding an attribute race.",
+   "\"creates a gap between the number and what the ability sees\" does not demonstrate a gap different from tag evaluation."
+  ],
+  "note": "Confidently recommends the tag using false timing distinctions and unverified consumers."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 1
+  },
+  "errors": [
+   "\"a buff that floors stamina at ... 10\" is not established by a declaration-level floor or a ReducedAtFloor change type; those do not prove buffs can change floors.",
+   "\"the two cannot disagree\" conflicts with the reply's later claim that a blocker can deliberately prevent the Empty Tag.",
+   "\"That is the seam a 'relentless' ... effect plugs into\" proposes an unverified gameplay effect and consequence.",
+   "\"ADR 0038 says gates, cues and conditions read the Empty Tag\" misstates an enabled benefit as a claim of existing consumers.",
+   "\"the only readers ... in game code ... and ... assertions\" mixes tests with game-code consumers."
+  ],
+  "note": "Provides extensive code and a useful timing correction, but buries the answer under speculative buffs, suppression behavior, and repeated arguments."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Hora is the Taijutsu ability\" conflicts with the rapier ability identified in the supplied replies.",
+   "\"has to end the moment a drain pulse empties the bar\" presents immediate execution that its later presence-check description does not prove.",
+   "\"Per-tick poll ... next tick, not at the pulse\" does not establish a timing disadvantage relative to the existing tag wait.",
+   "\"ADR 0038 ... rejects both of those\" ambiguously attributes rejection of three listed alternatives, including drain-effect wiring, to an ADR that rejects polling and an attribute race.",
+   "\"ADR names gates, cues, and effect conditions as readers\" misstates potential consumers as existing readers."
+  ],
+  "note": "Shows the race and settlement path and admits prospective reuse, but its opening and deciding rule still rely on an unsupported timing distinction."
+ }
+}

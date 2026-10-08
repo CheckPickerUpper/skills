@@ -1,0 +1,178 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "Accurate and candid, including that it has no source lines to show, but it repeats itself and its 'what decides this' line is close to a restated tradeoff."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"Every change to checkout from here on goes untested against the legacy path\" ignores the 31 legacy tests that run on every CI run",
+   "\"checkout stays broken for roughly 12 minutes\" leaves out the time to write and merge the revert"
+  ],
+  "note": "A clear cost-benefit answer, weakened by an invented argument that the fallback has decayed, which the 31 CI tests contradict."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"saved us twice last month\" is loose dating; the incidents were in the month before the 2026-09-15 rollout"
+  ],
+  "note": "Tight and correct, but it gives no incident sequence, introduces nothing, and does not admit the earlier label."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"every minute costs conversions\" is unverified",
+   "\"kill-switch wired to a fail-safe\" is vague and invented",
+   "it proposes deleting the legacy tests while keeping the legacy code as the fallback, which leaves the fallback untested",
+   "#882 is a bare reference",
+   "the \"peak-traffic event\" gate has no basis in the facts"
+  ],
+  "note": "It admits the earlier error, then hedges into a staged plan built on speculation that contradicts its own argument."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"I only checked src/flags.ts and the storefront code paths\" asserts a check that the facts do not record",
+   "#882 is bare in the opening paragraph"
+  ],
+  "note": "Strong before-and-after incident sequences, an explicit retraction and a clear deciding rule, though it is long and somewhat repetitive."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"mitigate a checkout incident instantly\" contradicts its own ~1 minute figure",
+   "\"reverts the bad commit\" when the revert would be of the deletion",
+   "it says the LaunchDarkly audit log shows 100% for 3 weeks, but the log only shows no toggles"
+  ],
+  "note": "Good paired sequences, but it recommends deletion and then ends on an open question, which muddles the decision."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Correct and brief, but it names files and incidents without introducing them and shows no sequence."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 1,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"Violates issue #882\" inflates a removal condition into a violation",
+   "the file:// links point at a local eval directory and are unusable",
+   "\"You are right\" capitulates without explaining what was wrong",
+   "the #882 link has no title"
+  ],
+  "note": "Terse labels and broken local links leave the reader unable to judge."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"I can't say it still works\" overlooks that 31 legacy tests exercise that path on every CI run"
+  ],
+  "note": "Excellent sequences and an honest list of what it could not confirm, with a usable deciding rule, though it is a bit long."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Accurate and well proportioned, with a correct 22-day count, an admitted earlier error and concrete next steps; it gives a narrative instead of a numbered sequence."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "it says recovery requires writing a fix, ignoring that the deletion can be reverted",
+   "\"this is how both pre-rollout incidents arrived\" invents their cause",
+   "\"Orders start failing at payment\" is invented",
+   "\"two incidents in the six weeks before 100%\" contradicts the fact that both were in the month before rollout",
+   "it recommends keeping the flag against #882's satisfied condition, on the basis of an unverified schema hypothesis",
+   "#882 is not linked"
+  ],
+  "note": "It retracts its labels, then rebuilds a keep argument from invented incident details and an inflated recovery cost."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [],
+  "note": "Accurate, marks its inference and retracts the earlier labels precisely, but the dense appositive sentences and repetition hurt readability."
+ }
+}

@@ -1,0 +1,183 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"39 of the 41 migrations ... took under 5 seconds\": the facts only say most did",
+   "the YAML block is presented as `deploy/orders.yaml` but is reconstructed, and uses `//` comments, which YAML does not allow",
+   "\"the 4m10s migration can never finish\": the outage ended after 19 minutes, so it did finish",
+   "never mentions that the old pods keep serving during the Job, or that this needs the migration to stay compatible with the running code"
+  ],
+  "note": "It has a clear step-by-step account and a usable deciding rule, but it shows a fabricated config block and says the loop could never end, which contradicts the incident."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"39 of the last 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+   "\"The Job has its own timeout\": not verified",
+   "\"the running pods keep serving the old version\": assumes the schema stays compatible and does not say so"
+  ],
+  "note": "It answers the benefit question honestly and offers the startupProbe alternative, but it shows no config and never admits its earlier answer was a label."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"39 of 41 migrations were under 5s\": an inferred number that is not marked as one"
+  ],
+  "note": "It is tight and accurate, but too thin to judge from: no code, no step-by-step sequence, no costs and no deciding rule."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"At 180s, the liveness probe started failing\": the facts say the pod is restarted after 180s of failures, so the probe was failing well before 180s",
+   "\"A Job is the only option here where that limit doesn't apply\": the next sentence offers raising the probe thresholds as another option"
+  ],
+  "note": "It admits the earlier label and has a strong section on what it could not confirm, but it repeats itself in places and contradicts itself about the alternatives."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"39 of 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+   "\"If the Job fails, the pipeline stops\": describes a design that does not exist yet as if it were settled"
+  ],
+  "note": "This is the most complete answer, covering the sequence, the new flow, the costs, the alternative and the unknowns, but it is long, it adds a CREATE INDEX CONCURRENTLY aside nobody asked about, and it shows no config lines."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "It is short and accurate and notes the compatibility requirement, but it shows no code and has no explicit deciding rule."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It is very honest about what is unverified, including that it has no config excerpts to show, but because it shows no code the reader has to trust the summary."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "the entrypoint code block (\"// today, in each pod entrypoint\") is reconstructed, not quoted from the file",
+   "never mentions that the old pods keep serving during the Job, or the compatibility cost"
+  ],
+  "note": "The sequence is accurate and the inference is marked, but the text is padded with repeated introductions and shows pseudo-code as if it came from the files."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "the entrypoint `./server` and `livenessProbe: {}` blocks are invented and shown as real file contents",
+   "\"the half-applied migration is whatever Postgres rolled back to\": speculation",
+   "\"Pods 2 and 3 ... killed at their own 180s marks\" and \"loop only ends when...\": invented detail; the facts only say all three pods were killed",
+   "\"that is the whole cost\": ignores that the migration must stay compatible with the code still running",
+   "\"Nobody outside the cluster depends on these probes\": filler"
+  ],
+  "note": "It is thorough, but it fabricates code and incident details and overstates how small the cost is."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"39 of 41 migrations that finish in under 5 seconds\": an inferred number that is not marked as one",
+   "\"crash-looping against a half-applied schema\": not supported by the facts",
+   "INC-212 is named bare, with no link or description"
+  ],
+  "note": "It leans on labels such as \"coupling\" and \"tail\", names INC-212 without introducing it, and ends with a question in the prose."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "INC-212 is named bare, with no link or description",
+   "\"decouples the database migration from the pod's startup lifecycle\": a label used as a reason"
+  ],
+  "note": "The gist is right, but it gives labels instead of a step-by-step sequence, offers no deciding rule and does not admit the earlier label."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"39 of 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+   "\"Today a failed migration means pods crash and restart in a loop\": not verified",
+   "the closing paragraph about the Canva and Todoist connectors is irrelevant"
+  ],
+  "note": "It has a strong sequence, benefits and costs with a clear rule, but it never admits the earlier label and ends with an irrelevant paragraph about connectors."
+ }
+}

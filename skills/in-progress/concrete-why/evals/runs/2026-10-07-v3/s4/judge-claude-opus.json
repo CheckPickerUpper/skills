@@ -1,0 +1,169 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"Fixing it would mean reverting that decision\" is an inference stated as fact"
+  ],
+  "note": "A tight, accurate breakdown of each issue that names the gate cost and corrects the earlier label, but it gives no step-by-step sequences and no rule the user could reuse."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"can't be fixed on the current builds\" is loosely worded for #403"
+  ],
+  "note": "Concise and correct; it puts the cost of leaving each issue open first and offers moving #401 out of the milestone, but it states no general deciding rule."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"well past the 7-day deadline\" cites a deadline that is not in the scenario's stated rule",
+   "\"Once that PR merges ... v3.2 is unblocked\" ignores that #403 is still open"
+  ],
+  "note": "A clear table and an actionable plan with a single question for the user, slightly overstated about what unblocks the release."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "Treats closing #403 as an outcome without noting that the won't-fix call is the user's",
+   "Bare #402/#455/#470 with no links or titles"
+  ],
+  "note": "It names the gate cost but uses bare references and quietly closes #403 against the user's rule."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Ends the notification/triage stream\" is generic and unverified",
+   "\"cheap to fix by setting the background color before first paint\" is an unverified fix",
+   "Proposes closing #403 \"as obsolete\" itself, bypassing the user's won't-fix decision"
+  ],
+  "note": "Its generic list of what closing does pads the answer, and it invents a cheap fix for #401."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "The 7-day deadline is not part of the scenario's stated rule"
+  ],
+  "note": "Thorough, concrete sequences, honest limits and a reusable deciding test, at the cost of some length."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"I confirmed #455 and #470 from their titles and the issue labels\" invents how they were verified and contradicts the established facts"
+  ],
+  "note": "A strong, well-structured answer with a clear rule, weakened by an invented caveat about how the PRs were verified."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Precise sequences per issue, explicit uncertainty about #403, and a clean deciding rule."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "Groups #403 as \"already resolved in the codebase\" and recommends closing it, bypassing the user's won't-fix decision"
+  ],
+  "note": "It misclassifies #403 as solved and repeats the gate explanation."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 1
+  },
+  "errors": [],
+  "note": "Accurate but buried in repetition and redundant hedging; the same inference caveats appear several times."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 3,
+   "honest": 5,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Correct and brief, but it gives no sequences and omits the PRs that shipped #402 and #404."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"The window paints before the theme is applied to the first frame\" asserts an unverified cause",
+   "\"which is the only reason #402 is still open\" overclaims"
+  ],
+  "note": "A strong rule and per-issue breakdown, undermined by inventing the cause of the flicker."
+ }
+}

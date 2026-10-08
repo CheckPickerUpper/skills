@@ -1,0 +1,5 @@
+exit 0 after 22s
+Permission allow rule (/home/ozzy-desktop/.claude/settings.json): Bash(grep * .env.local) has a wildcard before the rest of the command, so it also matches any options inserted at that position and approves them without a prompt. Replace that * with the exact value you mean, or only use * after the subcommand.
+Permission allow rule (/home/ozzy-desktop/.claude/settings.json): Write(/home/ozzy-desktop/dev/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/home/ozzy-desktop/dev/**) instead (Edit rules cover all file-editing tools).
+Permission allow rule (/home/ozzy-desktop/.claude/settings.json): Write(/home/ozzy-desktop/dev/dotfiles/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/home/ozzy-desktop/dev/dotfiles/**) instead (Edit rules cover all file-editing tools).
+Permission allow rule (/home/ozzy-desktop/.claude/settings.json): Write(/tmp/**) is not matched by file permission checks — only Edit(path) rules are. Use Edit(/tmp/**) instead (Edit rules cover all file-editing tools).

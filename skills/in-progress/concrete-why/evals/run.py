@@ -18,9 +18,9 @@ LANES = {
     "claude-opus":   lambda p, cwd, out: (["claude", "-p", p, "--model", "opus", "--effort", "medium", "--no-session-persistence", "--tools", "Read,Grep,Glob"], None),
     "claude-sonnet": lambda p, cwd, out: (["claude", "-p", p, "--model", "sonnet", "--effort", "medium", "--no-session-persistence", "--tools", "Read,Grep,Glob"], None),
     "codex":         lambda p, cwd, out: (["codex", "exec", "-s", "read-only", "--skip-git-repo-check", "--ephemeral", "-c", "model_reasoning_effort=medium", "-C", str(cwd), "-o", str(out), p], out),
-    "muse":          lambda p, cwd, out: (["muse", "exec", "--reasoning-effort", "ultra", "--workspace", str(cwd), p], None),
+    "muse":          lambda p, cwd, out: (["muse", "exec", "--reasoning-effort", "max", "--workspace", str(cwd), p], None),
     "mimo":          lambda p, cwd, out: (["pi", "-p", "--no-session", "--model", "xiaomi-token-plan-sgp/mimo-v2.6-pro", "--thinking", "max", "--tools", "read,grep,find,ls", p], None),
-    "gemini":        lambda p, cwd, out: (["agy", "-p", p, "--model", "gemini-3.1-pro-high", "--mode", "plan"], None),
+    "gemini":        lambda p, cwd, out: (["agy", "-p", p, "--model", "gemini-3.1-pro-high", "--mode", "plan", "--sandbox", "--dangerously-skip-permissions"], None),
 }
 
 FIXTURE_PROMPT = """You are the assistant in the conversation below. Every fact listed was verified by you earlier in this session. Do not run commands or open files. Write your next reply to the user exactly as you would send it, and output only that reply.
@@ -88,9 +88,22 @@ def main():
     sc = scenarios()
     keys = a.scenarios.split(",") if a.scenarios else list(sc)
     jobs = [(l, k, arm, *sc[k], out_dir) for k in keys for l in a.lanes.split(",") for arm in ("baseline", "skill")]
-    with cf.ThreadPoolExecutor(a.jobs) as ex:
-        for res in ex.map(lambda j: run_one(*j), jobs):
-            print(*res, flush=True)
+    # Live scenarios run in a throwaway detached worktree beside the real checkout, so an agent that writes
+    # scratch files (Gemini through agy did, even in plan mode) never touches the user's working tree.
+    worktrees = {}
+    for repo in {j[4] for j in jobs if j[4] is not None}:
+        wt = repo.parent / f"{repo.name}-concrete-why-bench"
+        if not wt.exists():
+            subprocess.run(["git", "-C", str(repo), "worktree", "add", "--detach", str(wt), "HEAD"], check=True)
+        worktrees[repo] = wt
+    jobs = [j[:4] + (worktrees.get(j[4], j[4]), j[5]) for j in jobs]
+    try:
+        with cf.ThreadPoolExecutor(a.jobs) as ex:
+            for res in ex.map(lambda j: run_one(*j), jobs):
+                print(*res, flush=True)
+    finally:
+        for repo, wt in worktrees.items():
+            subprocess.run(["git", "-C", str(repo), "worktree", "remove", "--force", str(wt)], check=True)
 
 
 if __name__ == "__main__":

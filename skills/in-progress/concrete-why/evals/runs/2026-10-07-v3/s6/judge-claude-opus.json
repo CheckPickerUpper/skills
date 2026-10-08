@@ -1,0 +1,179 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"Activation gates, effect conditions and gameplay cues can all see 'empty' for free\" is presented as current, but no gate, condition or cue reads an Empty Tag today",
+   "\"misses the empty moment if it doesn't happen to run between the change and the next drain pulse\" ignores that the tag wait is also read at each phase step",
+   "\"recorded decision, not an accident\" is a verdict"
+  ],
+  "note": "It explains the structural cost of an inline check well, but it shows no annotated code and never says that Hora is the only reader."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"Activation gates, runsWhileTagged effect conditions, and cues can all read that same tag\" suggests current readers, but Hora is the only one",
+   "\"number and tag flip atomically\" and \"Prediction is free\" are claims with no evidence shown"
+  ],
+  "note": "It is a compact list of ADR benefits. The Health-floor point is useful, but the reply shows no code and mostly gives labels."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "The claim that the sequence runtime carries `UntilInputReleasedOrResourceFull` is not verified by the ground truth",
+   "In the Health sequence, the ability \"holding a phase it should leave\" is a hypothetical consequence with no real reader behind it"
+  ],
+  "note": "It is thorough and honest: annotated code, the Health-floor case, an admission that the check works for Stamina, and a list of what it couldn't confirm. It is long."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It correctly says the tag wait is itself read at each step and that Hora is the only reader, but it leaves out the Health floor and gives no rule for deciding next time."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"Where my earlier reasoning... is empty\" refers to an earlier answer that does not exist",
+   "Dismissing the ADR's side-effect argument is opinion presented as fact"
+  ],
+  "note": "It is concrete and candid: it counts the runtime changes an inline check needs, gives the Health-floor reason, and strips the ADR reasons that don't hold up, so the deciding rule is clear."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 2,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It is honest that the tag wait is polled too, but it is too thin: no code, and no concrete cost of the inline check."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "The polling objection that it can \"see it a step late\" ignores that the tag wait is also read at each step",
+   "The Exhaustion aside is unasked"
+  ],
+  "note": "It frames both rejected options well and admits that only Hora uses the tag, but the code has no comments and some reasons are labels (\"always correct\")."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"Wakes up and strikes the exact moment the tag goes on\" is wrong: the runtime reads tag presence at each step",
+   "Says the engine would spend CPU cycles polling, but the tag wait is also checked every step",
+   "\"read by abilities that drain it\" overclaims, because Hora is the only reader"
+  ],
+  "note": "Its central argument, event versus polling, is contradicted by how the runtime actually evaluates OnTagAdded."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"every system can instantly react\" overclaims, because nothing but Hora reads the tag",
+   "\"instantly predictable on both client and server\" is unsupported, and Hora waits for the server",
+   "Calls the ability system GAS without introducing the term"
+  ],
+  "note": "It relays the ADR's labels with no code, no consequences, and no admission that only one reader exists."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"onTagAdded fires the instant it happens\" is wrong, because the wait is read at each step",
+   "Says gates, cues and other held abilities read the same tag, but none do",
+   "\"creates a gap between the number and what the ability sees\" is unsupported"
+  ],
+  "note": "It asserts an event-versus-poll distinction that the code does not have, and it shows no code."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "The knockdown reaction and the \"relentless\" blocker are hypothetical consumers presented as sequences, though partly flagged"
+  ],
+  "note": "It is the most complete reply: annotated code, the Health-floor failure as a sequence, a concession that the tag doesn't change timing, and honest unknowns, though it is long."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"Hora is the Taijutsu ability\" is likely wrong, since Hora is a rapier ability",
+   "\"Per-tick poll: the check runs on the next tick, not at the pulse\" applies equally to the tag wait"
+  ],
+  "note": "It covers the already-empty case well and admits that Hora is the only reader, but it overstates the timing advantage of the tag."
+ }
+}

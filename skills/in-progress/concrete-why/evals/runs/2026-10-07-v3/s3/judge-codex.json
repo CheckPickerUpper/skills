@@ -1,0 +1,224 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of the 41 migrations ... took under 5 seconds\" is not established; the facts say most did.",
+   "\"Pod 1 re-acquires the lock\" and \"the 180-second cycle repeats\" add an exact retry sequence not verified in the incident facts.",
+   "\"the 4m10s migration can never finish\" overstates the evidence and does not explain how the outage ended.",
+   "\"The Job ... has no liveness probe\" is an unverified configuration presented as fact.",
+   "\"runs it to completion\" and \"pods start immediately\" promise outcomes beyond removing the migration from pod startup.",
+   "\"a deploy pipeline Job does not\" kill a long-running migration ignores unverified Job timeout and termination settings."
+  ],
+  "note": "It explains the observed outage clearly, but repeats itself and turns a proposed Job configuration into guaranteed completion."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"39 of the last 41 migrations took under 5 seconds\" is not established.",
+   "\"The Job has its own timeout\" asserts configuration that has not been checked.",
+   "\"it can't take the API down\" ignores schema incompatibility and database blocking during migration.",
+   "\"roughly one migration in 20 is a risk\" treats migrations over 120 seconds as evidence of exceeding the 180-second restart threshold.",
+   "\"I'd then do the Job the next time a migration comes close to the limit\" assumes a warning opportunity that the evidence does not establish."
+  ],
+  "note": "The alternative and its recovery tradeoff are useful, but the answer understates compatibility risks and exaggerates what the migration statistics establish."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"39 of 41 migrations were under 5s\" is not established.",
+   "\"runs once to completion with no probes to kill it\" assumes an unverified Job configuration and guarantees completion."
+  ],
+  "note": "It gives a compact causal explanation of the benefit, but supplies neither the supporting configuration nor the conditions needed for the Job to deliver it."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"That has happened once\" asserts an incident count when only one incident is supplied.",
+   "\"At 180s, the liveness probe started failing\" confuses the restart threshold with the start of probe failures.",
+   "\"Every migration is fine until one runs long, and then it takes the API down\" generalizes one observed outage to every long migration.",
+   "\"compatible with the old code ... is true of an index build\" assumes adding an index cannot disrupt service through locking or other effects.",
+   "\"A Job is the only option here where that limit doesn't apply\" overlooks a startup probe that can defer liveness checks."
+  ],
+  "note": "It usefully identifies compatibility and timeout checks as unfinished, but several absolute claims contradict that otherwise careful uncertainty."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of 41 migrations took under 5 seconds\" is not established.",
+   "\"This only happens ... and for the 2 slow ones it did\" incorrectly treats both migrations over two minutes as exceeding the three-minute liveness limit.",
+   "\"The Job ... has no readiness or liveness check\" presents an unverified configuration as fact.",
+   "\"a 4-minute index build finishes\" guarantees completion beyond the evidence.",
+   "\"Nothing restarts them\" and \"the old pods keep serving orders\" are unconditional promises despite unverified compatibility and database blocking.",
+   "\"each slower index build needs the limit raised again\" assumes each subsequent build exceeds the newly configured allowance.",
+   "\"Two of the last 41 did\" incorrectly claims both slow migrations exceeded 180 seconds."
+  ],
+  "note": "The compatibility and database-locking caveats help decision-making, but the answer repeatedly confuses the two-minute statistic with the three-minute kill threshold."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"existing API pods keep serving\" is not guaranteed by schema compatibility alone; migration locking and Job configuration remain unverified.",
+   "\"the two slow index builds\" implies both benefited from avoiding the liveness threshold, although only one is established to have exceeded 180 seconds."
+  ],
+  "note": "It explains the benefit economically and acknowledges schema compatibility, but leaves the configuration supporting the argument unseen."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"a failed migration stops it\" describes intended pipeline gating without explicitly distinguishing it from verified existing behavior.",
+   "\"existing pods keep serving\" remains conditional on database effects as well as the acknowledged schema compatibility requirement."
+  ],
+  "note": "It gives the strongest evidence-calibrated explanation and admits the missing source excerpts, although that admission does not replace showing the configuration."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 1
+  },
+  "errors": [
+   "\"all three pods wait on one Postgres advisory lock\" misstates the supplied sequence: one holds the lock and two wait.",
+   "\"Deploy starts 3 new pods\" assumes an unverified rollout sequence.",
+   "\"are killed again\" adds a repeated-kill sequence not explicitly verified.",
+   "\"This happens only when a migration outlasts\" excludes lock waiting and other causes of exceeding the startup allowance.",
+   "\"the Job finishing once\" and \"new pods then starting at once\" guarantee completion and immediate startup.",
+   "\"there is no observable difference: pods wait a few seconds either way\" contradicts moving the migration wait out of the pods."
+  ],
+  "note": "It makes the mechanism understandable, but repeatedly restates it and presents illustrative commands without actual source locations."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"39 of the 41 migrations\" under five seconds is not established.",
+   "\"The benefit shows up on the other 2\" assumes both exceeded the 180-second limit.",
+   "\"./server\" invents an entrypoint command.",
+   "\"livenessProbe: {}\" is not verified source and does not encode the claimed 180-second threshold.",
+   "\"orders requests stop being routed\" precisely at 120 seconds assumes unverified routing and rollout details.",
+   "\"the half-applied migration is whatever Postgres rolled back to\" assumes unverified transaction and rollback behavior.",
+   "\"starts the index build again \u2014 from the start\" is not established.",
+   "\"The loop only ends when ... finishes inside a 180s window\" invents how the incident recovered.",
+   "\"The Job has no liveness probe\" asserts unverified configuration.",
+   "\"their prisma migrate deploy sees nothing to do\" retains an entrypoint migration command despite the proposed move out of that entrypoint.",
+   "\"orders stay up\" is unsupported without compatibility and database-locking checks.",
+   "\"that is the whole cost\" omits compatibility requirements, failure handling, and Job configuration."
+  ],
+  "note": "Its apparent precision comes from invented code and recovery mechanics, making the long explanation less trustworthy than the supplied facts."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"39 of 41 migrations ... under 5 seconds\" is not established.",
+   "\"got killed again\" adds a repeated-kill sequence not explicitly verified.",
+   "\"No amount of tuning the probes fixes this cleanly\" dismisses alternatives with a verdict and overlooks startup-probe options.",
+   "\"can take 4 minutes without anything killing it\" overstates removing a liveness probe.",
+   "\"half-applied schema\" asserts an unverified database state.",
+   "\"costs one Job manifest plus a pipeline step\" omits removing entrypoint migration execution and checking compatibility."
+  ],
+  "note": "It identifies the relevant timing conflict but substitutes jargon and absolutes for the configuration and asks again about work already requested."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"any pod that isn't healthy within 3 minutes\" generalizes the orders service's configured probe behavior to any pod.",
+   "\"hits the 3-minute limit again\" adds a repeated-kill sequence not explicitly verified.",
+   "\"safely take as long as it needs\" ignores Job termination settings and migration effects on the database.",
+   "\"existing pods will stay up and serve traffic normally\" assumes unverified schema compatibility and absence of database blocking."
+  ],
+  "note": "The startup-to-restart sequence is easy to follow, but the promised uninterrupted service exceeds the evidence."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of 41 migrations took under 5 seconds\" is not established.",
+   "\"fine until a migration builds an index, and then it takes the whole API down\" falsely treats every index build as an outage trigger.",
+   "\"Nothing kills it partway through\" ignores unverified Job timeout and termination settings.",
+   "\"The old pods keep serving\" assumes compatibility and absence of database blocking.",
+   "\"Today a failed migration means pods crash and restart in a loop\" generalizes beyond the verified slow-migration incident.",
+   "\"Adding a column or an index is fine\" guarantees safety without examining the operation or running code.",
+   "\"Renaming or dropping a column needs two deploys\" asserts a universal deployment count without knowing the migration strategy.",
+   "\"will probably break the current setup\" predicts failure from the presence of an index alone.",
+   "\"the Canva and claude.ai Todoist connectors need authorization\" introduces entirely unsupported and unrelated connector claims."
+  ],
+  "note": "It explains the observed failure but turns index builds into predicted outages and ends with unrelated, invented connector requirements."
+ }
+}

@@ -1,0 +1,3 @@
+If we hand-roll the validation and throw a standard `Error` on a bad payload, it will fall through to the default error handler. That returns a 500 status code, which will page on-call if it happens 5 times in a minute, and causes Stripe to retry the bad webhook for 3 days.
+
+Because `src/middleware/errors.ts` specifically catches `ZodError` to return a 400, using Zod ensures we reject invalid payloads correctly without triggering retries or pages. Zod is already used in 14 other handlers so there is no new dependency overhead, and it safely handles the recent Stripe change where `data.object.customer` can be `null` without risking a TypeError on nested property access.
