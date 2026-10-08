@@ -183,6 +183,36 @@ class CheckInTest(unittest.TestCase):
         self.assertEqual(self.lines(done, "orphan-reason"), [
             "orphan-reason: #878 Issue 878 <- #999 (reason line names no blocked-by edge)"])
 
+    def move_blocker_to(self, number, blocker, repository):
+        def change(pages):
+            [edge] = [edge for page in pages for edge in page if edge["number"] == blocker]
+            edge["repository_url"] = f"https://api.github.com/repos/{repository}"
+            edge["html_url"] = f"https://github.com/{repository}/issues/{blocker}"
+        self.edit(self.blocked_by(number), change)
+
+    def test_a_blocker_in_another_repository_matches_only_its_qualified_reason_line(self):
+        self.move_blocker_to(878, 820, "other-org/tools")
+        self.set_body(1266, 878, "\n".join([
+            "## Blocked by",
+            "- other-org/tools#820 Tool: cannot start until it lands, because the build needs it.",
+            "- #822 Money: cannot start until it lands, because the price query is rewritten there."]))
+        done = self.check_in()
+        self.assertFalse([line for line in self.lines(done, "missing-reason") if line.startswith("missing-reason: #878")],
+                         done.stdout)
+        self.assertFalse([line for line in self.lines(done, "orphan-reason") if line.startswith("orphan-reason: #878")],
+                         done.stdout)
+
+        # A local issue with the same number is a different issue: its line must not cover the other repository's.
+        self.set_body(1266, 878, "\n".join([
+            "## Blocked by",
+            "- #820 Queries: cannot start until it lands, because the price query is rewritten there.",
+            "- #822 Money: cannot start until it lands, because the price query is rewritten there."]))
+        done = self.check_in()
+        self.assertIn("missing-reason: #878 Issue 878 <- other-org/tools#820 Issue 820 (no reason line)",
+                      self.lines(done, "missing-reason"))
+        self.assertIn("orphan-reason: #878 Issue 878 <- #820 (reason line names no blocked-by edge)",
+                      self.lines(done, "orphan-reason"))
+
     def test_ready_skips_issues_with_work_and_fills_only_free_slots(self):
         self.settings(max_implementers=2)
         self.worktree("example-app-1190-valuation", "codex/1190-valuation", status="working")

@@ -35,7 +35,8 @@ CODEX_TURN_ENDED = {"task_complete", "turn_aborted"}
 
 BLOCKED_BY_HEADING = re.compile(r"^##\s+Blocked by\s*$", re.IGNORECASE)
 ANY_HEADING = re.compile(r"^#{1,6}\s")
-REASON_LINE = re.compile(r"^- #(\d+)\b")
+# "- #N ..." names an issue in the effort's repository; "- owner/repo#N ..." names one in another repository.
+REASON_LINE = re.compile(r"^- (?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?#(\d+)\b")
 WHOLE_ISSUE_CANNOT_START = re.compile(r"\bcannot start(?: at all)?(?:\s+until\b|[.,;:]|$)", re.IGNORECASE)
 NUMBER_TOKEN = re.compile(r"(?<![0-9])[0-9]+(?![0-9])")
 
@@ -44,7 +45,8 @@ RULES = {
     "parent-blocker": "A blocker on an issue with sub-issues holds every piece under it: move the edge down to the "
                       "sub-issue that truly needs it, unless its reason says the whole issue \"cannot start until it lands\".",
     "missing-reason": "Every blocked-by edge needs a \"- #N <title>: cannot ... until it lands, because ...\" line under "
-                      "\"## Blocked by\" in the blocked issue's body: record it, or drop the edge when no such reason exists.",
+                      "\"## Blocked by\" in the blocked issue's body (\"- owner/repo#N\" for a blocker in another "
+                      "repository): record it, or drop the edge when no such reason exists.",
     "orphan-reason": "A reason line must name a native blocked-by edge: add the edge when the block is real, "
                      "otherwise delete the line.",
     "ready": "Start this issue now; the board lists at most as many as there are free slots under max_implementers.",
@@ -67,9 +69,11 @@ class ReadFailed(Exception):
 class Ref:
     number: int
     title: str
+    # None for an issue in the effort's own repository; "owner/name" for one in another repository.
+    repository: str | None = None
 
     def __str__(self) -> str:
-        return f"#{self.number} {self.title}"
+        return f"{self.repository or ''}#{self.number} {self.title}"
 
 
 @dataclass(frozen=True)
@@ -225,8 +229,14 @@ def read_edges(repo: str, issues: dict[int, Issue]) -> None:
 
     with ThreadPoolExecutor(READ_WORKERS) as pool:
         for issue, raws in zip(wanted, pool.map(edges_of, wanted)):
-            issue.edges = [Edge(Ref(raw["number"], raw["title"]),
+            issue.edges = [Edge(Ref(raw["number"], raw["title"], other_repository(raw["repository_url"], repo)),
                                 raw["closed_at"] if raw["state"] == "closed" else None) for raw in raws]
+
+
+def other_repository(repository_url: str, repo: str) -> str | None:
+    """The blocker's "owner/name" when it lives outside the effort's repository, otherwise None."""
+    owner_name = repository_url.rstrip("/").split("/repos/", 1)[1]
+    return None if owner_name.lower() == repo.lower() else owner_name
 
 
 def read_prs(repo: str) -> list[dict]:
@@ -319,8 +329,16 @@ def read_max_implementers(checkout: str) -> int:
     return settings["max_implementers"]
 
 
-def reason_lines(body: str) -> dict[int, str]:
-    lines: dict[int, str] = {}
+BlockerKey = tuple[str, int]
+
+
+def blocker_key(repository: str | None, number: int, repo: str) -> BlockerKey:
+    """Same-numbered issues in two repositories are different issues, so a key carries both."""
+    return (repository or repo).lower(), number
+
+
+def reason_lines(body: str, repo: str) -> dict[BlockerKey, str]:
+    lines: dict[BlockerKey, str] = {}
     inside = False
     for line in body.splitlines():
         stripped = line.strip()
@@ -329,22 +347,24 @@ def reason_lines(body: str) -> dict[int, str]:
         elif ANY_HEADING.match(stripped):
             inside = False
         elif inside and (match := REASON_LINE.match(stripped)):
-            lines.setdefault(int(match.group(1)), stripped)
+            lines.setdefault(blocker_key(match.group(1), int(match.group(2)), repo), stripped)
     return lines
 
 
-def blocker_findings(issue: Issue) -> list[Finding]:
+def blocker_findings(issue: Issue, repo: str) -> list[Finding]:
     findings = []
-    lines = reason_lines(issue.body)
-    edge_numbers = {edge.blocker.number for edge in issue.edges}
+    lines = reason_lines(issue.body, repo)
+    edge_keys = {blocker_key(edge.blocker.repository, edge.blocker.number, repo) for edge in issue.edges}
     for edge in issue.edges:
         pair = f"{issue.ref} <- {edge.blocker}"
         detail = {"blocker": edge.blocker.number, "blocker_title": edge.blocker.title}
+        if edge.blocker.repository:
+            detail["blocker_repository"] = edge.blocker.repository
         if edge.closed_at is not None:
             findings.append(Finding("stale-blocker", f"{pair} (closed {edge.closed_at[:10]})", issue.ref.number,
                                     {**detail, "closed_at": edge.closed_at}))
             continue
-        line = lines.get(edge.blocker.number)
+        line = lines.get(blocker_key(edge.blocker.repository, edge.blocker.number, repo))
         valid = line is not None and "cannot" in line
         if not valid:
             why = "no reason line" if line is None else "its reason line says no \"cannot\""
@@ -352,9 +372,11 @@ def blocker_findings(issue: Issue) -> list[Finding]:
         if issue.has_sub_issues and not (valid and WHOLE_ISSUE_CANNOT_START.search(line)):
             findings.append(Finding("parent-blocker", f"{pair} (issue has sub-issues; reason does not say "
                                     "the whole issue cannot start)", issue.ref.number, detail))
-    for number in sorted(set(lines) - edge_numbers):
-        findings.append(Finding("orphan-reason", f"{issue.ref} <- #{number} (reason line names no blocked-by edge)",
-                                issue.ref.number, {"named": number, "reason_line": lines[number]}))
+    for key in sorted(set(lines) - edge_keys):
+        repository, number = key
+        named = f"#{number}" if repository == repo.lower() else f"{repository}#{number}"
+        findings.append(Finding("orphan-reason", f"{issue.ref} <- {named} (reason line names no blocked-by edge)",
+                                issue.ref.number, {"named": number, "reason_line": lines[key]}))
     return findings
 
 
@@ -430,7 +452,7 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
 
     findings: list[Finding] = []
     for issue in issues.values():
-        findings += blocker_findings(issue)
+        findings += blocker_findings(issue, repo)
 
     prs_by_issue: dict[int, list[dict]] = {}
     for pr in prs:
