@@ -1,0 +1,2 @@
+{"timestamp": "2026-10-07T18:48:22.004Z", "type": "session_meta", "payload": {"id": "01a117b1-f8cf-7cc0-a32f-6772965fb745", "timestamp": "2026-10-07T18:48:21.989Z", "cwd": "~/dev/example-app", "originator": "Codex Desktop", "source": {"subagent": {"thread_spawn": {"parent_thread_id": "01a117b0-3760-7061-b886-57e213128bd8"}}}}}
+{"timestamp": "2026-10-07T18:49:25.922Z", "type": "event_msg", "payload": {"type": "task_complete"}}

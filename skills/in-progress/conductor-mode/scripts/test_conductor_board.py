@@ -3,8 +3,11 @@
 `board_fixtures/bin` puts stand-ins for `gh` and `herdr` first on PATH; they
 replay responses recorded from a real repository (redacted, see replay.py).
 git is real: each test builds a checkout whose worktrees the board reads.
+Codex threads are rollouts under a test CODEX_HOME, built from the first and
+last lines of real rollouts that board_fixtures/record_rollouts.py recorded.
 """
 
+from datetime import datetime
 import json
 import os
 from pathlib import Path
@@ -12,6 +15,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import time
 import unittest
 
 HERE = Path(__file__).resolve().parent
@@ -21,6 +25,11 @@ REPO = "example-org/example-app"
 PR_LIST = ("gh_pr_list_repo_example_org_example_app_state_open_limit_500_json_number_title_isDraft_headRefOid_"
            "closingIssuesReferences_statusCheckRollup_reviews")
 PASSED_PR, PENDING_PR, FAILED_PR = 1288, 1289, 1285
+DESKTOP_CONDUCTOR = "01a117b0-3760-7061-b886-57e213128bd8"
+DESKTOP_RUNNING = "01a117b9-0986-7093-9e2b-62937838f0bc"
+DESKTOP_COMPLETE = "01a117b1-f8cf-7cc0-a32f-6772965fb745"
+TUI_RUNNING = "01a1191d-d8f3-7a40-9de5-495916fdf3bb"
+TUI_COMPLETE_THEN_SETTINGS = "01a11607-71fb-7282-8924-ed187ea62ce9"
 
 
 def git(cwd, *arguments):
@@ -82,21 +91,37 @@ class CheckInTest(unittest.TestCase):
             pr.update(fields)
         self.edit(PR_LIST, change)
 
-    def worktree(self, name, branch, status=None, pane="wQ:p6"):
+    def worktree(self, name, branch, status=None, pane="wQ:p6", codex_thread=None):
         path = self.root / name
         git(self.checkout, "worktree", "add", "-q", "-b", branch, str(path))
         if status is not None:
             template = json.loads((FIXTURES / "responses" / "herdr_agent_list.json").read_text())
             row = template["stdout"]["result"]["agents"][0]
+            if codex_thread is not None:
+                row = {**row, "agent": "codex", "agent_session": {"agent": "codex", "kind": "id",
+                                                                  "source": "herdr:codex", "value": codex_thread}}
             self.agents.append({**row, "pane_id": pane, "cwd": str(path / "src"), "foreground_cwd": str(path),
                                 "agent_status": status})
         return path
 
+    def rollout(self, thread, cwd, minutes_ago=0):
+        [recorded] = (FIXTURES / "rollouts").glob(f"*-{thread}.jsonl")
+        rows = [json.loads(line) for line in recorded.read_text().splitlines()]
+        rows[0]["payload"]["cwd"] = str(cwd)
+        today = datetime.now()
+        path = self.root / "codex" / "sessions" / f"{today:%Y/%m/%d}" / f"rollout-{today:%Y-%m-%d}T00-00-00-{thread}.jsonl"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        written = time.time() - minutes_ago * 60
+        os.utime(path, (written, written))
+
     def check_in(self, *effort, as_json=False):
         self.edit("herdr_agent_list", lambda listed: listed["result"].update(agents=self.agents))
         env = {**os.environ, "PATH": f"{FIXTURES / 'bin'}{os.pathsep}{os.environ['PATH']}",
-               "BOARD_RESPONSES": str(self.responses), "XDG_CONFIG_HOME": str(self.root / "config")}
+               "BOARD_RESPONSES": str(self.responses), "XDG_CONFIG_HOME": str(self.root / "config"),
+               "CODEX_HOME": str(self.root / "codex")}
         env.pop("HERDR_PANE_ID", None)
+        env.pop("CODEX_THREAD_ID", None)
         env.pop("BOARD_RECORD", None)
         arguments = [sys.executable, str(SCRIPT), "check-in", "--repo", REPO, *(effort or ("--parent", "1266")),
                      "--checkout", str(self.checkout), *(["--json"] if as_json else [])]
@@ -217,6 +242,51 @@ class CheckInTest(unittest.TestCase):
             f"unmapped: pane wQ:p6, worktree {self.shown('example-app-lane-shared')}, branch lane-shared: agent_status working, maps to no issue"])
         self.assertIn("slots: 1 running, max 1 -> 0 free", done.stdout)
         self.assertEqual(self.ready(done), [])
+
+    def test_running_desktop_thread_takes_a_slot_and_the_thread_directing_it_does_not(self):
+        self.settings(max_implementers=2)
+        self.rollout(DESKTOP_CONDUCTOR, self.checkout)
+        self.rollout(DESKTOP_RUNNING, self.checkout, minutes_ago=3)
+        done = self.check_in()
+        self.assertIn("slots: 1 running, max 2 -> 1 free", done.stdout)
+        self.assertEqual(self.lines(done, "unmapped"), [
+            f"unmapped: Codex Desktop thread {DESKTOP_RUNNING}, checkout {self.shown('example-app')}, branch main: "
+            "turn running, maps to no issue"])
+        self.assertEqual(len(self.ready(done)), 1)
+
+        self.rollout(DESKTOP_RUNNING, self.checkout, minutes_ago=11)
+        self.assertIn("slots: 0 running, max 2 -> 2 free", self.check_in().stdout)
+
+    def test_ended_thread_in_an_issue_worktree_is_idle_until_its_pr_waits_on_review(self):
+        valuation = self.worktree("example-app-1190-valuation", "1190-valuation")
+        persistence = self.worktree("example-app-1187-persistence", "1187-persistence")
+        self.rollout(DESKTOP_COMPLETE, valuation / "src", minutes_ago=30)
+        self.rollout(TUI_COMPLETE_THEN_SETTINGS, persistence)
+        done = self.check_in()
+        self.assertEqual(self.lines(done, "idle"), [
+            f"idle: #1187 Issue 1187 (codex-tui thread {TUI_COMPLETE_THEN_SETTINGS}, worktree "
+            f"{self.shown('example-app-1187-persistence')}) task_complete 0m ago, no PR",
+            f"idle: #1190 Issue 1190 (Codex Desktop thread {DESKTOP_COMPLETE}, worktree "
+            f"{self.shown('example-app-1190-valuation')}) task_complete 30m ago, no PR"])
+        self.assertIn("slots: 2 running", done.stdout)
+
+        self.point_pr_at(PASSED_PR, 1190)
+        self.assertEqual([line for line in self.lines(self.check_in(), "idle") if "#1190" in line], [])
+
+    def test_thread_in_another_repository_is_ignored(self):
+        self.settings(max_implementers=1)
+        for name in ("example-app-other-repo", "dotfiles-1364-admission-shutdown"):
+            (self.root / name).mkdir()
+            self.rollout(TUI_RUNNING, self.root / name)
+            done = self.check_in()
+            self.assertIn("slots: 0 running, max 1 -> 1 free", done.stdout)
+            self.assertEqual(self.lines(done, "unmapped"), [])
+
+    def test_codex_thread_that_herdr_also_lists_counts_once(self):
+        path = self.worktree("example-app-1190-valuation", "1190-valuation", status="working",
+                             codex_thread=TUI_RUNNING)
+        self.rollout(TUI_RUNNING, path)
+        self.assertIn("slots: 1 running", self.check_in().stdout)
 
     def test_milestone_board_with_nothing_to_do_exits_zero(self):
         milestone = ("--milestone", "Milestone 3")
