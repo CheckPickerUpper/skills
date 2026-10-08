@@ -96,9 +96,9 @@ footer a { color: inherit; }
 
 <div class="wrap">
   <header>
-    <div class="label">Skill benchmark · run 2026-10-07-v3</div>
+    <div class="label">Skill benchmark · run 2026-10-08-v4</div>
     <h1>Does <code>concrete-why</code> help across agents?</h1>
-    <p class="lede">Six agent lanes each answered five "why / why not" questions twice: once plain and once with the rewritten skill pasted into the prompt. Two judges from different model families scored every reply blind against the new rules. <strong>Every reply below is the lane's exact output.</strong></p>
+    <p class="lede">Six agent lanes each answered five "why / why not" questions twice: once plain and once with the rewritten skill (plus round 3's three fixes) pasted into the prompt. Two judges from different model families scored every reply blind against the new rules. <strong>Every reply below is the lane's exact output.</strong></p>
   </header>
 
   <div class="method">
@@ -111,21 +111,21 @@ footer a { color: inherit; }
   <div style="display:grid;gap:12px">
     <h2>What the judges found</h2>
     <div class="tbl"><table>
-      <thead><tr><th>Criterion (sum over 30 pairs)</th><th>Opus judge</th><th>Codex judge</th><th>Agree?</th></tr></thead>
+      <thead><tr><th>Criterion (skill minus without, 30 pairs)</th><th>Opus judge</th><th>Codex judge</th><th>Round 3 (Opus / Codex)</th></tr></thead>
       <tbody>
-        <tr><td>Answers the side asked</td><td class="num up">+21</td><td class="num up">+14</td><td>Yes, skill better</td></tr>
-        <tr><td>Concrete: sequences, no verdicts</td><td class="num up">+38</td><td class="num up">+21</td><td>Yes, skill better</td></tr>
-        <tr><td>Self-contained: intros and code shown</td><td class="num up">+42</td><td class="num up">+33</td><td>Yes, skill better</td></tr>
-        <tr><td>Honest, no overclaiming</td><td class="num up">+6</td><td class="num up">+5</td><td>Yes, slightly</td></tr>
-        <tr><td>Usable decision</td><td class="num up">+23</td><td class="num up">+13</td><td>Yes, skill better</td></tr>
-        <tr><td>Economy: repetition and filler</td><td class="num down">−26</td><td class="num down">−41</td><td>Yes, skill worse</td></tr>
-        <tr><td><b>Total</b></td><td class="num up"><b>708 vs 604</b></td><td class="num up"><b>618 vs 573</b></td><td>Both favour the skill</td></tr>
+        <tr><td>Answers the side asked</td><td class="num up">+7</td><td class="num up">+8</td><td>+21 / +14</td></tr>
+        <tr><td>Concrete: sequences, no verdicts</td><td class="num up">+26</td><td class="num up">+19</td><td>+38 / +21</td></tr>
+        <tr><td>Self-contained: intros and code shown</td><td class="num up">+37</td><td class="num up">+32</td><td>+42 / +33</td></tr>
+        <tr><td>Honest, no overclaiming</td><td class="num up">+19</td><td class="num up">+5</td><td>+6 / +5</td></tr>
+        <tr><td>Usable decision</td><td class="num up">+17</td><td class="num up">+12</td><td>+23 / +13</td></tr>
+        <tr><td>Economy: repetition and filler</td><td class="num down">−32</td><td class="num down">−40</td><td>−26 / −41</td></tr>
+        <tr><td><b>Total</b></td><td class="num up"><b>716 vs 642</b></td><td class="num up"><b>623 vs 587</b></td><td>708 vs 604 / 618 vs 573</td></tr>
       </tbody>
     </table></div>
     <div class="note-box">
-      <p style="margin:0 0 8px"><b>What improved since round 2:</b> both judges now favour the skill, and every lane's total went up. Honesty moved from split to positive, so the "keep consequences at the size of the facts" rule worked. On the NRO question all six lanes showed annotated code with the skill; none did without it.</p>
-      <p style="margin:0 0 8px"><b>New failure the rules caused:</b> on the fixture questions, where no source code was given, some agents wrote source code to satisfy "show the code", for example an invented <code>src/middleware/errors.ts:14</code> (Muse, Gemini). Some also invented an earlier answer to admit to, or a verification step they never did (Opus on NRO, Sonnet on old issues).</p>
-      <p style="margin:0"><b>Still costly:</b> repetition. Muse ran up to 9× longer (1,500 words vs 171 on NRO), much of it a glossary of definitions. MiMo ran 2–4× longer.</p>
+      <p style="margin:0 0 8px"><b>The three fixes worked:</b> judge flags for invented content in with-skill replies fell from 27 to 14, and flags about invented source code fell from 9 to 3. Claude Opus has none left; MiMo (6) and Gemini (5) carry most of the rest. Honesty under the Opus judge rose from +6 to +19.</p>
+      <p style="margin:0 0 8px"><b>Smaller gaps elsewhere are mostly the without-skill replies scoring higher this round</b> (642 vs 604 under the Opus judge) on byte-identical prompts. That's run-to-run noise, and it's why rerunning the unchanged half was logged as waste in dotfiles#1400.</p>
+      <p style="margin:0"><b>Still costly:</b> repetition. Muse runs 4–8× longer than without the skill (1,577 words vs 197 on NRO), MiMo 2–3×.</p>
     </div>
   </div>
 

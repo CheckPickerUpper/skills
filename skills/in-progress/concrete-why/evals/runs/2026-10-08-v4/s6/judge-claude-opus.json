@@ -1,0 +1,182 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Phase races... activation gates, effect conditions... and gameplay cues all read tags today. As a tag, 'empty' is instantly usable by all of them\" presents the benefit as already in use, when Hora's flurry is the only reader today",
+   "\"free everywhere else\" overstates the cost: ResourceEmptyTags runs after every attribute change",
+   "the 'exactly 0 is transient and can be missed' race is asserted with no sequence of events"
+  ],
+  "note": "Restates the ADR as labelled verdicts (\"racy and forbidden\", \"1 fact, 2 owners\") with almost no code shown, and never says Hora is the only reader today."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"rejects your two simpler alternatives\": the user proposed only one",
+   "\"visible to all of them at once\" leaves out that nothing besides Hora reads the tag yet"
+  ],
+  "note": "A compact relay of the ADR whose headline reasons are labels, with no code beyond one inline line and no admission that the reuse benefit is still in the future."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "Health floor of 1 is shown in code but not covered by the ground truth, and another reply says all bars floor at zero; neither can be confirmed here",
+   "says the check \"breaks in three places\" and then sets the third aside as not counting"
+  ],
+  "note": "Thorough, annotated code and honest about the single reader and about timing, but very long with a sampling detour that it then sets aside."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Honest and code-backed: it shows the runtime reads tag presence, concedes the polling argument does not separate the options, and names the real cost; it skips the prediction and single-owner points."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "the Exhaustion effect (\"lowers maximum stamina by 30 for 8 seconds\") is a detour the user never raised, and its detail is unverified",
+   "the four switch line numbers in PhaseGraphExecution.ts are unverified specifics"
+  ],
+  "note": "Gives a clear deciding rule (there is nowhere to put an if, and no attribute wait exists), concretely costs the alternative, and honestly calls the reuse benefit prospective."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Short and fair-minded, but it rests on the label \"reuse\" with no code shown, and never shows what a numeric check would actually need in the phase system."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"the client and server can disagree about which tick saw zero\" is unsupported",
+   "stamina hitting zero \"from an enemy's drain or exhaustion\" is speculative",
+   "M1String.ts:355 cancelling combo attacks on stun is unverified",
+   "\"Adding it later would mean going back and changing every place\" is an invented consequence"
+  ],
+  "note": "Well structured and admits Hora is the only consumer, but adds unsupported failure claims and shows no code."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 1,
+   "economy": 2
+  },
+  "errors": [
+   "invents a Status.Exhausted tag and an initial-activation stamina check for Hora",
+   "the claim that the flurry \"keeps flurrying with 0 stamina\" contradicts the real onTagAdded race",
+   "the Sprint and Dodge abilities are invented",
+   "ADR prose is presented as ts code blocks",
+   "says \"whatever drains the stamina grants the tag\", but the attribute container settles it"
+  ],
+  "note": "It never found the code (it says so), so it builds an invented failure scenario that contradicts how Hora actually works."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"inside its tick loop\": Hora has no per-tick code",
+   "\"the entire rest of the game (UI, cancellation logic, and visual cues) to react\" overclaims: only Hora reads it",
+   "\"all of these subsystems can instantly react to exhaustion\" is presented as current fact"
+  ],
+  "note": "A generic paraphrase of the ADR made of labelled reasons, with no code and an overclaimed reach for the tag."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "cites NRO's CLAUDE.md for the \"Take the dependency\" rule; the ground truth places it in AGENTS.md",
+   "\"Every other ability, gate or cue that cares about empty stamina\" never says that none exists today"
+  ],
+  "note": "Accurate in structure and correctly frames the flurry as an Await race, but it relays the polling claim without a sequence and leaves the reuse benefit looking current."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"all five bars ... use ordinaryZeroFloor\" may conflict with Health's floor of 1 shown in another reply; neither can be confirmed here",
+   "\"Bumps the change counter other surfaces poll\" is unverified"
+  ],
+  "note": "The strongest reply: annotated code at every step, a numbered drift sequence, honest that the tag is not faster and that Hora is the only reader, and a clear deciding rule, though it is long."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"Every arm of the race is an event the game announces\": `after` is a timer"
+  ],
+  "note": "Clear and code-backed, with a good runs-dry sequence; it is candid that the ADR's \"goes wrong between changes\" line is unsupported and that Hora is the only consumer."
+ }
+}

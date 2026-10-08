@@ -1,0 +1,182 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "the yaml block is labelled 'illustration, not the real code', so it is invented code standing in for the real lines; it also uses // comments, which are not valid YAML",
+   "'A Job has no liveness probe' is stated as a fact without being verified against any Job spec"
+  ],
+  "note": "It admits the earlier answer was a label and gives a clear sequence and deciding rule, but the code it shows is a made-up illustration instead of the real probe lines, and it gives no costs or alternatives."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "'39 of 41 took under 5 seconds': the facts only say most were under 5s and 2 were over 2 minutes",
+   "'the running pods keep serving while it works' is an unverified inference",
+   "'it will take about 5 seconds' for a column add is an inflated guess"
+  ],
+  "note": "It answers the benefit question directly and fairly, with an alternative and a check it hasn't done yet, but it overstates the migration stats and never admits that 'cleaner, more robust' was a label."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "'39 of the last 41 migrations were under 5s' goes beyond the facts",
+   "INC-212 is linked with no title or explanation"
+  ],
+  "note": "It is tight and factual, but terse and full of jargon, with a bare incident link and no admission or deciding rule."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'Old pods keep serving while the Job runs' is presented as fact without being verified",
+   "'a failed migration stops the deploy' assumes pipeline behaviour no one has checked"
+  ],
+  "note": "It is the most complete reply: it admits the label, gives a full sequence, costs, an alternative, what it couldn't confirm and a usable rule, though it runs long with several extra sections."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'39 of the last 41 were short' slightly stretches 'most under 5s'",
+   "'today, the first new pod migrates while the old pods still serve' is unverified and sits awkwardly with an outage of all three pods"
+  ],
+  "note": "It marks its inferences carefully and has a strong deciding rule, but it is long and repeats some points."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "'the existing API pods keep serving while the migration runs' is unverified"
+  ],
+  "note": "It is concise and accurate, but too thin: no probe details, no deciding rule, and the incident is told only as a summary rather than step by step."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It is honest about what it hasn't verified, including that it lacks the source lines to quote, but some reasons slide into abstraction, e.g. 'removes migration duration from startup time'."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "the aside that the kubelet reads the manifest is irrelevant detail"
+  ],
+  "note": "The run-on introductions packed into every sentence make it hard to read, and the benefit is framed as 'pods start at once' instead of the outage being avoided."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'39 finished in under 5 seconds' goes beyond the facts",
+   "'That cycle repeated until the index finally completed' is invented",
+   "'true right up until it isn't' is a truism"
+  ],
+  "note": "It has a good sequence and good caveats about the Job spec, but invents how the outage ended and pads with rhetoric."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "'resolved only when someone intervened' is invented",
+   "'Nothing can finish a 4m10s migration' asserts a perpetual loop the facts don't show",
+   "'The Job is the cleaner separation' brings the label back",
+   "INC-212 is linked with no title"
+  ],
+  "note": "It invents details of the incident and ends on the same label the user pushed back on."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "'fail in a loop' suggests a loop that never ends, but the outage ended after 19 minutes",
+   "'Kubernetes will wait for it to finish before rolling': the pipeline does the waiting, not Kubernetes",
+   "INC-212 is mentioned with no link or explanation"
+  ],
+  "note": "It is short but misstates who does the waiting, leaves out the lock, and gives no deciding rule."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "'39 of the last 41 migrations finished in under 5 seconds' goes beyond the facts",
+   "the paragraph about the Canva and Todoist connectors has nothing to do with the question"
+  ],
+  "note": "Strong concrete content and a good alternative analysis, spoiled by an overstated statistic and an irrelevant note about connectors."
+ }
+}

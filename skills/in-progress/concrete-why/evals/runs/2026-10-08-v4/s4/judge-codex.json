@@ -1,0 +1,191 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"That is the only practical difference\" overstates the evidence about open and closed issues.",
+   "\"The crash can no longer happen on a supported device\" extends evidence about Android 9 installation to all supported devices.",
+   "\"v3.2 is unblocked\" assumes there are no other open issues in the milestone."
+  ],
+  "note": "Explains the release cost and corrects the blanket closure recommendation, but overstates what the verified facts establish."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"Android 9 devices ... can't hit this crash\" should be limited to current builds; older installed builds are not addressed.",
+   "\"the open record that forces a fix\" overstates the gate, which also permits a user-approved won't-fix decision."
+  ],
+  "note": "Gives actionable consequences for each issue, but repeats lengthy references and leaves the flash as a symptom rather than a reproduction sequence."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"If we close all four, it ships\" confuses removing these blockers with actually shipping and assumes no other milestone blockers.",
+   "\"There's nothing left to fix in the current app\" treats exclusion of Android 9 as proof that no relevant defect remains."
+  ],
+  "note": "Clearly retracts the earlier reasoning and separates completed work from unresolved bugs, but makes release and defect claims stronger than the evidence."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 5
+  },
+  "errors": [
+   "\"Closing them unblocks it\" assumes these four are the only release blockers.",
+   "\"#402, #403, and #404 ... are already resolved\" incorrectly treats the Android 9 support change as resolution of the crash.",
+   "\"Closing them is correct\" includes closing #403 without the user's required won't-fix decision."
+  ],
+  "note": "Answers the immediate release consequence concisely, but substitutes an obsolete verdict for the required decision on the Android 9 crash."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Closing does three concrete things and nothing more\" claims an exhaustive account without evidence.",
+   "\"#403 \u2014 won't-fix by product decision\" presents a disposition that the user has not yet decided."
+  ],
+  "note": "Explains retained history and the release gate, but bare issue and PR numbers force the reader to reconstruct the supporting facts."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"closing it would ship v3.2\" treats issue closure as a release action.",
+   "\"Close: the release unblocks\" for #402 and #404 ignores the other unresolved blockers.",
+   "\"the tracker says it's resolved\" ignores the distinction between completed and won't-fix closures.",
+   "\"no build we ship can hit this crash\" extends current-build installation evidence beyond its verified scope."
+  ],
+  "note": "Includes a useful flash reproduction and acknowledges unknown additional blockers, but repeatedly restates the gate and contradicts that uncertainty elsewhere."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"If all four close ... v3.2 can ship\" assumes no other open milestone issues.",
+   "\"Nothing is left to fix\" is not established by Android 9 being excluded from current builds.",
+   "\"The gate clears\" after closing #401 ignores the other open issues.",
+   "\"nothing in the tracker records it\" is false: closing an issue retains its record.",
+   "\"Android 9 users ... can't hit the crash\" does not account for older installed builds."
+  ],
+  "note": "Explains individual choices and marks its deadline inference, but falsely says closure erases the bug's record."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Connects leaving issues open to the release gate, shows the flash reproduction, and distinguishes an installation restriction from a verified crash fix."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"I will close #402, #403, and #404\" violates the requirement that the user decide #403's won't-fix disposition.",
+   "\"Closing them removes them from the milestone\" is false: closing changes issue state, not milestone membership.",
+   "\"so the release can ship\" overlooks #401 remaining open and blocking release.",
+   "\"closing #401 violates your standing rule\" is too broad; user-approved won't-fix closure is permitted."
+  ],
+  "note": "Provides concrete gate and flash sequences, but its proposed action contradicts the user's rule and its account of milestone membership is wrong."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 1
+  },
+  "errors": [
+   "\"a reader opening #470 sees the corrected copy\" claims specific PR contents not supplied in the verified facts.",
+   "\"Because the crash was never fixed\" is unverified; the facts establish only that current builds exclude Android 9.",
+   "\"move it out of the v3.2 milestone instead of closing it\" recommends bypassing the release gate while leaving a reproduced bug unresolved, contrary to the no-bug-backlog rule."
+  ],
+  "note": "Explains installation and startup events concretely, but excessive repetition culminates in a recommendation to defer the live bug."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"It also records that the work is resolved or that you've decided not to fix it\" treats closure itself as evidence of completion or a decision, although either needs supporting documentation."
+  ],
+  "note": "Answers directly and respects the user's authority, but omits the PR evidence, Android version restriction, and reproduction details needed to judge its recommendations."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"that is the whole reason they are still open\" invents an exclusive causal explanation from the absence of PR references.",
+   "\"Android 9 users can't install the app and can't hit the crash\" should be limited to current builds.",
+   "\"whether the release gate ... only counts open issues\" introduces uncertainty about the blocking rule already supplied as verified.",
+   "\"it's also the only state that stops an issue from holding the v3.2 gate\" ignores removal from the milestone.",
+   "\"we no longer ship to that OS is your call to make\" conflates the already-established support change with the still-required won't-fix decision."
+  ],
+  "note": "Separates the four outcomes usefully, but repeats the explanation and adds unsupported causal claims and contradictory uncertainty."
+ }
+}

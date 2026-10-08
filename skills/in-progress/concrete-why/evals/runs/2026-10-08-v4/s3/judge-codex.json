@@ -1,0 +1,207 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"A Job has no liveness probe\" \u2014 Job pods can have liveness probes; the proposed configuration is unverified.",
+   "\"a 5-minute index build finishes successfully\" \u2014 removing the Deployment's probe does not guarantee migration success or establish the Job's timeout."
+  ],
+  "note": "Explains the outage sequence and acknowledges the earlier labels, but substitutes illustrative pseudocode for source evidence and guarantees unverified Job behavior."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"39 of 41 took under 5 seconds\" \u2014 the facts establish only that most did; the remaining 39 are not all established as under five seconds.",
+   "\"a 250s build just finishes\" \u2014 the Job's probes, timeout, and migration success are unverified.",
+   "\"the running pods keep serving while it works\" \u2014 compatibility with the changed schema and migration effects on serving are unverified.",
+   "\"If it's a small column add, it will take about 5 seconds, and nothing breaks\" \u2014 neither duration nor safety of this migration is established.",
+   "\"the threshold change would also stop a repeat\" \u2014 this depends on sufficient probe configuration and successful migration completion."
+  ],
+  "note": "Provides a useful alternative and its observable cost, but invents an exact migration distribution and promises safety for an unchecked schema change."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"39 of the last 41 migrations were under 5s\" \u2014 only most are established as under five seconds.",
+   "\"with no probes\" \u2014 the proposed Job configuration has not been verified.",
+   "\"a 2min+ index build just delays the deploy instead of taking orders down\" \u2014 exceeding two minutes does not establish exceeding the 180-second liveness window, and continued API availability requires additional checks."
+  ],
+  "note": "Compactly connects lock waiting to restarts, but leaves the incident and configuration poorly introduced and overstates what the Job guarantees."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"Migrations that take under about 3 minutes work fine\" \u2014 duration alone does not establish successful migration or deployment.",
+   "\"a database-wide 'one at a time' lock\" \u2014 the advisory lock serializes these migration runners, not database activity generally.",
+   "\"the probes ... fail from the first second\" \u2014 initial probe timing is not provided.",
+   "\"a 4-minute index build can't get killed at 180s\" \u2014 the proposed Job's own probes and deadlines are unverified.",
+   "\"If it's a quick column add, the entrypoint will handle it as before\" \u2014 this change's behavior is unverified."
+  ],
+  "note": "Explains the compatibility cost and admits uncertainty about the incident's recovery, but includes unsupported timing and success assurances."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"39 of the last 41 were short\" \u2014 only most being under five seconds and two exceeding two minutes are established.",
+   "\"The running pods keep serving while the migration runs\" \u2014 schema compatibility and migration effects on serving are unverified.",
+   "\"A 4-minute index build becomes a 4-minute deploy instead of an outage\" \u2014 total deployment duration and uninterrupted serving are not established.",
+   "\"today, the first new pod migrates while the old pods still serve\" \u2014 the current rollout configuration and old-pod availability are not provided.",
+   "\"If it's a quick column add, today's setup would deploy it fine\" \u2014 the new migration has not been checked.",
+   "\"2 of the last 41 did\" \u2014 two exceeded two minutes; only the incident migration is established as exceeding 180 seconds.",
+   "\"a pre-deploy Job can't\" take the API down \u2014 a Job migration can still disrupt serving through schema incompatibility or database effects."
+  ],
+  "note": "Marks one configuration assumption as an inference, but its deciding argument misreads the duration evidence and promises that Job migrations cannot cause outages."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"the existing API pods keep serving while the migration runs\" \u2014 compatibility is subsequently acknowledged, but database effects and continued serving remain unverified."
+  ],
+  "note": "Gives a concise benefit and compatibility requirement, though the outage sequence omits how startup and lock waiting caused probe failures and shows no configuration lines."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Best distinguishes the demonstrated restart failure from unverified migration compatibility and Job configuration, while candidly acknowledging that it cannot supply accurate source lines."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"the kubelet on each node reads\" the manifest \u2014 the kubelet acts on pod specifications supplied through Kubernetes, rather than directly reading this repository manifest.",
+   "\"the new pods start, find no pending migrations\" \u2014 this implies retaining entrypoint migration execution, contrary to the proposed move out of the entrypoint.",
+   "\"with the Job they start at once\" \u2014 eliminating migration waiting does not eliminate server startup time."
+  ],
+  "note": "Explains the observable startup difference, but cumbersome definitions obscure it and the proposed behavior ambiguously leaves migration checks in new pods."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"That cycle repeated until the index finally completed\" \u2014 the incident facts do not establish how recovery occurred or that index completion ended the outage.",
+   "\"39 finished in under 5 seconds\" \u2014 only most are established as under five seconds.",
+   "\"both are in exactly the shape that hit you\" \u2014 the second slow migration is not established as exceeding 180 seconds or causing this failure.",
+   "\"the migration no longer runs inside a pod that has probes pointed at it\" \u2014 the Job's probe configuration is unverified.",
+   "\"delays the rollout by 4 minutes, with the old pods still serving\" \u2014 Job duration, schema compatibility, and continued serving are unverified.",
+   "\"The same 39 fast migrations cost a few extra seconds\" \u2014 neither that count nor Job overhead is established.",
+   "\"an index build on a large table\" \u2014 the table's size is not provided."
+  ],
+  "note": "Includes useful checks for rollout gating and Job timeout, but wraps them in repetition and an invented account of outage recovery."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"Nothing can finish a 4m10s migration\" \u2014 this is an unsupported absolute about recovery and execution behavior.",
+   "\"resolved only when someone intervened\" \u2014 no intervention or recovery mechanism is provided.",
+   "\"two replicas are guaranteed to be sitting idle-unready whenever a migration runs\" \u2014 lock contention and simultaneous startup are not guaranteed for every migration.",
+   "\"a Job pod has no readiness/liveness probe\" \u2014 Job pods can have probes; this Job is not configured yet.",
+   "\"it runs the migration to completion\" \u2014 removing the Deployment's probe does not guarantee completion.",
+   "\"39 of your 41 recent migrations would've been fine either way\" \u2014 the duration distribution and counterfactual success are not established.",
+   "\"slow index builds can't take the API down\" \u2014 schema changes and database effects can still disrupt the API."
+  ],
+  "note": "Invents intervention and repeated failure details, then replaces the earlier label with another label and several unsupported guarantees."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"hit the 180-second timeout again, and fail in a loop\" \u2014 repeated timed kills beyond the documented restart and renewed waiting are not explicitly established.",
+   "\"detaches it from the pod lifecycle\" \u2014 a Kubernetes Job still runs in pods with a lifecycle.",
+   "\"The migration can take as long as it needs\" \u2014 Job and pipeline deadlines are unverified.",
+   "\"Kubernetes will wait for it to finish before rolling the new pods\" \u2014 the pipeline must explicitly enforce this ordering; Kubernetes does not automatically couple the Job and Deployment."
+  ],
+  "note": "States the benefit briefly, but omits the lock sequence and attributes pipeline coordination and unlimited runtime to Kubernetes."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"39 of the last 41 migrations finished in under 5 seconds\" \u2014 only most are established as under five seconds.",
+   "\"That pod has no server, so the 180s liveness limit doesn't apply\" \u2014 absence of a server does not determine probe or deadline configuration.",
+   "\"a 4-minute index build simply finishes\" \u2014 successful completion and Job timeout are unverified.",
+   "\"the pods would never get stuck in a restart loop\" \u2014 gating migration failure prevents this particular rollout failure, not every restart loop.",
+   "\"raise the liveness limit ... to 10 minutes. That would have prevented INC-212\" \u2014 this may avoid the documented 180-second kills, but preventing the entire incident is not established.",
+   "\"the Canva and claude.ai Todoist connectors need authorization\" \u2014 these connectors and their authorization state are absent from the scenario."
+  ],
+  "note": "Gives a clear failure sequence and an actionable alternative, but adds unsupported guarantees and an entirely unrelated connector-authorization paragraph."
+ }
+}

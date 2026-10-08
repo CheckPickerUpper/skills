@@ -1,0 +1,94 @@
+exit 0 after 68s
+trikeNearestForward),
+
+hook: PostToolUse
+hook: PostToolUse Completed
+**Clarifying polling timing**
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/usr/bin/zsh -lc "sed -n '580,620p' src/Shared/ReplicatedStorage/GameplayAbilities/PhaseGraphExecution.ts; sed -n '638,666p' src/Shared/ReplicatedStorage/GameplayAttributes/GameplayAttributeContainer.ts; rg --files docs/adr | rg '0038'" in /home/ozzy-desktop/dev/NRO-concrete-why-bench
+ succeeded in 1561ms:
+					default:
+						return unreachable(death);
+				}
+			}
+			case "OnTagAdded": {
+				const presence = this.host.Owner.ReadTagPresence(wait.Tag);
+				switch (presence.Kind) {
+					case "Present":
+						return { Kind: "WaitTriggered", Transition: wait.Transition };
+					case "Absent":
+						return AwaitingEventPending;
+					default:
+						return unreachable(presence);
+				}
+			}
+			case "OnTagRemoved": {
+				const presence = this.host.Owner.ReadTagPresence(wait.Tag);
+				switch (presence.Kind) {
+					case "Present":
+						this.observedPresentTags.add(wait.Tag);
+						return AwaitingEventPending;
+					case "Absent": {
+						if (this.observedPresentTags.has(wait.Tag)) {
+							this.observedPresentTags.delete(wait.Tag);
+							return { Kind: "WaitTriggered", Transition: wait.Transition };
+						}
+						return AwaitingEventPending;
+					}
+					default:
+						return unreachable(presence);
+				}
+			}
+			case "OnIncomingAttack":
+			case "OnAttackFinished":
+			case "OnTargetLost":
+				return AwaitingEventPending;
+			default:
+				return unreachable(wait);
+		}
+	}
+
+		this.recordChange(change);
+		return change;
+	}
+
+	/**
+	 * Lands one change in the same step the number moved: marks it unseen for every reader, writes it to the
+	 * log, and puts the number's Empty Tag on or takes it off to match what the number now reads.
+	 *
+	 * Every write, cost, and modifier going on or coming off reaches here, so a bar's Empty Tag can never
+	 * disagree with the bar, and nothing has to watch the number to find out it ran dry.
+	 */
+	private recordChange(change: GameplayAttributeChange): void {
+		this.versions.RecordChange(change.Attribute);
+		writeAttributeChange(this.log, change);
+		this.settleEmptyTag(change.Attribute, change.OccurredAt);
+	}
+
+	/** Puts one number's Empty Tag on or takes it off to match what the number reads right now. */
+	private settleEmptyTag(attribute: AttributeDefinition, occurredAt: number): void {
+		this.emptyTags.Settle(
+			attribute,
+			limitForReading(attribute, this.ledger.ReadGameplayAttribute(attribute)),
+			occurredAt,
+		);
+	}
+}
+docs/adr/0038-an-empty-resource-bar-is-a-gameplay-tag.md
+
+hook: PostToolUse
+hook: PostToolUse Completed
+codex
+**For Hora alone, checking `stamina === 0` would be simpler.** NRO uses a tag so the same condition works throughout its existing gameplay system.
+
+[Hora’s flurry](/home/ozzy-desktop/dev/NRO-concrete-why-bench/src/Shared/ReplicatedStorage/Content/GameplayAbilities/Hora.Ability.ts:135) declares three ways to reach its final strike: release the button, reach the hold limit, or have stamina’s empty tag present. The attribute container maintains that tag when stamina changes and removes it when stamina rises.
+
+That makes “stamina is empty” available to ability phases, activation gates, effect conditions, and cues through their existing tag support. A direct numeric check would need support in the phase system; other consumers would need their own equivalent support. That’s the rationale recorded in [ADR 0038](/home/ozzy-desktop/dev/NRO-concrete-why-bench/docs/adr/0038-an-empty-resource-bar-is-a-gameplay-tag.md).
+
+**Your objection is valid about the check itself:** comparing a number to zero is perfectly sound. The tag buys reuse, not a better comparison. Despite the name `onTagAdded`, the runtime actually checks tag presence when evaluating the wait—so this isn’t inherently more event-driven than checking stamina.
+
+I’d keep it given NRO’s shared tag-based rules, but justify it by that reuse, not by claiming a zero check is wrong.
+tokens used
+30,908

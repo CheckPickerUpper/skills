@@ -1,0 +1,176 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [
+   "\"That is the only practical difference\" overstates it: closing also changes how the issue shows in search and in its history",
+   "\"Once #401 is fixed and #403 is decided, v3.2 is unblocked\" assumes v3.2 has no other open issues, which was never checked"
+  ],
+  "note": "Short and correct: it names the release block as the cost of leaving the issues open and splits the four correctly, but it never states the deciding rule in general form."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "It gives the concrete cost of leaving each issue open and closing each one, explains minSdkVersion, and offers to check #404 on main first, but it repeats the full issue links and titles many times."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"If we close all four, it ships\" assumes v3.2 holds no other open issues"
+  ],
+  "note": "A clear admission that the earlier answer was wrong and a correct split per issue, with a little unverified certainty about the release unblocking."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "Calls #403 \"already resolved\" and says \"Closing them is correct\", which takes away the user's won't-fix decision",
+   "Bare references #402, #470 and v2.3 with no PR links or titles"
+  ],
+  "note": "Too terse, and it quietly makes the #403 won't-fix call that belongs to the user."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "Issues and PRs are bare numbers with no links or titles",
+   "Broken bold markup \"**not****\""
+  ],
+  "note": "A good breakdown of what closing does mechanically, weakened by bare issue numbers the reader has to look up."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "Thorough and honest: it shows the reproduction steps, says it did not check other open issues, and states a deciding rule, but it repeats itself and is long."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"nothing in the tracker records it\" overstates it: a closed issue stays in the tracker",
+   "The 7-day deadline overdue claim rests on inference, though the reply does mark it as inferred"
+  ],
+  "note": "Strong, concrete sequences and a clear deciding rule, though it is long and slightly inflates what closing hides."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"could not confirm whether the Android 9 crash was fixed in older builds\" is a caveat about something irrelevant to the decision",
+   "Never notes that other issues in v3.2 might still block the release"
+  ],
+  "note": "Solid and well introduced, with a sensible deciding rule, plus one irrelevant caveat."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"I will close #402, #403, and #404\" closes #403 without the user's won't-fix decision",
+   "\"Closing them removes them from the milestone\" is false: closed issues stay in the milestone",
+   "Leaves #401 \"for your decision\" instead of offering to fix it as the rule requires"
+  ],
+  "note": "It contradicts its own reading of the rule by acting on #403 alone, and it misstates what closing does."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"v2.3, the release before v3.2\" is wrong: v3.0 came in between",
+   "Suggests moving #401 out of v3.2 to unblock the release, which ships the known bug and gets around the gate",
+   "\"a reader opening #470 sees the corrected copy\" is an odd, unsupported claim"
+  ],
+  "note": "Heavily padded and repetitive, with a factual slip and a workaround that defeats the release gate."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "Never notes that other open issues may still block v3.2"
+  ],
+  "note": "Tight and correct, but thin: it gives no reproduction sequence and only short link titles."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "PRs and issues lack links (titles are given)",
+   "\"Opening and closing are also how the tracker answers 'is this still true' later\" is filler"
+  ],
+  "note": "Correct splits and an honest caveat, but long-winded and repetitive in its closing sections."
+ }
+}

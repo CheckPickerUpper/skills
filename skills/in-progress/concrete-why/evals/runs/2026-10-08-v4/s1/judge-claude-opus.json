@@ -1,0 +1,172 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "Honest and well sourced, and it says what is unverified, but meta lines like \"No source snippets are included because...\" and the abstract closing sentence add filler."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"a checkout outage would last about 12 minutes instead of 1\" is an unmarked inference that ignores the time to write and merge a revert",
+   "\"your own issue set\" assumes the user wrote #882"
+  ]
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"both checkout incidents last month\": the incidents were in the month before 2026-09-15, not last month"
+  ],
+  "note": "Tight and accurate trade-off, but it never says the earlier \"safety net\" answer was a label and gives no rule the reader could reuse."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"Issue #882\" is a bare number with no link or title",
+   "\"the issue you filed\" is unverified",
+   "\"a flag that will otherwise live forever\" is unsupported"
+  ],
+  "note": "Clear accounting of the 11-minute gap, but it cites #882 without a link and makes several unsupported asides."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Side-by-side before/after sequences, a candid retraction, and a flag that the legacy fallback itself is unverified make this strong and actionable."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"I have no concrete reason not to delete it\" contradicts the 1-minute vs 12-minute cost it then lists"
+  ],
+  "note": "The closing line \"outweighs\" is a verdict, and the opening denies the very downside the reply goes on to describe."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Correct but bare: it never names the flag, files or tests, so the reader has to trust it."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 1,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"Flipping the flag off now would fail over to unexercised code, which is riskier than relying on the 12-minute deploy\" is an invented comparison",
+   "\"Issue #882 explicitly requires removal\" is a bare number and overstates the issue",
+   "\"I will remove... and close #882\" acts without authorization"
+  ],
+  "note": "It lists the downsides of keeping the flag when the user asked for the downside of deleting it, and it makes up a risk claim."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"roughly 13 minutes instead of 1\" adds an unexplained extra minute for the revert, an inferred figure not marked as such"
+  ],
+  "note": "A thorough step-by-step incident sequence with clear unconfirmed items, slightly weakened by the made-up 13-minute total and the speculation about traffic peaks."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"A checkout outage would last roughly 12 times longer\" is an inflated, unmarked inference",
+   "\"the flag check in src/flags.ts\": the facts only say the flag is defined there",
+   "\"a branch every future checkout change has to consider\" is unsupported"
+  ],
+  "note": "Well organised and actionable, but it inflates the rollback cost into a multiplier the facts do not support."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "\"while it was actively moving traffic\" is unsupported",
+   "\"Checkout is broken for every user\" overstates the failure",
+   "\"which every checkout change has to read correctly\" is unsupported"
+  ],
+  "note": "The strongest concrete sequence and a full retraction, but it is long and repeats itself, with a few inflated asides."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"keeps charging the test and review cost\": review cost is not in the facts"
+  ],
+  "note": "Accurate and careful to mark inferences, but it glosses every noun (\"the incident log, the record of checkout incidents\") until the reply becomes hard to read."
+ }
+}
