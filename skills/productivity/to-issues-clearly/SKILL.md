@@ -215,6 +215,17 @@ For a **decision issue**, keep the decision and the questions needed to make it 
 
 **Look for the prefactor and file it first.** *Make the change easy, then make the easy change.* When one preparatory change would make three others straightforward, that is its own issue and it blocks them. Finding it after filing the three is finding it too late.
 
+**Test every blocked-by edge before drafting it.** An issue is blocked by X only when doing it now would duplicate or conflict with work in X that must land first: it cannot start at all, or it cannot meet one of its acceptance criteria, until X lands. These are never blockers: merge order, rebase-time checks (such as "take the next free migration number at merge"), "cleaner after X", "extra work if done now", and anything already merged or closed. When only one piece of an issue depends on X, the edge goes on that piece's own issue, never on the lane or parent above it. A blocked-by edge holds an issue back from whoever would pick it up, so an edge that fails this test idles that work.
+
+Every edge that passes gets one reason line in the blocked issue's body, under a `## Blocked by` heading, naming what this issue cannot start or cannot meet and why:
+
+~~~markdown
+## Blocked by
+- #1212 Idempotency-key binding: cannot pass "a retried charge with the same key is rejected" until it lands, because keys are not bound to charges yet.
+~~~
+
+The shape is fixed, because `scripts/issues_check.py` and `conductor-mode` both read it: `- #N <title>: cannot <what> until it lands, because <why>.` A reason line on an issue with sub-issues says the whole issue `cannot start`. If you cannot write the line, the edge is not real; drop it.
+
 Use words a maintainer would recognise. Keep file paths and proposed APIs out of the title unless the user has already made that decision.
 
 ### 3a. The wide refactor is the exception to vertical slicing
@@ -369,12 +380,12 @@ The final draft should stand on its own. A reader should understand the verifier
 
 **Nothing is created until the user has seen the set.** An issue published wrong has to be edited, and a set published wrong has to be edited eleven times.
 
-Show a numbered list. For each: **title**, **kind label** (and priority, for a bug), **blocked by**, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
+Show a numbered list. For each: **title**, **kind label** (and priority, for a bug), **blocked by** with the draft reason line for each edge, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
 
 Then ask three things:
 
 - Is the granularity right — too coarse, too fine?
-- Is each blocking edge real, or is it just ordering?
+- Is each blocking edge real, or is it just ordering? Does its reason line say what cannot start or cannot be met?
 - Should any of these be merged or split?
 - Is each milestone placement right, and should the proposed new milestone exist?
 
@@ -427,7 +438,7 @@ gh api repos/OWNER/REPO/issues/PARENT/sub_issues -F sub_issue_id=$(gh api repos/
 
 Note `-F`, not `-f`. `-f` sends the id as a string and the API rejects it as not an integer.
 
-A blocker is genuine only when the child cannot start, or cannot meet its criteria, until the blocker lands. Ordinary sequencing is not a blocker, and "related" is not a parent.
+Create a blocked-by edge only after it passes the blocker test in step 3, and write its reason line into the blocked issue's `## Blocked by` section in the same change. An edge without its reason line, or a reason line without its edge, is half a change. "Related" is not a parent.
 
 Create a "blocked by" edge at creation or afterwards; each flag takes issue numbers or URLs:
 
@@ -455,6 +466,16 @@ gh api graphql -f query='{repository(owner:"OWNER",name:"REPO"){issue(number:OLD
 
 If an edge cannot be created, report the URL and the missing edge rather than implying the tree is complete.
 
+### 7a. Run the issue check
+
+Run the check on every issue you created or edited:
+
+~~~sh
+python3 <folder of this SKILL.md>/scripts/issues_check.py --repo OWNER/REPO ISSUE [ISSUE ...]
+~~~
+
+It reads each issue fresh from GitHub and flags `stale-blocker` (the blocking issue is closed), `parent-blocker` (an issue with sub-issues whose reason line does not say the whole issue cannot start), `missing-reason` (an edge with no valid reason line) and `orphan-reason` (a reason line naming an issue that is not an edge). It exits 0 with no findings, 1 with findings, and 2 when a read fails, naming the read. Fix every finding, by removing the edge with its reason line, moving it to the sub-issue that depends on the blocker, or writing the reason line, then run it again until it exits 0. Its summary lists the labels, milestones and edges that exist.
+
 ### 8. Read your own titles back
 
 Before reporting, list every title with no other context — no body, no conversation, no repository open — and put each through both checks:
@@ -469,4 +490,4 @@ Any title that fails gets rewritten and the issue edited before you report. This
 
 ## Final report
 
-Report the issue URLs, the labels that actually landed, the milestone each issue actually sits in (with the URL of any milestone you created), the sub-issue and blocked-by edges that actually exist, each replaced issue and how it was closed, any catch-all milestone you flagged, and any unresolved publication step. Name the gaps rather than implying completeness.
+Report the issue URLs, then quote the summary from the last `issues_check.py` run, which exited 0, for the labels that actually landed, the milestone each issue actually sits in and the blocked-by edges that actually exist. Add the URL of any milestone you created, the sub-issue edges that exist, each replaced issue and how it was closed, any catch-all milestone you flagged, and any unresolved publication step. Name the gaps rather than implying completeness.
