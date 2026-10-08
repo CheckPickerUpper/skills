@@ -1,0 +1,808 @@
+{
+ "argv": [
+  "gh",
+  "pr",
+  "list",
+  "--repo",
+  "example-org/example-app",
+  "--state",
+  "open",
+  "--limit",
+  "500",
+  "--json",
+  "number,title,isDraft,headRefOid,closingIssuesReferences,statusCheckRollup,reviews"
+ ],
+ "stdout": [
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABV0BKCw",
+     "number": 1290,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/1290"
+    }
+   ],
+   "headRefOid": "840df9d62f1dab22839f61637568e37cc12ba3ba",
+   "isDraft": false,
+   "number": 1291,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:51:15Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229178746",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:51:13Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587039/job/113229178994",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:51:11Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587016/job/113229178512",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:51:42Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229178708",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "0001-01-01T00:00:00Z",
+     "conclusion": "",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229178992",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "IN_PROGRESS",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "0001-01-01T00:00:00Z",
+     "conclusion": "",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229178988",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "IN_PROGRESS",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:52:54Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229178803",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-08T08:51:06Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "0001-01-01T00:00:00Z",
+     "conclusion": "",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37752587002/job/113229250692",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-08T08:51:17Z",
+     "status": "IN_PROGRESS",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1291"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABVx3npA",
+     "number": 1287,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/1287"
+    }
+   ],
+   "headRefOid": "10791d2eb0bfc14047841fc2518a4b1e8721ed03",
+   "isDraft": false,
+   "number": 1289,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:02:03Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211221327",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-08T08:01:54Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:01:20Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072242/job/113210968162",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-08T08:01:12Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:01:16Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072324/job/113210970733",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-08T08:01:12Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:02:26Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211221008",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-08T08:01:54Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:11:24Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211220648",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-08T08:01:54Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:04:10Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211221232",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-08T08:01:54Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:03:54Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211221229",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-08T08:01:54Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "0001-01-01T00:00:00Z",
+     "conclusion": "",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37747072405/job/113211285722",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-08T08:02:05Z",
+     "status": "IN_PROGRESS",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1289"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABTWN2Ng",
+     "number": 858,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/858"
+    }
+   ],
+   "headRefOid": "057a91b1dec847ea8a046aef51508951b5db2261",
+   "isDraft": false,
+   "number": 1288,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:48:23Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916591",
+     "name": "Auth service",
+     "startedAt": "2026-10-08T07:46:24Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:45:22Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382328/job/113205504392",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-08T07:45:12Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:45:19Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382295/job/113205504288",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-08T07:45:12Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:46:31Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916643",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-08T07:46:23Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:46:53Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916755",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-08T07:46:23Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:08:39Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916731",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-08T07:46:23Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:49:48Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916381",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-08T07:46:59Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T07:48:39Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205916589",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-08T07:46:25Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:49:09Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113205971649",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-08T07:46:33Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T08:49:15Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37745382330/job/113228465922",
+     "name": "pull-request-verification",
+     "startedAt": "2026-10-08T08:49:12Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1288"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABUpXv3A",
+     "number": 1203,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/1203"
+    }
+   ],
+   "headRefOid": "9e48530e7ac7367f86aaa36803d6937662174a49",
+   "isDraft": false,
+   "number": 1286,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:13:25Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145542179",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-08T04:13:19Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:11:06Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238089/job/113144936715",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-08T04:10:56Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:11:01Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238094/job/113144936731",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-08T04:10:56Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:14:46Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145541594",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-08T04:13:19Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:34:44Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145541915",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-08T04:13:19Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:16:28Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145541970",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-08T04:13:21Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T04:15:03Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145541973",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-08T04:13:19Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T05:28:07Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113145577473",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-08T04:13:28Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T05:28:12Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37726238097/job/113164649088",
+     "name": "pull-request-verification",
+     "startedAt": "2026-10-08T05:28:10Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1286"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABUsRpfA",
+     "number": 1212,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/1212"
+    }
+   ],
+   "headRefOid": "227306ccf5ae08f5114c6a62db6e42fbe2be34b3",
+   "isDraft": false,
+   "number": 1285,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:33:59Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088257301",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-08T00:33:51Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:34:01Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420099/job/113088256825",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-08T00:33:50Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:33:54Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420258/job/113088257209",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-08T00:33:50Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:34:26Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088257369",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-08T00:33:51Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:42:57Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088257345",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-08T00:33:51Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:36:43Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088257089",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-08T00:33:50Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T00:35:55Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088257408",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-08T00:33:52Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T01:32:14Z",
+     "conclusion": "FAILURE",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113088306550",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-08T00:34:01Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-08T01:32:20Z",
+     "conclusion": "FAILURE",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37708420125/job/113104326829",
+     "name": "pull-request-verification",
+     "startedAt": "2026-10-08T01:32:16Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1285"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABUtrv4g",
+     "number": 1219,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/1219"
+    }
+   ],
+   "headRefOid": "4fc227aa92346ea2eea0e1e09d14c8320982bda2",
+   "isDraft": true,
+   "number": 1232,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:33Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569381737",
+     "name": "Read the backend test environment",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:37Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381623",
+     "name": "pnpm-pins",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:31Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912232/job/111569381162",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:33:06Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569381812",
+     "name": "Repository tooling",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:33:04Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381830",
+     "name": "Frozen install (admin)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:33:00Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381876",
+     "name": "Frozen install (frontends/capital-portal-web)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:51Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381922",
+     "name": "Frozen install (packages/api-client)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:47Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381867",
+     "name": "Frozen install (packages/api-types)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:49Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381894",
+     "name": "Frozen install (packages/brand)",
+     "startedAt": "2026-10-05T00:32:28Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:51Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381881",
+     "name": "Frozen install (sandbox)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:32:50Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912255/job/111569381996",
+     "name": "Frozen install (tests/browser)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Repository pnpm pins"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:41:40Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569381639",
+     "name": "API regeneration and request round-trip",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:35:24Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569381865",
+     "name": "Frontend (admin)",
+     "startedAt": "2026-10-05T00:32:28Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:34:14Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569381760",
+     "name": "Frontend (frontends/capital-portal-web)",
+     "startedAt": "2026-10-05T00:32:27Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:55:41Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111569406142",
+     "name": "Backend workspace",
+     "startedAt": "2026-10-05T00:32:35Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    },
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-10-05T00:55:47Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/37247912274/job/111573696852",
+     "name": "pull-request-verification",
+     "startedAt": "2026-10-05T00:55:44Z",
+     "status": "COMPLETED",
+     "workflowName": "Pull request verification"
+    }
+   ],
+   "title": "Issue 1232"
+  },
+  {
+   "closingIssuesReferences": [
+    {
+     "id": "I_kwDOQJLfs88AAAABTu9T7A",
+     "number": 940,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/940"
+    },
+    {
+     "id": "I_kwDOQJLfs88AAAABUChecQ",
+     "number": 988,
+     "repository": {
+      "id": "R_kgDOQJLfsw",
+      "name": "example-app",
+      "owner": {
+       "id": "",
+       "login": "example-org"
+      }
+     },
+     "url": "https://github.com/example-org/example-app/issues/988"
+    }
+   ],
+   "headRefOid": "0f2c097a42212c62b7c1c4545c886b846611dcc1",
+   "isDraft": true,
+   "number": 966,
+   "reviews": [],
+   "statusCheckRollup": [
+    {
+     "__typename": "CheckRun",
+     "completedAt": "2026-09-30T02:47:23Z",
+     "conclusion": "SUCCESS",
+     "detailsUrl": "https://github.com/example-org/example-app/actions/runs/36661436915/job/109716874250",
+     "name": "pull request closes a tracked issue",
+     "startedAt": "2026-09-30T02:47:18Z",
+     "status": "COMPLETED",
+     "workflowName": "linked issue"
+    }
+   ],
+   "title": "Issue 966"
+  }
+ ]
+}
