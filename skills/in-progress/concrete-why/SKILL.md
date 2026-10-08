@@ -58,13 +58,13 @@ The first time an issue, PR, file, type, function, incident, or rule appears, gi
 - **Who uses it or waits on it**: the callers, lane, session, or person that depend on it. Check this; it often changes the answer ("only tests read this return value").
 - **How much it matters**, when that changes the recommendation: priority, deadline, what breaks while it is open.
 
-A bare `#1187`, a bare path, or a bare identifier makes the reader trust you. Do not write one.
+A bare `#1187`, a bare path, or a bare identifier makes the reader trust you. Do not write one. Introduce each item inline, in a clause where it first appears; never collect introductions into a glossary or definitions section.
 
 ### 8. Show the code the argument rests on
 
 When a reason depends on code, show it. The reader is often away from their editor.
 
-- Quote the real lines with `file:line`, keeping the code's own comments exactly as they are.
+- Quote only lines you read in this session, with `file:line`, keeping the code's own comments exactly as they are. Never write code and present it as the source. When you have not read the code, describe it in words; code you sketch to illustrate a point is labelled "illustration, not the real code" and carries no `file:line`.
 - Between the lines, add comments that say what each part does in plain language, marked `// ▸` so they are never mistaken for the code's own comments.
 - When comparing two shapes, show both: before and after, or option A and option B.
 - Trim unrelated lines with `// ...`. Show only what the argument needs.
@@ -80,11 +80,11 @@ this.removeTagsBlockedBy(tag, application.Since);
 
 ### 9. Verify, and say what you could not
 
-Every fact comes from something you read in this session. Check what can be checked before answering: grep for callers, read the function, confirm the rule is actually configured. If you infer, say "I infer" and from what. If something could not be confirmed, say so in its own line ("ADR 0003 says a lint rule enforces this; I could not find it configured"). Never add detail to an incident or timeline that the source does not contain.
+Every fact comes from something you read in this session. Check what can be checked before answering: grep for callers, read the function, confirm the rule is actually configured. If you infer, say "I infer" and from what. If something could not be confirmed, say so in its own line ("ADR 0003 says a lint rule enforces this; I could not find it configured"). Never add detail to an incident or timeline that the source does not contain, and describe how something was verified only when you did it in this session.
 
 ### 10. Admit an empty side, and flip if it is empty
 
-If an earlier answer leaned on a label or a convention ("same as the other routes", "cleaner"), quote it and say it was not a reason, even if the recommendation survives. If one option has no concrete consequence left after these rules, say so plainly and change the recommendation:
+This applies only to an answer that exists earlier in this conversation; never invent one to admit to. If an earlier answer leaned on a label or a convention ("same as the other routes", "cleaner"), quote it and say it was not a reason, even if the recommendation survives. If one option has no concrete consequence left after these rules, say so plainly and change the recommendation:
 
 > "I have no concrete reason not to. My earlier recommendation was a default, not an argument. Move them."
 
