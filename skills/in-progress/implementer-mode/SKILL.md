@@ -73,6 +73,14 @@ you cannot, report the exact refusal text and what you tried. Confirm a refusal
 through the real guard before reporting it; a preview or dry run can be
 stricter than the guard itself. Every write, including a temporary one made to
 show a test fails, goes through the guard.
+
+"Checks pass" means the checks as the repository configures them now. Never
+turn back on a check the owner has turned off: no `git -c` or config change
+that forces a hook or pre-push gate on, no re-adding a skipped or removed CI
+job, and no running a fuller lane (a "full release lane") because a brief says
+checks must pass. If you believe a disabled check is needed, ask the conductor
+with the reason and the failure it would catch, and do not run it until
+answered.
 </what-to-do>
 
 ## 5. Finish and report

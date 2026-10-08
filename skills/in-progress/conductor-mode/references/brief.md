@@ -53,7 +53,11 @@ names the proof that shows it met>
   follows your report.
 
 ## Finish line
-- Push the branch; the pre-push checks pass.
+- Push the branch; the pre-push checks pass as the repository configures them
+  now. Never turn back on a check the owner has turned off: no `git -c` or
+  config change that forces a hook on, no re-added CI job, no fuller lane than
+  the configured one. If you think a disabled check is needed, ask me with the
+  reason and the failure it would catch, and do not run it until answered.
 - Open a PR against <base> with `Closes #N` and a body saying what changed and
   how it was verified.
 - Wait until the PR's checks pass on the pushed head SHA and it is mergeable.
