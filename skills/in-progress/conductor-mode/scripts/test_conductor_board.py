@@ -3,8 +3,9 @@
 `board_fixtures/bin` puts stand-ins for `gh` and `herdr` first on PATH; they
 replay responses recorded from a real repository (redacted, see replay.py).
 git is real: each test builds a checkout whose worktrees the board reads.
-Codex threads are rollouts under a test CODEX_HOME, built from the first and
-last lines of real rollouts that board_fixtures/record_rollouts.py recorded.
+Codex threads are rollouts under a test CODEX_HOME, built from the lines of
+real rollouts that board_fixtures/record_rollouts.py recorded; the directories
+their tool calls name are moved from ~/dev to the test's root.
 """
 
 from datetime import datetime
@@ -27,6 +28,7 @@ PR_LIST = ("gh_pr_list_repo_example_org_example_app_state_open_limit_500_json_nu
 PASSED_PR, PENDING_PR, FAILED_PR = 1288, 1289, 1285
 DESKTOP_CONDUCTOR = "01a117b0-3760-7061-b886-57e213128bd8"
 DESKTOP_RUNNING = "01a117b9-0986-7093-9e2b-62937838f0bc"
+DESKTOP_MOVED = "01a117b3-2e94-71a2-8464-af65d33acda4"
 DESKTOP_COMPLETE = "01a117b1-f8cf-7cc0-a32f-6772965fb745"
 TUI_RUNNING = "01a1191d-d8f3-7a40-9de5-495916fdf3bb"
 TUI_COMPLETE_THEN_SETTINGS = "01a11607-71fb-7282-8924-ed187ea62ce9"
@@ -108,6 +110,11 @@ class CheckInTest(unittest.TestCase):
         [recorded] = (FIXTURES / "rollouts").glob(f"*-{thread}.jsonl")
         rows = [json.loads(line) for line in recorded.read_text().splitlines()]
         rows[0]["payload"]["cwd"] = str(cwd)
+        for row in rows[1:]:
+            payload = row.get("payload", {})
+            for carrier in ("input", "arguments"):
+                if carrier in payload:
+                    payload[carrier] = payload[carrier].replace("~/dev/", f"{self.root}/")
         today = datetime.now()
         path = self.root / "codex" / "sessions" / f"{today:%Y/%m/%d}" / f"rollout-{today:%Y-%m-%d}T00-00-00-{thread}.jsonl"
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -287,6 +294,38 @@ class CheckInTest(unittest.TestCase):
         self.rollout(DESKTOP_RUNNING, self.checkout, minutes_ago=11)
         self.assertIn("slots: 0 running, max 2 -> 2 free", self.check_in().stdout)
 
+    def test_thread_started_in_the_checkout_maps_to_the_worktree_its_commands_run_in(self):
+        self.worktree("example-app-lane-signin", "codex/1190-better-auth-service")
+        self.rollout(DESKTOP_RUNNING, self.checkout, minutes_ago=3)
+        done = self.check_in()
+        self.assertEqual(self.lines(done, "unmapped"), [])
+        self.assertEqual(self.lines(done, "implementer"), [
+            f"implementer: #1190 Issue 1190 (Codex Desktop thread {DESKTOP_RUNNING}, worktree "
+            f"{self.shown('example-app-lane-signin')}, branch codex/1190-better-auth-service) turn running"])
+
+    def test_thread_whose_commands_moved_between_worktrees_maps_to_the_latest_workdir(self):
+        self.worktree("example-app-lane-shared", "codex/1187-idempotency-claim-binding")
+        self.worktree("example-app-1284-program-only-server", "codex/1190-program-only-server")
+        self.worktree("example-app-1287-fly-gate-runner", "820-fly-gate-runner")
+        self.rollout(DESKTOP_MOVED, self.checkout, minutes_ago=3)
+        self.assertEqual(self.lines(self.check_in(), "implementer"), [
+            f"implementer: #1190 Issue 1190 (Codex Desktop thread {DESKTOP_MOVED}, worktree "
+            f"{self.shown('example-app-1284-program-only-server')}, branch codex/1190-program-only-server) "
+            "turn running"])
+
+    def test_thread_whose_commands_name_no_worktree_stays_unmapped_in_the_checkout(self):
+        self.worktree("example-app-lane", "1190-lane")
+        self.rollout(DESKTOP_RUNNING, self.checkout, minutes_ago=3)
+        self.assertEqual(self.lines(self.check_in(), "unmapped"), [
+            f"unmapped: Codex Desktop thread {DESKTOP_RUNNING}, checkout {self.shown('example-app')}, branch main: "
+            "turn running, maps to no issue"])
+
+    def test_branch_number_wins_over_the_path_number_and_both_are_shown(self):
+        self.worktree("example-app-1187-persistence", "codex/1190-valuation", status="done")
+        self.assertEqual(self.lines(self.check_in(), "idle"), [
+            f"idle: #1190 Issue 1190 (pane wQ:p6, worktree {self.shown('example-app-1187-persistence')}, "
+            "branch codex/1190-valuation) agent_status done, no PR"])
+
     def test_ended_thread_in_an_issue_worktree_is_idle_until_its_pr_waits_on_review(self):
         valuation = self.worktree("example-app-1190-valuation", "1190-valuation")
         persistence = self.worktree("example-app-1187-persistence", "1187-persistence")
@@ -332,7 +371,7 @@ class CheckInTest(unittest.TestCase):
         board = json.loads(self.check_in(as_json=True).stdout)
         self.assertEqual([finding["line"] for finding in board["findings"]],
                          [line for line in text.stdout.splitlines()
-                          if not line.startswith(("slots:", "  rule"))])
+                          if not line.startswith(("slots:", "implementer:", "  rule"))])
         self.assertEqual(set(board["rules"]), {finding["kind"] for finding in board["findings"]})
 
     def test_failed_read_exits_two_and_names_the_read(self):

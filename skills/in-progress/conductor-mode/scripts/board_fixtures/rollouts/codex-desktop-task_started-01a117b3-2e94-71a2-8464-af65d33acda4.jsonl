@@ -1,0 +1,6 @@
+{"timestamp": "2026-10-07T18:49:41.636Z", "type": "session_meta", "payload": {"id": "01a117b3-2e94-71a2-8464-af65d33acda4", "timestamp": "2026-10-07T18:49:41.296Z", "cwd": "~/dev/example-app", "originator": "Codex Desktop", "source": {"subagent": {"thread_spawn": {"parent_thread_id": "01a117b0-3760-7061-b886-57e213128bd8"}}}}}
+{"timestamp": "2026-10-07T18:49:49.519Z", "type": "response_item", "payload": {"type": "custom_tool_call", "name": "exec", "input": "workdir:\"~/dev/example-app-lane-shared\""}}
+{"timestamp": "2026-10-08T05:28:42.051Z", "type": "event_msg", "payload": {"type": "task_started"}}
+{"timestamp": "2026-10-08T05:33:20.819Z", "type": "response_item", "payload": {"type": "custom_tool_call", "name": "exec", "input": "workdir:\"~/dev/example-app-1284-program-only-server\""}}
+{"timestamp": "2026-10-08T09:20:06.295Z", "type": "response_item", "payload": {"type": "custom_tool_call", "name": "exec", "input": "\"~/dev/example-app-1287-fly-gate-runner\" workdir:\"~/dev/example-app-1284-program-only-server\""}}
+{"timestamp": "2026-10-08T09:20:50.782Z", "type": "token_usage_record"}

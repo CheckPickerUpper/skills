@@ -4,8 +4,9 @@
 or the open issues of --milestone), their native blocked-by edges and
 `## Blocked by` reason lines, the repository's open PRs, the herdr agents
 running in the checkout's worktrees, and the Codex threads (Desktop, TUI and
-exec, which herdr does not list) whose rollouts name the checkout or one of its
-worktrees, fresh on every run. It prints one line per finding plus, once per
+exec, which herdr does not list) whose rollouts start in the checkout or one of
+its worktrees, fresh on every run. A thread works in the worktree its latest
+tool call names, not where it started. It prints one line per finding plus, once per
 kind, the rule that says what to do about it.
 Exit 0: nothing needs action. Exit 1: something does. Exit 2: a read failed.
 """
@@ -39,6 +40,7 @@ ANY_HEADING = re.compile(r"^#{1,6}\s")
 REASON_LINE = re.compile(r"^- (?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?#(\d+)\b")
 WHOLE_ISSUE_CANNOT_START = re.compile(r"\bcannot start(?: at all)?(?:\s+until\b|[.,;:]|$)", re.IGNORECASE)
 NUMBER_TOKEN = re.compile(r"(?<![0-9])[0-9]+(?![0-9])")
+PATH_END = r"""(?=$|[/\s"'`;,:)}\]\\])"""
 
 RULES = {
     "stale-blocker": "A closed issue blocks nothing: remove the edge and its reason line, then start the issue.",
@@ -103,7 +105,7 @@ class Worktree:
 @dataclass(frozen=True)
 class CodexThread:
     id: str
-    cwd: str
+    works_in: str
     originator: str
     parent: str | None
     written: datetime
@@ -258,11 +260,17 @@ def read_worktrees(checkout: str, repo: str) -> tuple[Worktree, list[Worktree]]:
     return Worktree(*entries[0], None), [Worktree(path, branch, None) for path, branch in entries[1:]]
 
 
+def path_numbers(worktree: Worktree, primary: str) -> list[int]:
+    return [int(token) for token in NUMBER_TOKEN.findall(Path(worktree.path).name.removeprefix(Path(primary).name))]
+
+
 def issue_for(worktree: Worktree, primary: str, effort: dict[int, Issue]) -> int | None:
-    name = Path(worktree.path).name.removeprefix(Path(primary).name)
-    candidates = [int(token) for text in (worktree.branch, name) for token in NUMBER_TOKEN.findall(text)]
-    in_effort = [number for number in candidates if number in effort]
-    return (in_effort or candidates or [None])[0]
+    # The branch is what is checked out now; a worktree's path keeps the name of whatever it was made for.
+    for candidates in ([int(token) for token in NUMBER_TOKEN.findall(worktree.branch)],
+                       path_numbers(worktree, primary)):
+        if candidates:
+            return next((number for number in candidates if number in effort), candidates[0])
+    return None
 
 
 def read_agents() -> list[dict]:
@@ -270,11 +278,34 @@ def read_agents() -> list[dict]:
     return listed["result"]["agents"]
 
 
-def last_turn_event(path: Path) -> str | None:
-    found = None
+def strings(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [text for item in value.values() for text in strings(item)]
+    if isinstance(value, list):
+        return [text for item in value for text in strings(item)]
+    return []
+
+
+def directory_named(payload: dict, worktree_path: re.Pattern) -> str | None:
+    """The worktree a tool call runs in: its last `workdir` inside one, else the last worktree it names."""
+    workdirs, named = [], []
+    for text in strings(payload):
+        for match in worktree_path.finditer(text):
+            named.append(match.group("root"))
+            if match.group("workdir"):
+                workdirs.append(match.group("root"))
+    return (workdirs or named or [None])[-1]
+
+
+def read_rollout(path: Path, worktree_path: re.Pattern) -> tuple[str | None, str | None]:
+    """Return the rollout's last turn event and the worktree its latest tool call ran in."""
+    turn, works_in = None, None
     with path.open(encoding="utf-8", errors="replace") as rollout:
         for line in rollout:
-            if '"task_' not in line and '"turn_aborted"' not in line:
+            is_turn = '"task_' in line or '"turn_aborted"' in line
+            if not is_turn and '_call"' not in line:
                 continue
             try:
                 payload = json.loads(line).get("payload")
@@ -283,8 +314,10 @@ def last_turn_event(path: Path) -> str | None:
                 continue
             kind = payload.get("type") if isinstance(payload, dict) else None
             if kind == CODEX_TURN_STARTED or kind in CODEX_TURN_ENDED:
-                found = kind
-    return found
+                turn = kind
+            elif isinstance(kind, str) and kind.endswith("_call"):
+                works_in = directory_named(payload, worktree_path) or works_in
+    return turn, works_in
 
 
 def read_codex_threads(roots: list[str], since: datetime) -> list[CodexThread]:
@@ -292,7 +325,11 @@ def read_codex_threads(roots: list[str], since: datetime) -> list[CodexThread]:
 
     Rollouts are selected by when they were last written, not by their date
     folder, because a resumed thread keeps appending to the file of the day it started.
+    A thread works in the root its latest tool call names, falling back to where it started.
     """
+    # Longest first, so a worktree whose path extends the checkout's is not read as the checkout.
+    alternatives = "|".join(re.escape(root.rstrip("/")) for root in sorted(roots, key=len, reverse=True))
+    worktree_path = re.compile(rf"""(?P<workdir>workdir"?\s*:\s*")?(?P<root>{alternatives}){PATH_END}""")
     sessions = Path(os.environ.get("CODEX_HOME") or Path.home() / ".codex") / "sessions"
     threads = []
     for path in sorted(sessions.glob("*/*/*/rollout-*.jsonl")):
@@ -311,10 +348,10 @@ def read_codex_threads(roots: list[str], since: datetime) -> list[CodexThread]:
         source = meta.get("source")
         spawn = source.get("subagent", {}).get("thread_spawn", {}) if isinstance(source, dict) else {}
         try:
-            turn = last_turn_event(path)
+            turn, works_in = read_rollout(path, worktree_path)
         except OSError as error:
             raise ReadFailed("Codex rollouts", f"{path} could not be read: {error}") from error
-        threads.append(CodexThread(meta["id"], meta["cwd"], meta.get("originator", "codex"),
+        threads.append(CodexThread(meta["id"], works_in or meta["cwd"], meta.get("originator", "codex"),
                                    spawn.get("parent_thread_id"), written, turn))
     return threads
 
@@ -479,6 +516,10 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
     def worktree_of(cwd: str) -> Worktree | None:
         return next((w for w in worktrees if under(cwd, w.path)), None)
 
+    def located(worktree: Worktree) -> str:
+        named_by_branch = worktree.issue is not None and worktree.issue not in path_numbers(worktree, primary.path)
+        return f"worktree {tilde(worktree.path)}" + (f", branch {worktree.branch}" if named_by_branch else "")
+
     def on_board(worktree: Worktree | None) -> bool:
         return worktree is not None and (worktree.issue is None or worktree.issue in issues)
 
@@ -494,7 +535,7 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
             herdr_threads.add(session.get("value"))
         status = agent["agent_status"]
         implementers.append(Implementer(
-            f"pane {agent['pane_id']}, worktree {tilde(worktree.path)}", worktree, status == WORKING_STATUS,
+            f"pane {agent['pane_id']}, {located(worktree)}", worktree, status == WORKING_STATUS,
             f"agent_status {status}", {"pane_id": agent["pane_id"], "worktree": worktree.path, "agent_status": status}))
 
     # A thread that spawned sub-agents on this board is the conductor directing them, like the own pane.
@@ -502,16 +543,16 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
     for thread in threads:
         if thread.id in directing or thread.id in herdr_threads:
             continue
-        worktree = worktree_of(thread.cwd) or primary
+        worktree = worktree_of(thread.works_in) or primary
         running = thread.last_turn_event == CODEX_TURN_STARTED and now - thread.written <= CODEX_RUNNING_WINDOW
         ended = thread.last_turn_event in CODEX_TURN_ENDED
         # An ended thread holds a slot only while its worktree's issue is open on this board: it can be resumed there.
         if not (running and on_board(worktree) or ended and worktree.issue in issues):
             continue
-        where = "checkout" if worktree is primary else "worktree"
+        where = f"checkout {tilde(worktree.path)}" if worktree is primary else located(worktree)
         turn = "turn running" if running else f"{thread.last_turn_event}{ago(thread.written.isoformat(), now)}"
         implementers.append(Implementer(
-            f"{thread.originator} thread {thread.id}, {where} {tilde(worktree.path)}", worktree, running, turn,
+            f"{thread.originator} thread {thread.id}, {where}", worktree, running, turn,
             {"thread_id": thread.id, "originator": thread.originator, "worktree": worktree.path,
              "last_turn_event": thread.last_turn_event}))
 
@@ -566,6 +607,9 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
         "repo": repo,
         "effort": {kind: int(value) if kind == "parent" else value},
         "slots": {"running": running, "max_implementers": max_implementers, "free": free, "ready": len(ready)},
+        "implementers": [{"issue": i.worktree.issue, "branch": i.worktree.branch, "working": i.working,
+                          "line": f"implementer: {issues[i.worktree.issue].ref if i.worktree.issue in issues else 'no issue'}"
+                                  f" ({i.place}) {i.status}", **i.detail} for i in implementers],
         "findings": [{"kind": f.kind, "issue": f.issue, "line": f"{f.kind}: {f.line}", **f.detail}
                      for f in findings],
         "rules": {kind: RULES[kind] for kind in KIND_ORDER if any(f.kind == kind for f in findings)},
@@ -576,6 +620,8 @@ def print_board(board: dict) -> None:
     slots = board["slots"]
     print(f"slots: {slots['running']} running, max {slots['max_implementers']} -> {slots['free']} free, "
           f"{slots['ready']} ready")
+    for implementer in board["implementers"]:
+        print(implementer["line"])
     for kind in KIND_ORDER:
         lines = [finding["line"] for finding in board["findings"] if finding["kind"] == kind]
         if lines:

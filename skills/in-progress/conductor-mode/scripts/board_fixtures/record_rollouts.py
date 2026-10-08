@@ -4,23 +4,29 @@
 Usage: record_rollouts.py THREAD_ID...
 
 For each thread, writes board_fixtures/rollouts/<originator>-<turn>-<id>.jsonl
-with three kinds of line: the `session_meta` first line, the last turn event
-(task_started, task_complete or turn_aborted) and the rollout's last line.
-Each keeps only its type, `payload.type` and timestamp; the first line also
-keeps the thread id, cwd, originator and sub-agent parent. Prompts, messages,
-accounts and instructions are dropped. A cwd under ~/dev is kept relative to
-it with the private repository's name replaced; any other cwd is redacted.
+with four kinds of line, in rollout order: the `session_meta` first line, each
+tool call whose last named checkout directory differs from the previous call's
+(and the last such call), the last turn event (task_started, task_complete or
+turn_aborted) and the rollout's last line. Each keeps only its type,
+`payload.type` and timestamp; the first line also keeps the thread id, cwd,
+originator and sub-agent parent, and a tool call keeps its name and, in the
+field that carried them, only the directories directly under ~/dev that it
+named, each marked `workdir:` when it was a workdir value. Prompts, messages, commands, file paths, accounts and instructions are
+dropped. A cwd under ~/dev is kept relative to it with the private
+repository's name replaced; any other cwd is redacted.
 """
 
 import json
 import os
 from pathlib import Path
+import re
 import sys
 
 HERE = Path(__file__).resolve().parent
 DEV = Path.home() / "dev"
 PRIVATE_NAMES = (("venoble-application", "example-app"), ("venoble", "example-org"))
 TURN_EVENTS = {"task_started", "task_complete", "turn_aborted"}
+CHECKOUT_DIRECTORY = re.compile(r'(workdir"?\s*:\s*")?(' + re.escape(str(DEV)) + r"/[^/\s\"'`;,:)}\]\\]+)")
 
 
 def sessions() -> Path:
@@ -44,6 +50,54 @@ def event(row: dict) -> dict:
     return kept
 
 
+def strings(value: object) -> list[str]:
+    if isinstance(value, str):
+        return [value]
+    if isinstance(value, dict):
+        return [text for item in value.values() for text in strings(item)]
+    if isinstance(value, list):
+        return [text for item in value for text in strings(item)]
+    return []
+
+
+def named_directories(payload: dict) -> list[str]:
+    """Each ~/dev directory the call names, as `workdir:"…"` when it is a workdir value, else `"…"`."""
+    named = [f'workdir:"{public_cwd(path)}"' if workdir else f'"{public_cwd(path)}"'
+             for text in strings(payload) for workdir, path in CHECKOUT_DIRECTORY.findall(text)]
+    return [token for index, token in enumerate(named) if index == 0 or token != named[index - 1]]
+
+
+def works_in(directories: list[str]) -> str:
+    workdirs = [token for token in directories if token.startswith("workdir:")]
+    return (workdirs or directories)[-1].removeprefix("workdir:")
+
+
+def tool_call(row: dict, directories: list[str]) -> dict:
+    payload = row["payload"]
+    carrier = "input" if "input" in payload else "arguments"
+    return {"timestamp": row["timestamp"], "type": row["type"],
+            "payload": {"type": payload["type"], "name": payload.get("name"), carrier: " ".join(directories)}}
+
+
+def directory_moves(rows: list[dict]) -> dict[int, dict]:
+    moves: dict[int, dict] = {}
+    previous, last = None, None
+    for index, row in enumerate(rows):
+        payload = row.get("payload")
+        if not (isinstance(payload, dict) and str(payload.get("type", "")).endswith("_call")):
+            continue
+        directories = named_directories(payload)
+        if not directories:
+            continue
+        last = (index, tool_call(row, directories))
+        if works_in(directories) != previous:
+            moves[index] = last[1]
+            previous = works_in(directories)
+    if last is not None:
+        moves[last[0]] = last[1]
+    return moves
+
+
 def meta(row: dict) -> dict:
     payload = row["payload"]
     source = payload.get("source")
@@ -57,11 +111,15 @@ def meta(row: dict) -> dict:
 def record(thread_id: str) -> Path:
     [path] = sessions().glob(f"*/*/*/rollout-*-{thread_id}.jsonl")
     rows = [json.loads(line) for line in path.read_text().splitlines()]
-    turns = [row for row in rows if isinstance(row.get("payload"), dict) and row["payload"].get("type") in TURN_EVENTS]
-    kept = [meta(rows[0])] + [event(row) for row in (turns[-1:] + [rows[-1]]) if row is not rows[0]]
+    turns = [index for index, row in enumerate(rows)
+             if isinstance(row.get("payload"), dict) and row["payload"].get("type") in TURN_EVENTS]
+    kept_rows = directory_moves(rows)
+    for index in {*turns[-1:], len(rows) - 1} - {0}:
+        kept_rows.setdefault(index, event(rows[index]))
+    kept = [meta(rows[0])] + [kept_rows[index] for index in sorted(kept_rows)]
     unique = [row for index, row in enumerate(kept) if row not in kept[:index]]
     originator = rows[0]["payload"]["originator"].lower().replace(" ", "-").replace("_", "-")
-    turn = turns[-1]["payload"]["type"] if turns else "no-turn"
+    turn = rows[turns[-1]]["payload"]["type"] if turns else "no-turn"
     out = HERE / "rollouts" / f"{originator}-{turn}-{thread_id}.jsonl"
     out.parent.mkdir(exist_ok=True)
     out.write_text("".join(json.dumps(row) + "\n" for row in unique))
