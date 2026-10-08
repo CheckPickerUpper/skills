@@ -1,0 +1,42 @@
+exit 0 after 31s
+low is stable](https://github.com/acme/storefront/issues/882) is open; its body says "remove once at 100% for 2 weeks with no incidents".
+
+## Conversation so far
+**User:** can we clean up the checkout flag now
+**Assistant:** I'd keep `new_checkout_flow` for now. It's a safety net and removing it is risky this soon; the legacy code isn't hurting anything.
+**User:** why not just delete it tho whats actually the downside
+
+</scenario>
+2026-10-08T02:09:40.506151Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.canva.com/.well-known/oauth-protected-resource/mcp\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+2026-10-08T02:09:40.508872Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer error=\"invalid_token\", error_description=\"Missing Authorization header\", scope=\"email profile\", resource_metadata=\"https://api.fireflies.ai/.well-known/oauth-protected-resource/mcp\"" })
+2026-10-08T02:09:40.620166Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://api.mobbin.com/.well-known/oauth-protected-resource/mcp\"" })
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+hook: SessionStart
+hook: SessionStart Completed
+codex
+Today, `new_checkout_flow`, the LaunchDarkly flag defined in `src/flags.ts`, sends all storefront traffic through the new checkout. Deleting it and the legacy path removes the ability to switch back in about one minute; I’d still delete them now because the cleanup issue’s stated condition has been met.
+
+The old checkout in `src/checkout/legacy/` is reachable only when the flag is off. Keeping it preserves this response to an incident:
+
+1. A checkout incident occurs.
+2. Someone flips `new_checkout_flow` off in LaunchDarkly.
+3. Traffic switches to the legacy checkout.
+
+That mitigated two incidents in the month before rollout, taking about one minute each. After deletion, that switch is unavailable. A fix or rollback requiring a production deploy takes about 12 minutes **from merge to live**, based on the last 20 deploys; diagnosing and preparing it can add time. I cannot confirm that either earlier incident could recur.
+
+Keeping the fallback also has a measured cost: 412 lines across six legacy files, plus 31 legacy-only tests in `tests/checkout/legacy.spec.ts` that add about 40 seconds to every CI run.
+
+[Remove legacy checkout after new flow is stable](https://github.com/acme/storefront/issues/882) is the open cleanup issue. It says to remove the legacy checkout after two weeks at 100% with no incidents. The flag has been at 100% since September 15—about three weeks—with no toggles or checkout incidents since then.
+
+My earlier “safety net” wording needed that concrete mitigation comparison. “The legacy code isn’t hurting anything” was wrong: its tests add time to every CI run. I have no verified reason to extend the waiting period.
+
+I don’t have the exact source lines in the supplied record, so I can’t show an authentic code excerpt.
+
+What decides this is whether preserving the one-minute fallback warrants keeping the legacy code and CI cost after the agreed stability period. The verified history supports cleanup now.
+tokens used
+15,407

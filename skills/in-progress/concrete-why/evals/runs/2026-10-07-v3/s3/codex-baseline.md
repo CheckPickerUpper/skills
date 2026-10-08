@@ -1,0 +1,5 @@
+The benefit is keeping a slow migration from restarting all three API pods. That happened in [INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212): the index build took 4m10s, but liveness killed the pods after 3 minutes. They restarted and waited on the migration lock again, leaving orders down for 19 minutes.
+
+Prisma’s lock already prevents duplicate migrations. A separate Job lets the migration finish while the existing API pods keep serving, then rolls out the new version only if it succeeds. That requires the schema change to remain compatible with the running version.
+
+Most migrations finish under 5 seconds, so the benefit usually isn’t visible. It protects deployments like the two slow index builds out of the last 41 migrations. That’s why I recommend it; “cleaner” wasn’t a concrete reason.

@@ -1,0 +1,2217 @@
+{
+ "s1": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Every change to checkout from here on goes untested against the legacy path\" ignores the 31 legacy tests that run on every CI run",
+      "\"checkout stays broken for roughly 12 minutes\" leaves out the time to write and merge the revert"
+     ],
+     "note": "A clear cost-benefit answer, weakened by an invented argument that the fallback has decayed, which the 31 CI tests contradict.",
+     "scores": [
+      4,
+      4,
+      3,
+      3,
+      4,
+      4
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\"the only real downside is slower rollback\" claims an exhaustive assessment the evidence does not establish.",
+      "\"checkout stays broken for roughly 12 minutes instead of 1\" assumes complete checkout failure, successful mitigation, and no preparation time.",
+      "\"How likely that is: low\" assigns a likelihood unsupported by the incident history alone.",
+      "\"Every change to checkout from here on goes untested against the legacy path\" contradicts the continued presence of 31 legacy tests and invents future testing behavior.",
+      "\"that untested code\" mischaracterizes the legacy path, which has a dedicated test suite."
+     ],
+     "note": "The useful timing comparison is undermined by invented testing behavior and unjustified confidence about future incidents.",
+     "scores": [
+      5,
+      4,
+      3,
+      2,
+      4,
+      3
+     ],
+     "total": 21
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"I only checked src/flags.ts and the storefront code paths\" asserts a check that the facts do not record",
+      "#882 is bare in the opening paragraph"
+     ],
+     "note": "Strong before-and-after incident sequences, an explicit retraction and a clear deciding rule, though it is long and somewhat repetitive.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"The one real downside\" claims an exhaustive assessment.",
+      "\"Someone opens a revert of the removal PR ... The deploy runs\" does not establish how restoring a flag still served at 100% actually switches customers to the legacy path.",
+      "\"I only checked src/flags.ts and the storefront code paths\" invents the precise scope of earlier inspection.",
+      "\"say it isn't\" treats meeting the cleanup condition as proof that the fast fallback has no remaining value."
+     ],
+     "note": "Provides useful named paths and preparation-time caveats, but repeats itself and leaves its proposed recovery sequence incomplete.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Accurate and well proportioned, with a correct 22-day count, an admitted earlier error and concrete next steps; it gives a narrative instead of a numbered sequence.",
+     "scores": [
+      5,
+      4,
+      4,
+      5,
+      5,
+      4
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\"if checkout breaks ... it's fixed in about a minute\" generalizes two successful mitigations to every checkout failure.",
+      "\"the same fix means reverting the PR and deploying\" does not establish that a revert restores working checkout or selects the legacy path.",
+      "\"the worst case ... about 12 minutes of broken checkout\" invents an upper bound and omits diagnosis, preparation, and merge time.",
+      "\"The risk ... looks low\" is an unsupported likelihood estimate.",
+      "\"nobody has needed the fallback\" infers absence of need from absence of toggles.",
+      "\"code that no user can reach\" ignores that users can reach the legacy path when the flag is switched off."
+     ],
+     "note": "Offers a clear cleanup action, but repeatedly converts historical observations into guarantees about future recovery.",
+     "scores": [
+      5,
+      3,
+      3,
+      2,
+      4,
+      3
+     ],
+     "total": 20
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"I can't say it still works\" overlooks that 31 legacy tests exercise that path on every CI run"
+     ],
+     "note": "Excellent sequences and an honest list of what it could not confirm, with a usable deciding rule, though it is a bit long.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"a checkout bug would take about 12 minutes to undo\" initially presents merge-to-live duration as total recovery time.",
+      "\"Checkout stays broken for that whole time\" assumes the incident's severity and persistence.",
+      "\"Someone reverts the deletion commit ... Checkout stays broken ...\" omits the flag-off action needed to select the restored legacy path.",
+      "\"I only checked that it's reachable solely when the flag is off\" invents the precise scope of earlier inspection.",
+      "\"the flag only saves you the difference between a 1-minute and a roughly 12-minute undo\" contradicts its own acknowledgment of additional PR, CI, and review time.",
+      "\"#882's own criteria say it's now proven\" overstates a cleanup threshold as proof of reliability."
+     ],
+     "note": "Names relevant evidence and admits some uncertainty, but its recovery arithmetic contradicts its own detailed sequence.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      3,
+      2
+     ],
+     "total": 20
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Correct and brief, but it names files and incidents without introducing them and shows no sequence.",
+     "scores": [
+      4,
+      3,
+      2,
+      4,
+      3,
+      5
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"a rollback deploy would take about 12 minutes\" extends the measured production deployment timing to an unverified rollback procedure without stating the merge-to-live boundary."
+     ],
+     "note": "Answers directly and efficiently, but leaves the cleanup criteria, code locations, and recovery timing boundary for the reader to infer.",
+     "scores": [
+      5,
+      4,
+      2,
+      4,
+      4,
+      5
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Accurate and candid, including that it has no source lines to show, but it repeats itself and its 'what decides this' line is close to a restated tradeoff.",
+     "scores": [
+      4,
+      4,
+      4,
+      5,
+      4,
+      3
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [],
+     "note": "Explains the lost recovery action and its measured timing, corrects the earlier recommendation, and explicitly acknowledges why it cannot provide authentic code.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      5,
+      4
+     ],
+     "total": 28
+    }
+   }
+  },
+  "gemini": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Violates issue #882\" inflates a removal condition into a violation",
+      "the file:// links point at a local eval directory and are unusable",
+      "\"You are right\" capitulates without explaining what was wrong",
+      "the #882 link has no title"
+     ],
+     "note": "Terse labels and broken local links leave the reader unable to judge.",
+     "scores": [
+      3,
+      2,
+      1,
+      2,
+      2,
+      4
+     ],
+     "total": 14
+    },
+    "codex": {
+     "errors": [
+      "\"Violates issue #882\" turns a removal eligibility condition into a proven violation.",
+      "\"requires removal after 2 weeks\" overstates the issue's stated condition.",
+      "The file links invent storefront source locations inside the judge's evaluation workspace.",
+      "\"a 12-minute production deploy\" omits that the measurement starts at merge and does not include preparing recovery."
+     ],
+     "note": "The short cost comparison is weakened by fabricated file targets and treating an issue's cleanup condition as a rule violation.",
+     "scores": [
+      5,
+      3,
+      2,
+      2,
+      3,
+      4
+     ],
+     "total": 19
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"mitigate a checkout incident instantly\" contradicts its own ~1 minute figure",
+      "\"reverts the bad commit\" when the revert would be of the deletion",
+      "it says the LaunchDarkly audit log shows 100% for 3 weeks, but the log only shows no toggles"
+     ],
+     "note": "Good paired sequences, but it recommends deletion and then ends on an open question, which muddles the decision.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      3,
+      4
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\"mitigate a checkout incident instantly\" contradicts the measured approximately one-minute mitigations.",
+      "\"merges the fix to main\" invents the repository's canonical branch.",
+      "\"The incident is mitigated when the deploy finishes\" assumes the chosen revert fixes the incident.",
+      "\"The LaunchDarkly audit log shows ... zero checkout incidents\" attributes incident evidence to the flag audit log rather than the incident log.",
+      "\"a 12-minute rollback time\" treats merge-to-live duration as total rollback time."
+     ],
+     "note": "Corrects the earlier dismissal of CI cost, but presents a hypothetical recovery as guaranteed and misattributes its evidence.",
+     "scores": [
+      5,
+      4,
+      3,
+      2,
+      4,
+      4
+     ],
+     "total": 22
+    }
+   }
+  },
+  "mimo": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"every minute costs conversions\" is unverified",
+      "\"kill-switch wired to a fail-safe\" is vague and invented",
+      "it proposes deleting the legacy tests while keeping the legacy code as the fallback, which leaves the fallback untested",
+      "#882 is a bare reference",
+      "the \"peak-traffic event\" gate has no basis in the facts"
+     ],
+     "note": "It admits the earlier error, then hedges into a staged plan built on speculation that contradicts its own argument.",
+     "scores": [
+      4,
+      3,
+      2,
+      2,
+      3,
+      2
+     ],
+     "total": 16
+    },
+    "codex": {
+     "errors": [
+      "\"your only mitigation for a checkout incident becomes a redeploy\" is not established for every incident.",
+      "\"roughly a 10x slower time-to-mitigate\" treats deployment duration as complete mitigation time.",
+      "\"every minute costs conversions\" invents a business impact not measured in the supplied facts.",
+      "\"LaunchDarkly serving (trivial)\" assigns an unverified cost judgment.",
+      "\"the flag isn't protecting you from anything new\" is unsupported.",
+      "\"until the new flow has been through a real checkout incident or a high-traffic event\" introduces an unsupported replacement for the agreed removal condition.",
+      "\"Delete the legacy tests and the dead branch ... keep the flag as a kill-switch wired to a fail-safe\" proposes an unspecified recovery mechanism after removing the branch that provides the verified fallback."
+     ],
+     "note": "Replaces the established cleanup condition with an invented waiting period and an incoherent partial cleanup.",
+     "scores": [
+      4,
+      2,
+      2,
+      1,
+      1,
+      2
+     ],
+     "total": 12
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "it says recovery requires writing a fix, ignoring that the deletion can be reverted",
+      "\"this is how both pre-rollout incidents arrived\" invents their cause",
+      "\"Orders start failing at payment\" is invented",
+      "\"two incidents in the six weeks before 100%\" contradicts the fact that both were in the month before rollout",
+      "it recommends keeping the flag against #882's satisfied condition, on the basis of an unverified schema hypothesis",
+      "#882 is not linked"
+     ],
+     "note": "It retracts its labels, then rebuilds a keep argument from invented incident details and an inflated recovery cost.",
+     "scores": [
+      4,
+      3,
+      3,
+      1,
+      2,
+      2
+     ],
+     "total": 15
+    },
+    "codex": {
+     "errors": [
+      "\"a checkout bug cannot be undone without writing, merging, and shipping a fix\" excludes unverified recovery alternatives.",
+      "\"That is the whole downside\" claims an exhaustive assessment.",
+      "\"this is how both pre-rollout incidents arrived\" invents that deployments introduced bugs in the new flow.",
+      "\"Orders start failing at payment\" invents the incidents' failure mode.",
+      "\"Both September incidents\" invents incident dates; the supplied window includes part of August.",
+      "\"two incidents in the six weeks before 100%\" changes the supplied one-month incident window.",
+      "\"revisit at, say, 6\u20138 weeks with no checkout change\" introduces an unsupported waiting condition."
+     ],
+     "note": "Its detailed incident story appears concrete because it invents events, then uses those inventions to justify extending the agreed waiting period.",
+     "scores": [
+      5,
+      3,
+      4,
+      1,
+      2,
+      1
+     ],
+     "total": 16
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"saved us twice last month\" is loose dating; the incidents were in the month before the 2026-09-15 rollout"
+     ],
+     "note": "Tight and correct, but it gives no incident sequence, introduces nothing, and does not admit the earlier label.",
+     "scores": [
+      4,
+      3,
+      2,
+      4,
+      3,
+      5
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"the only real downside\" claims completeness beyond the supplied evidence.",
+      "\"rollback goes from a ~1-minute flag flip to a ~12-minute deploy\" compresses merge-to-live timing into total recovery timing and assumes the deploy mitigates the incident."
+     ],
+     "note": "Gives a compact, actionable comparison but omits the recovery sequence and the limits of the 12-minute measurement.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      4,
+      5
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Accurate, marks its inference and retracts the earlier labels precisely, but the dense appositive sentences and repetition hurt readability.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      4,
+      2
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"I infer the only recovery left is merging a fix and deploying it\" marks an inference but still excludes alternatives the evidence does not address.",
+      "\"about 11 minutes longer\" subtracts historical mitigation time from deployment duration without including diagnosis or preparation.",
+      "\"it has not broken since 2026-09-15\" overstates the absence of logged checkout incidents.",
+      "\"set the threshold for accepting the slower rollback\" attributes a specific rationale to the issue that its supplied body does not state."
+     ],
+     "note": "Explains the verified flag behavior and reverses the earlier recommendation, but repeats the same facts and overstates what the incident log and issue establish.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  }
+ },
+ "s2": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It opens on a verdict ('better fit'), then gives a clear guest-checkout sequence and a correct point that .nullable() is needed either way, without inventing middleware source.",
+     "scores": [
+      4,
+      4,
+      4,
+      4,
+      4,
+      4
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "'Retries ... for 3 days' turns an upper bound into a guaranteed duration.",
+      "'Several guest checkouts ... push the count past 5/min' asserts a threshold crossing without enough delivery or timing evidence.",
+      "'Nothing is broken' dismisses the illustrated incorrect 500 response.",
+      "'Dropped without anyone noticing' invents the absence of logging, monitoring, or other visibility.",
+      "'That .nullable() matters whichever approach we pick' assumes accepting guest-checkout events is required before establishing the endpoint's intended event scope."
+     ],
+     "note": "It shows how a plain Error becomes a retryable response, but opens with a verdict and overstates paging, duration, and silent loss.",
+     "scores": [
+      4,
+      3,
+      3,
+      2,
+      3,
+      3
+     ],
+     "total": 18
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "The strongest overall: proposed code is labelled, it admits the earlier label, contrasts null under both options, says what it couldn't confirm, and states a clear deciding rule.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "'Works only if your code also sends the same 400 response' excludes routing handwritten failures through existing error handling.",
+      "'Customer has to accept null' and 'the check must accept null' assume an event scope the reply admits is unknown.",
+      "'The 14 route handlers ... just by calling .parse()' invents their exact method usage.",
+      "'This the one route that builds that response shape itself' assumes no other route builds it directly.",
+      "'That event is lost and nobody is told' invents permanent loss and absence of visibility.",
+      "'Stripe redelivers it for 3 days' turns an upper bound into a guaranteed duration."
+     ],
+     "note": "The proposed code and conditional failure sequence help, but repeated conclusions and unsupported absolutes weaken the explanation.",
+     "scores": [
+      4,
+      4,
+      3,
+      2,
+      3,
+      2
+     ],
+     "total": 18
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"One bad payload could then be retried for 3 days and page on-call along the way\": a single payload retried with backoff is unlikely to exceed 5/min, so the paging is inflated"
+     ],
+     "note": "Tight and actionable, with a good null-customer decision, but files and the pager are thinly introduced and there is no failure sequence.",
+     "scores": [
+      5,
+      4,
+      3,
+      4,
+      4,
+      5
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "'The code would be about the same size' is an unsupported size estimate presented as fact.",
+      "'One bad payload could ... page on-call' lacks evidence that its retry timing or other failures could cross the paging threshold.",
+      "'This route has its own error format instead of the shared one' assumes a direct response cannot match the shared format.",
+      "'Zod also adds no weight' overstates the narrower fact that no new dependency is needed.",
+      "'With ... a hand-written typeof customer === \"string\" check, those events get a 400' assumes rejection handling that the check alone does not provide.",
+      "'Dropped silently' invents the absence of visibility.",
+      "'I'll use zod with .nullable()' assumes acceptance of guest-checkout events before determining the intended event scope."
+     ],
+     "note": "It acknowledges that manual checks can work, but several compressed claims exceed the facts and it decides the null contract prematurely.",
+     "scores": [
+      4,
+      4,
+      3,
+      2,
+      3,
+      4
+     ],
+     "total": 20
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It labels the sketch as not repo code, adds the real TypeError-to-500 path for a missing data field, admits the earlier convention answer, and states a rule the reader can reuse.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [
+      "'Hand-rolling the check makes a bad body return 500' overgeneralizes from the proposed throwing implementation.",
+      "'The 14 existing route handlers ... all take the 400 path' assumes their exact validation and error propagation behavior.",
+      "'If that shape changes, this route won't change with it' asserts a future maintenance failure rather than a possible need to update the route.",
+      "'I've made customer nullable so they pass validation' selects acceptance before establishing how customer-less events should be handled.",
+      "'Hand-written checks produce a plain Error unless you copy that mapping' excludes other ways of using the existing validation-error path."
+     ],
+     "note": "Clearly marked proposed code and conditional paging make the comparison useful, although the opening and conclusion still overgeneralize handwritten validation.",
+     "scores": [
+      4,
+      4,
+      3,
+      3,
+      4,
+      3
+     ],
+     "total": 21
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is vague and summary-level: no names, no sequence, no code, and nothing the reader could apply next time.",
+     "scores": [
+      3,
+      2,
+      2,
+      4,
+      2,
+      4
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "'I'll accept that in the schema so those valid events don't fail validation' assumes the endpoint should process guest-checkout events without establishing its intended event scope."
+     ],
+     "note": "It gives a concise, fair comparison and acknowledges direct HTTP 400 responses, but omits the code and details needed to independently assess the argument.",
+     "scores": [
+      4,
+      4,
+      2,
+      4,
+      3,
+      5
+     ],
+     "total": 22
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"Under either implementation... String-only validation rejects it with HTTP 400\": a hand-rolled check that throws a plain Error returns 500, not 400, which contradicts its own earlier sequence"
+     ],
+     "note": "It admits the earlier answer was a label and correctly says it cannot quote source, but it ends noncommittal and shows no code at all.",
+     "scores": [
+      4,
+      4,
+      3,
+      4,
+      3,
+      3
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [],
+     "note": "It explains the conditional failure sequence and permits handwritten validation when it produces the required response, but repeats that conclusion.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      5,
+      3
+     ],
+     "total": 27
+    }
+   }
+  },
+  "gemini": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"safely handles the recent Stripe change where customer can be null\": zod only accepts null with .nullable(), which is never mentioned",
+      "\"page on-call if it happens 5 times in a minute\": the threshold is more than 5 per minute"
+     ],
+     "note": "The core mechanism is right, but it is thinly explained and overclaims that zod handles null by itself.",
+     "scores": [
+      4,
+      3,
+      2,
+      3,
+      3,
+      4
+     ],
+     "total": 19
+    },
+    "codex": {
+     "errors": [
+      "'Page on-call if it happens 5 times in a minute' uses the wrong threshold; the facts say more than five.",
+      "'Retry the bad webhook for 3 days' replaces an upper bound with a guaranteed duration.",
+      "'It safely handles ... customer can be null' implies choosing Zod automatically accepts null; the schema must explicitly permit it."
+     ],
+     "note": "The conditional Error-to-500 explanation is concise, but the reply supplies no code and misstates both the paging threshold and null handling.",
+     "scores": [
+      4,
+      3,
+      2,
+      2,
+      2,
+      4
+     ],
+     "total": 17
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "Presents invented errors.ts code (res.status(500).send(\"Internal Server Error\"), issues: err.issues) as real",
+      "\"When 5 webhook failures happen per minute\": the threshold is more than 5",
+      "Treats zod returning 400 and dropping the null-customer event as a good outcome, even though it silently loses valid guest-checkout events",
+      "Calls pager.ts an \"alerting script\", which is an invented detail"
+     ],
+     "note": "The sequences are clear, but it fabricates middleware source and misses that dropping valid null-customer events is itself a bug.",
+     "scores": [
+      4,
+      4,
+      3,
+      2,
+      3,
+      4
+     ],
+     "total": 20
+    },
+    "codex": {
+     "errors": [
+      "'Hand-rolling the validation throws a standard error' assumes all handwritten validation uses that rejection mechanism.",
+      "The displayed errors.ts implementation, including err.issues and send(\"Internal Server Error\"), is invented source code.",
+      "'The hand-rolled check throws' on customer: null is not supported by the shown check, which only checks id.",
+      "'When 5 webhook failures happen per minute' uses the wrong paging threshold.",
+      "'Zod throws a ZodError' on null assumes an unspecified schema rejects null.",
+      "'The exact same invalid payload' calls a documented null customer invalid without establishing the endpoint's intended contract.",
+      "'An if statement does not' provide a catchable error type ignores that handwritten validation can throw a suitable error or return HTTP 400."
+     ],
+     "note": "Its central reproduction does not follow from its own code, and it presents invented middleware source as evidence.",
+     "scores": [
+      3,
+      2,
+      2,
+      1,
+      2,
+      3
+     ],
+     "total": 13
+    }
+   }
+  },
+  "mimo": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"20 lines of validation code\" is an invented number",
+      "\"multi-day retry storm plus pages\" inflates the consequences of a single bad payload",
+      "Uses labels as reasons: \"consistency is load-bearing\", \"working around the wiring\""
+     ],
+     "note": "The key mechanism is buried in labels and rhetoric instead of a step-by-step sequence, and no code is shown.",
+     "scores": [
+      4,
+      2,
+      2,
+      3,
+      3,
+      3
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "'20 lines of validation code' supplies an unsupported size estimate.",
+      "'A multi-day retry storm plus pages' inflates possible backoff retries and conditional paging into an inevitable incident.",
+      "'Redeliver for 3 days' turns an upper bound into a guaranteed duration.",
+      "'z.string().nullable() or .nullish()' treats schemas with different acceptance behavior as interchangeable; nullish also accepts undefined.",
+      "'Hand-rolled, it's scattered typeof checks' assumes handwritten validation cannot be centralized.",
+      "'No new cost' overstates the fact that Zod is already a dependency.",
+      "'Hammering us for three days' exaggerates retries that occur with backoff for up to three days."
+     ],
+     "note": "Labels such as 'load-bearing' substitute for concrete maintenance consequences, while exaggerated retries and an unnecessary permission question obscure the deciding rule.",
+     "scores": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      2
+     ],
+     "total": 13
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "Quotes errors.ts code (instanceof check, issues.map with path.join) as real source, but the facts include no code excerpts",
+      "\"I read errors.ts and confirmed it matches ZodError by instanceof\" is unsupported",
+      "\"I did not find a ValidationError base class\" claims an investigation that never happened"
+     ],
+     "note": "The null-to-500 retry sequence is excellent, but it presents invented middleware code and an invented code reading as verified.",
+     "scores": [
+      5,
+      5,
+      4,
+      2,
+      5,
+      3
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "'Hand-rolled validation throws an Error' assumes an implementation the user has not chosen.",
+      "'Exactly one validation-shaped branch' and the displayed instanceof check and path.join mapping are not established by the supplied facts.",
+      "'I read errors.ts' and 'I did not find a ValidationError base class' invent an inspection.",
+      "'The schema should be z.string().nullable()' assumes the endpoint must process guest-checkout events.",
+      "'There is one way to hand-roll safely' incorrectly excludes other ways to route validation failures to HTTP 400.",
+      "'The checks and the type' must be separately maintained assumes handwritten validation necessarily uses the illustrated casts.",
+      "'If one does, it has this same defect' attributes a defect to an uninspected handler without checking its response handling.",
+      "'Any rejection that isn't a ZodError takes the second path' contradicts the acknowledged option of returning HTTP 400 directly."
+     ],
+     "note": "Its detailed examples are undermined by fabricated source inspection and by treating one flawed handwritten implementation as unavoidable.",
+     "scores": [
+      4,
+      4,
+      2,
+      1,
+      3,
+      2
+     ],
+     "total": 16
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"a manual typeof check would 500 + page + retry\": paging only happens above 5/min, so stating it unconditionally is inflated"
+     ],
+     "note": "The mechanism is correct but compressed into shorthand with no sequence, no code and no introductions.",
+     "scores": [
+      4,
+      3,
+      2,
+      3,
+      3,
+      4
+     ],
+     "total": 19
+    },
+    "codex": {
+     "errors": [
+      "'A manual typeof !== 'string' check would 500 + page + retry' assumes a plain Error rejection and omits the paging threshold condition.",
+      "'Here it changes the status code' implies the library choice itself determines the response, although manual validation can return HTTP 400."
+     ],
+     "note": "It identifies the response-handling concern quickly but compresses a conditional sequence into an inevitable failure and offers no actionable manual alternative.",
+     "scores": [
+      3,
+      3,
+      2,
+      2,
+      2,
+      4
+     ],
+     "total": 16
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "Invented line number \"src/middleware/errors.ts:14\" and invented middleware code",
+      "Invented event type \"checkout.completed\"",
+      "Its zod schema has no .nullable() and it endorses guest checkouts failing as a 400, so valid events are silently dropped"
+     ],
+     "note": "It buries a correct sequence under a glossary of padded definitions and fabricated source, and its recommended schema drops valid events.",
+     "scores": [
+      4,
+      4,
+      4,
+      2,
+      3,
+      1
+     ],
+     "total": 18
+    },
+    "codex": {
+     "errors": [
+      "'src/middleware/errors.ts:14' fabricates a source line number and implementation.",
+      "'Parse() ... those handlers call' invents the existing handlers' exact method usage.",
+      "'Error ... for any other throw' incorrectly implies every thrown value is a built-in Error.",
+      "'True only when a zod schema rejected the body' ignores manually constructed ZodError instances.",
+      "The displayed default response '{ error: \"internal\" }' is not supplied by the facts.",
+      "'Which this endpoint must now accept' assumes guest-checkout events belong to its intended scope.",
+      "The sample Stripe event type 'checkout.completed' is not a verified event type and is not marked as fictitious.",
+      "'Which on-call waits on for server failures' invents an operational practice."
+     ],
+     "note": "It supplies a detailed conditional failure sequence, but fabricated source evidence, excessive definitions, and contradictory null guidance make it unreliable.",
+     "scores": [
+      4,
+      4,
+      2,
+      1,
+      2,
+      1
+     ],
+     "total": 14
+    }
+   }
+  }
+ },
+ "s3": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+      "\"Today a failed migration means pods crash and restart in a loop\": not verified",
+      "the closing paragraph about the Canva and Todoist connectors is irrelevant"
+     ],
+     "note": "It has a strong sequence, benefits and costs with a clear rule, but it never admits the earlier label and ends with an irrelevant paragraph about connectors.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      5,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 migrations took under 5 seconds\" is not established.",
+      "\"fine until a migration builds an index, and then it takes the whole API down\" falsely treats every index build as an outage trigger.",
+      "\"Nothing kills it partway through\" ignores unverified Job timeout and termination settings.",
+      "\"The old pods keep serving\" assumes compatibility and absence of database blocking.",
+      "\"Today a failed migration means pods crash and restart in a loop\" generalizes beyond the verified slow-migration incident.",
+      "\"Adding a column or an index is fine\" guarantees safety without examining the operation or running code.",
+      "\"Renaming or dropping a column needs two deploys\" asserts a universal deployment count without knowing the migration strategy.",
+      "\"will probably break the current setup\" predicts failure from the presence of an index alone.",
+      "\"the Canva and claude.ai Todoist connectors need authorization\" introduces entirely unsupported and unrelated connector claims."
+     ],
+     "note": "It explains the observed failure but turns index builds into predicted outages and ends with unrelated, invented connector requirements.",
+     "scores": [
+      4,
+      4,
+      3,
+      1,
+      3,
+      2
+     ],
+     "total": 17
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+      "\"If the Job fails, the pipeline stops\": describes a design that does not exist yet as if it were settled"
+     ],
+     "note": "This is the most complete answer, covering the sequence, the new flow, the costs, the alternative and the unknowns, but it is long, it adds a CREATE INDEX CONCURRENTLY aside nobody asked about, and it shows no config lines.",
+     "scores": [
+      5,
+      5,
+      4,
+      4,
+      5,
+      3
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 migrations took under 5 seconds\" is not established.",
+      "\"This only happens ... and for the 2 slow ones it did\" incorrectly treats both migrations over two minutes as exceeding the three-minute liveness limit.",
+      "\"The Job ... has no readiness or liveness check\" presents an unverified configuration as fact.",
+      "\"a 4-minute index build finishes\" guarantees completion beyond the evidence.",
+      "\"Nothing restarts them\" and \"the old pods keep serving orders\" are unconditional promises despite unverified compatibility and database blocking.",
+      "\"each slower index build needs the limit raised again\" assumes each subsequent build exceeds the newly configured allowance.",
+      "\"Two of the last 41 did\" incorrectly claims both slow migrations exceeded 180 seconds."
+     ],
+     "note": "The compatibility and database-locking caveats help decision-making, but the answer repeatedly confuses the two-minute statistic with the three-minute kill threshold.",
+     "scores": [
+      5,
+      4,
+      3,
+      2,
+      4,
+      2
+     ],
+     "total": 20
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of the last 41 migrations took under 5 seconds\": an inferred number that is not marked as one",
+      "\"The Job has its own timeout\": not verified",
+      "\"the running pods keep serving the old version\": assumes the schema stays compatible and does not say so"
+     ],
+     "note": "It answers the benefit question honestly and offers the startupProbe alternative, but it shows no config and never admits its earlier answer was a label.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      4,
+      4
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"39 of the last 41 migrations took under 5 seconds\" is not established.",
+      "\"The Job has its own timeout\" asserts configuration that has not been checked.",
+      "\"it can't take the API down\" ignores schema incompatibility and database blocking during migration.",
+      "\"roughly one migration in 20 is a risk\" treats migrations over 120 seconds as evidence of exceeding the 180-second restart threshold.",
+      "\"I'd then do the Job the next time a migration comes close to the limit\" assumes a warning opportunity that the evidence does not establish."
+     ],
+     "note": "The alternative and its recovery tradeoff are useful, but the answer understates compatibility risks and exaggerates what the migration statistics establish.",
+     "scores": [
+      4,
+      4,
+      2,
+      2,
+      4,
+      3
+     ],
+     "total": 19
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"At 180s, the liveness probe started failing\": the facts say the pod is restarted after 180s of failures, so the probe was failing well before 180s",
+      "\"A Job is the only option here where that limit doesn't apply\": the next sentence offers raising the probe thresholds as another option"
+     ],
+     "note": "It admits the earlier label and has a strong section on what it could not confirm, but it repeats itself in places and contradicts itself about the alternatives.",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      4,
+      3
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"That has happened once\" asserts an incident count when only one incident is supplied.",
+      "\"At 180s, the liveness probe started failing\" confuses the restart threshold with the start of probe failures.",
+      "\"Every migration is fine until one runs long, and then it takes the API down\" generalizes one observed outage to every long migration.",
+      "\"compatible with the old code ... is true of an index build\" assumes adding an index cannot disrupt service through locking or other effects.",
+      "\"A Job is the only option here where that limit doesn't apply\" overlooks a startup probe that can defer liveness checks."
+     ],
+     "note": "It usefully identifies compatibility and timeout checks as unfinished, but several absolute claims contradict that otherwise careful uncertainty.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      4,
+      3
+     ],
+     "total": 22
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is short and accurate and notes the compatibility requirement, but it shows no code and has no explicit deciding rule.",
+     "scores": [
+      5,
+      4,
+      3,
+      4,
+      3,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"existing API pods keep serving\" is not guaranteed by schema compatibility alone; migration locking and Job configuration remain unverified.",
+      "\"the two slow index builds\" implies both benefited from avoiding the liveness threshold, although only one is established to have exceeded 180 seconds."
+     ],
+     "note": "It explains the benefit economically and acknowledges schema compatibility, but leaves the configuration supporting the argument unseen.",
+     "scores": [
+      5,
+      4,
+      2,
+      4,
+      4,
+      5
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is very honest about what is unverified, including that it has no config excerpts to show, but because it shows no code the reader has to trust the summary.",
+     "scores": [
+      5,
+      4,
+      3,
+      5,
+      4,
+      4
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"a failed migration stops it\" describes intended pipeline gating without explicitly distinguishing it from verified existing behavior.",
+      "\"existing pods keep serving\" remains conditional on database effects as well as the acknowledged schema compatibility requirement."
+     ],
+     "note": "It gives the strongest evidence-calibrated explanation and admits the missing source excerpts, although that admission does not replace showing the configuration.",
+     "scores": [
+      5,
+      5,
+      3,
+      4,
+      4,
+      4
+     ],
+     "total": 25
+    }
+   }
+  },
+  "gemini": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "INC-212 is named bare, with no link or description",
+      "\"decouples the database migration from the pod's startup lifecycle\": a label used as a reason"
+     ],
+     "note": "The gist is right, but it gives labels instead of a step-by-step sequence, offers no deciding rule and does not admit the earlier label.",
+     "scores": [
+      4,
+      3,
+      2,
+      3,
+      2,
+      4
+     ],
+     "total": 18
+    },
+    "codex": {
+     "errors": [
+      "\"any pod that isn't healthy within 3 minutes\" generalizes the orders service's configured probe behavior to any pod.",
+      "\"hits the 3-minute limit again\" adds a repeated-kill sequence not explicitly verified.",
+      "\"safely take as long as it needs\" ignores Job termination settings and migration effects on the database.",
+      "\"existing pods will stay up and serve traffic normally\" assumes unverified schema compatibility and absence of database blocking."
+     ],
+     "note": "The startup-to-restart sequence is easy to follow, but the promised uninterrupted service exceeds the evidence.",
+     "scores": [
+      5,
+      4,
+      2,
+      2,
+      3,
+      4
+     ],
+     "total": 20
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of the 41 migrations ... took under 5 seconds\": the facts only say most did",
+      "the YAML block is presented as `deploy/orders.yaml` but is reconstructed, and uses `//` comments, which YAML does not allow",
+      "\"the 4m10s migration can never finish\": the outage ended after 19 minutes, so it did finish",
+      "never mentions that the old pods keep serving during the Job, or that this needs the migration to stay compatible with the running code"
+     ],
+     "note": "It has a clear step-by-step account and a usable deciding rule, but it shows a fabricated config block and says the loop could never end, which contradicts the incident.",
+     "scores": [
+      4,
+      4,
+      3,
+      2,
+      4,
+      4
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"39 of the 41 migrations ... took under 5 seconds\" is not established; the facts say most did.",
+      "\"Pod 1 re-acquires the lock\" and \"the 180-second cycle repeats\" add an exact retry sequence not verified in the incident facts.",
+      "\"the 4m10s migration can never finish\" overstates the evidence and does not explain how the outage ended.",
+      "\"The Job ... has no liveness probe\" is an unverified configuration presented as fact.",
+      "\"runs it to completion\" and \"pods start immediately\" promise outcomes beyond removing the migration from pod startup.",
+      "\"a deploy pipeline Job does not\" kill a long-running migration ignores unverified Job timeout and termination settings."
+     ],
+     "note": "It explains the observed outage clearly, but repeats itself and turns a proposed Job configuration into guaranteed completion.",
+     "scores": [
+      5,
+      4,
+      3,
+      2,
+      3,
+      2
+     ],
+     "total": 19
+    }
+   }
+  },
+  "mimo": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of 41 migrations that finish in under 5 seconds\": an inferred number that is not marked as one",
+      "\"crash-looping against a half-applied schema\": not supported by the facts",
+      "INC-212 is named bare, with no link or description"
+     ],
+     "note": "It leans on labels such as \"coupling\" and \"tail\", names INC-212 without introducing it, and ends with a question in the prose.",
+     "scores": [
+      5,
+      3,
+      2,
+      3,
+      4,
+      4
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 migrations ... under 5 seconds\" is not established.",
+      "\"got killed again\" adds a repeated-kill sequence not explicitly verified.",
+      "\"No amount of tuning the probes fixes this cleanly\" dismisses alternatives with a verdict and overlooks startup-probe options.",
+      "\"can take 4 minutes without anything killing it\" overstates removing a liveness probe.",
+      "\"half-applied schema\" asserts an unverified database state.",
+      "\"costs one Job manifest plus a pipeline step\" omits removing entrypoint migration execution and checking compatibility."
+     ],
+     "note": "It identifies the relevant timing conflict but substitutes jargon and absolutes for the configuration and asks again about work already requested.",
+     "scores": [
+      4,
+      3,
+      2,
+      2,
+      3,
+      3
+     ],
+     "total": 17
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "the entrypoint `./server` and `livenessProbe: {}` blocks are invented and shown as real file contents",
+      "\"the half-applied migration is whatever Postgres rolled back to\": speculation",
+      "\"Pods 2 and 3 ... killed at their own 180s marks\" and \"loop only ends when...\": invented detail; the facts only say all three pods were killed",
+      "\"that is the whole cost\": ignores that the migration must stay compatible with the code still running",
+      "\"Nobody outside the cluster depends on these probes\": filler"
+     ],
+     "note": "It is thorough, but it fabricates code and incident details and overstates how small the cost is.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      4,
+      2
+     ],
+     "total": 21
+    },
+    "codex": {
+     "errors": [
+      "\"39 of the 41 migrations\" under five seconds is not established.",
+      "\"The benefit shows up on the other 2\" assumes both exceeded the 180-second limit.",
+      "\"./server\" invents an entrypoint command.",
+      "\"livenessProbe: {}\" is not verified source and does not encode the claimed 180-second threshold.",
+      "\"orders requests stop being routed\" precisely at 120 seconds assumes unverified routing and rollout details.",
+      "\"the half-applied migration is whatever Postgres rolled back to\" assumes unverified transaction and rollback behavior.",
+      "\"starts the index build again \u2014 from the start\" is not established.",
+      "\"The loop only ends when ... finishes inside a 180s window\" invents how the incident recovered.",
+      "\"The Job has no liveness probe\" asserts unverified configuration.",
+      "\"their prisma migrate deploy sees nothing to do\" retains an entrypoint migration command despite the proposed move out of that entrypoint.",
+      "\"orders stay up\" is unsupported without compatibility and database-locking checks.",
+      "\"that is the whole cost\" omits compatibility requirements, failure handling, and Job configuration."
+     ],
+     "note": "Its apparent precision comes from invented code and recovery mechanics, making the long explanation less trustworthy than the supplied facts.",
+     "scores": [
+      5,
+      4,
+      2,
+      1,
+      3,
+      1
+     ],
+     "total": 16
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"39 of 41 migrations were under 5s\": an inferred number that is not marked as one"
+     ],
+     "note": "It is tight and accurate, but too thin to judge from: no code, no step-by-step sequence, no costs and no deciding rule.",
+     "scores": [
+      4,
+      3,
+      2,
+      3,
+      3,
+      5
+     ],
+     "total": 20
+    },
+    "codex": {
+     "errors": [
+      "\"39 of 41 migrations were under 5s\" is not established.",
+      "\"runs once to completion with no probes to kill it\" assumes an unverified Job configuration and guarantees completion."
+     ],
+     "note": "It gives a compact causal explanation of the benefit, but supplies neither the supporting configuration nor the conditions needed for the Job to deliver it.",
+     "scores": [
+      5,
+      4,
+      2,
+      3,
+      3,
+      5
+     ],
+     "total": 22
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "the entrypoint code block (\"// today, in each pod entrypoint\") is reconstructed, not quoted from the file",
+      "never mentions that the old pods keep serving during the Job, or the compatibility cost"
+     ],
+     "note": "The sequence is accurate and the inference is marked, but the text is padded with repeated introductions and shows pseudo-code as if it came from the files.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    },
+    "codex": {
+     "errors": [
+      "\"all three pods wait on one Postgres advisory lock\" misstates the supplied sequence: one holds the lock and two wait.",
+      "\"Deploy starts 3 new pods\" assumes an unverified rollout sequence.",
+      "\"are killed again\" adds a repeated-kill sequence not explicitly verified.",
+      "\"This happens only when a migration outlasts\" excludes lock waiting and other causes of exceeding the startup allowance.",
+      "\"the Job finishing once\" and \"new pods then starting at once\" guarantee completion and immediate startup.",
+      "\"there is no observable difference: pods wait a few seconds either way\" contradicts moving the migration wait out of the pods."
+     ],
+     "note": "It makes the mechanism understandable, but repeatedly restates it and presents illustrative commands without actual source locations.",
+     "scores": [
+      5,
+      4,
+      3,
+      3,
+      4,
+      1
+     ],
+     "total": 20
+    }
+   }
+  }
+ },
+ "s4": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"well past the 7-day deadline\" cites a deadline that is not in the scenario's stated rule",
+      "\"Once that PR merges ... v3.2 is unblocked\" ignores that #403 is still open"
+     ],
+     "note": "A clear table and an actionable plan with a single question for the user, slightly overstated about what unblocks the release.",
+     "scores": [
+      4,
+      3,
+      4,
+      3,
+      5,
+      4
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\u201cLose the record of it\u201d is false; closing preserves the issue.",
+      "\u201cClosing it as \u2018not planned\u2019 means officially dropping Android 9\u201d misstates a support change already made in v3.0.",
+      "\u201cOnce that PR merges \u2026 v3.2 is unblocked\u201d omits the unresolved #403 decision.",
+      "\u201cLeaving it open says the feature is missing\u201d overstates what an open issue establishes."
+     ],
+     "note": "Gives actionable outcomes but inflates closing into lost history, a support decision, and guaranteed release eligibility.",
+     "scores": [
+      5,
+      3,
+      4,
+      2,
+      4,
+      3
+     ],
+     "total": 21
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "The 7-day deadline is not part of the scenario's stated rule"
+     ],
+     "note": "Thorough, concrete sequences, honest limits and a reusable deciding test, at the cost of some length.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      3
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\u201cAnyone can reopen it\u201d ignores GitHub permissions.",
+      "\u201cGitHub only closes an issue automatically when the PR says something like \u2018Closes #402\u2019\u201d excludes other automatic closure paths.",
+      "\u201cThe tracker says CSV export doesn't exist and the typo is still there\u201d overstates what open status means.",
+      "\u201cNeither PR's description mentioned its issue\u201d specifies a location beyond the supplied fact that the PRs did not reference them."
+     ],
+     "note": "Provides concrete user sequences and careful Android 9 uncertainty, but repeats the gate argument and adds inaccurate GitHub mechanics.",
+     "scores": [
+      5,
+      5,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 23
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Fixing it would mean reverting that decision\" is an inference stated as fact"
+     ],
+     "note": "A tight, accurate breakdown of each issue that names the gate cost and corrects the earlier label, but it gives no step-by-step sequences and no rule the user could reuse.",
+     "scores": [
+      4,
+      3,
+      4,
+      4,
+      4,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\u201cFixing it would mean reverting that decision\u201d is unsupported; fixing older builds need not restore Android 9 support in current builds."
+     ],
+     "note": "Explains the release block and corrects the blanket closure, but invents a constraint on fixing the Android 9 crash.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      4
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"I confirmed #455 and #470 from their titles and the issue labels\" invents how they were verified and contradicts the established facts"
+     ],
+     "note": "A strong, well-structured answer with a clear rule, weakened by an invented caveat about how the PRs were verified.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      5,
+      4
+     ],
+     "total": 26
+    },
+    "codex": {
+     "errors": [
+      "\u201cThat is the only thing that would make #403 matter\u201d excludes other relevant facts, such as support obligations or the same crash on newer Android versions.",
+      "\u201cI confirmed #455 and #470 from their titles and the issue labels\u201d invents how the earlier verification was performed.",
+      "Moving #401 to a later milestone conflicts with completing the bug determination under the no-backlog rule.",
+      "\u201cAn issue is closed only if its work has shipped or can no longer happen\u201d excludes the user's authorized won't-fix outcome for a reproducible bug."
+     ],
+     "note": "Explains the gate but invents verification history and ends by parking decisions the standing rule requires resolving.",
+     "scores": [
+      5,
+      3,
+      4,
+      2,
+      2,
+      2
+     ],
+     "total": 18
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Correct and brief, but it gives no sequences and omits the PRs that shipped #402 and #404.",
+     "scores": [
+      4,
+      2,
+      3,
+      5,
+      4,
+      5
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\u201cClosing it would unblock the gate\u201d is too broad if read as unblocking the whole release; the other open issues still block it."
+     ],
+     "note": "Gives the essential correction economically, but omits the verified PRs, Android minimum, and cold-start sequence needed to judge the cases independently.",
+     "scores": [
+      5,
+      3,
+      3,
+      4,
+      4,
+      5
+     ],
+     "total": 24
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Precise sequences per issue, explicit uncertainty about #403, and a clean deciding rule.",
+     "scores": [
+      5,
+      5,
+      4,
+      5,
+      5,
+      4
+     ],
+     "total": 28
+    },
+    "codex": {
+     "errors": [],
+     "note": "Connects each open issue to release blocking, shows the observable bug sequences, and preserves the user's authority over won't-fix decisions.",
+     "scores": [
+      5,
+      5,
+      5,
+      5,
+      5,
+      4
+     ],
+     "total": 29
+    }
+   }
+  },
+  "gemini": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "Treats closing #403 as an outcome without noting that the won't-fix call is the user's",
+      "Bare #402/#455/#470 with no links or titles"
+     ],
+     "note": "It names the gate cost but uses bare references and quietly closes #403 against the user's rule.",
+     "scores": [
+      4,
+      2,
+      2,
+      2,
+      3,
+      4
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "\u201cClears a bug that is no longer possible to hit\u201d overlooks older installed Android 9 builds.",
+      "Treating #403 as ready to close omits the user's required won't-fix decision."
+     ],
+     "note": "Answers the release-gate question briefly, but bare issue references and the missing Android 9 decision weaken it.",
+     "scores": [
+      5,
+      3,
+      2,
+      3,
+      3,
+      5
+     ],
+     "total": 21
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "Groups #403 as \"already resolved in the codebase\" and recommends closing it, bypassing the user's won't-fix decision"
+     ],
+     "note": "It misclassifies #403 as solved and repeats the gate explanation.",
+     "scores": [
+      4,
+      3,
+      4,
+      2,
+      3,
+      3
+     ],
+     "total": 19
+    },
+    "codex": {
+     "errors": [
+      "\u201cThe three already solved: #402, #403, and #404\u201d incorrectly treats dropping platform support as fixing #403.",
+      "\u201cAlready resolved in the codebase\u201d is unsupported for the Android 9 crash.",
+      "\u201cClose the three\u201d bypasses the user's required won't-fix decision for #403.",
+      "Closing those three does not by itself \u201callow \u2026 the release to proceed\u201d while #401 remains open.",
+      "\u201cDrops the bug from the milestone\u201d conflates closing an issue with removing its milestone assignment."
+     ],
+     "note": "Repeated gate sequences cannot compensate for treating an unsupported-platform crash as already fixed.",
+     "scores": [
+      5,
+      3,
+      4,
+      2,
+      2,
+      2
+     ],
+     "total": 18
+    }
+   }
+  },
+  "mimo": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Ends the notification/triage stream\" is generic and unverified",
+      "\"cheap to fix by setting the background color before first paint\" is an unverified fix",
+      "Proposes closing #403 \"as obsolete\" itself, bypassing the user's won't-fix decision"
+     ],
+     "note": "Its generic list of what closing does pads the answer, and it invents a cheap fix for #401.",
+     "scores": [
+      3,
+      3,
+      2,
+      2,
+      3,
+      3
+     ],
+     "total": 16
+    },
+    "codex": {
+     "errors": [
+      "\u201cEnds the notification/triage stream\u201d is unsupported; closed issues can still receive activity and notifications.",
+      "\u201cNo further work planned\u201d is not the meaning of every closure, including completed work.",
+      "\u201cCheap to fix by setting the background color before first paint\u201d invents a diagnosis, fix, and effort estimate.",
+      "\u201cClose #402, #403, #404\u201d bypasses the user's required won't-fix decision for #403.",
+      "\u201cThe gate is the only thing forcing the decision\u201d ignores the standing no-bug-backlog rule."
+     ],
+     "note": "Useful release-gate information is undermined by invented notification behavior and an unverified flicker fix.",
+     "scores": [
+      4,
+      3,
+      3,
+      1,
+      2,
+      3
+     ],
+     "total": 16
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"The window paints before the theme is applied to the first frame\" asserts an unverified cause",
+      "\"which is the only reason #402 is still open\" overclaims"
+     ],
+     "note": "A strong rule and per-issue breakdown, undermined by inventing the cause of the flicker.",
+     "scores": [
+      5,
+      4,
+      5,
+      3,
+      5,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\u201cThe only thing the v3.2 release gate looks at\u201d excludes unverified additional release conditions.",
+      "\u201cThe only reason #402 is still open\u201d asserts an exclusive cause not established by the facts.",
+      "\u201cThe window paints before the theme is applied to the first frame\u201d invents the flicker's implementation cause.",
+      "\u201cHappens on every cold start today\u201d expands one reproduced case into universal frequency.",
+      "\u201cClosing it as stale would record \u2018this no longer happens\u2019\u201d assigns a meaning closure does not necessarily carry.",
+      "\u201cOpen is a false statement about the app\u201d overstates what issue status establishes.",
+      "\u201cOne of my four closures I'm taking back\u201d understates the correction because #403 also requires the user's decision."
+     ],
+     "note": "Shows consequences clearly but substitutes an invented rendering diagnosis and exaggerated tracker semantics for verified evidence.",
+     "scores": [
+      5,
+      4,
+      4,
+      2,
+      3,
+      2
+     ],
+     "total": 20
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"can't be fixed on the current builds\" is loosely worded for #403"
+     ],
+     "note": "Concise and correct; it puts the cost of leaving each issue open first and offers moving #401 out of the milestone, but it states no general deciding rule.",
+     "scores": [
+      4,
+      3,
+      4,
+      4,
+      4,
+      5
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\u201cCan't be fixed on the current builds\u201d confuses inability to install with inability to fix.",
+      "\u201cKeep #401 / #403 open until you decide won't-fix or move them out\u201d offers deferral without completing the required bug determination."
+     ],
+     "note": "Makes the cost of leaving completed work open clear, but treats moving unresolved bugs as an adequate endpoint.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      3,
+      4
+     ],
+     "total": 23
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "Accurate but buried in repetition and redundant hedging; the same inference caveats appear several times.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      4,
+      1
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\u201cRemove it from the milestone \u2026 so the gate opens\u201d ignores the other unresolved blockers and offers deferral contrary to the no-backlog rule."
+     ],
+     "note": "Mostly distinguishes evidence from inference, but excessive repetition and procedural commentary bury the answer.",
+     "scores": [
+      5,
+      4,
+      4,
+      4,
+      3,
+      1
+     ],
+     "total": 21
+    }
+   }
+  }
+ },
+ "s6": {
+  "claude-opus": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "The polling objection that it can \"see it a step late\" ignores that the tag wait is also read at each step",
+      "The Exhaustion aside is unasked"
+     ],
+     "note": "It frames both rejected options well and admits that only Hora uses the tag, but the code has no comments and some reasons are labels (\"always correct\").",
+     "scores": [
+      5,
+      3,
+      4,
+      4,
+      4,
+      3
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"The repo bans guessing state by polling\" broadens the stated prohibition against inferring state from side effects into a general polling ban.",
+      "\"can miss the moment ... or see it a step late\" does not establish that current tag checks avoid the same timing issue.",
+      "\"Prediction comes free\" overstates the evidence and omits whether Hora uses prediction."
+     ],
+     "note": "Shows Hora's race and admits its sole-reader status, but its timing and prediction reasons remain unproven.",
+     "scores": [
+      4,
+      3,
+      3,
+      3,
+      3,
+      3
+     ],
+     "total": 19
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"Where my earlier reasoning... is empty\" refers to an earlier answer that does not exist",
+      "Dismissing the ADR's side-effect argument is opinion presented as fact"
+     ],
+     "note": "It is concrete and candid: it counts the runtime changes an inline check needs, gives the Health-floor reason, and strips the ADR reasons that don't hold up, so the deciding rule is clear.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      5,
+      4
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\"Nothing calls it from gameplay code\" contradicts Hora's demonstrated use through Resources.Stamina.WhileEmpty.EmptyTag.",
+      "\"made at the same moment a stamina read would be\" assumes the scheduling of an unimplemented alternative.",
+      "\"a second trigger kind that only works for bars whose floor is 0\" conflates a zero comparison with the proposed onAttributeEmpty trigger, which could inspect the declared floor.",
+      "\"my earlier reasoning\" refers to an earlier answer absent from the supplied conversation."
+     ],
+     "note": "Shows concrete runtime changes and challenges the timing rationale, but undermines that care with contradictory and overly narrow claims.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      2
+     ],
+     "total": 22
+    }
+   }
+  },
+  "claude-sonnet": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"onTagAdded fires the instant it happens\" is wrong, because the wait is read at each step",
+      "Says gates, cues and other held abilities read the same tag, but none do",
+      "\"creates a gap between the number and what the ability sees\" is unsupported"
+     ],
+     "note": "It asserts an event-versus-poll distinction that the code does not have, and it shows no code.",
+     "scores": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      3
+     ],
+     "total": 14
+    },
+    "codex": {
+     "errors": [
+      "\"It's an event, not a poll\" misrepresents the runtime's current tag-presence checks.",
+      "\"onTagAdded fires the instant it happens\" is not supported by the implementation.",
+      "\"Anything else ... reads the same tag\" implies existing gates, cues, and other held abilities consume Empty Tags; only Hora does.",
+      "\"CLAUDE.md ... pushes toward this shape\" relies on a Claude-only instruction surface that does not govern Codex.",
+      "\"would have to live in the flurry's tick or in the drain effect\" omits adding an attribute race.",
+      "\"creates a gap between the number and what the ability sees\" does not demonstrate a gap different from tag evaluation."
+     ],
+     "note": "Confidently recommends the tag using false timing distinctions and unverified consumers.",
+     "scores": [
+      3,
+      2,
+      2,
+      1,
+      2,
+      3
+     ],
+     "total": 13
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"Hora is the Taijutsu ability\" is likely wrong, since Hora is a rapier ability",
+      "\"Per-tick poll: the check runs on the next tick, not at the pulse\" applies equally to the tag wait"
+     ],
+     "note": "It covers the already-empty case well and admits that Hora is the only reader, but it overstates the timing advantage of the tag.",
+     "scores": [
+      5,
+      4,
+      4,
+      3,
+      4,
+      4
+     ],
+     "total": 24
+    },
+    "codex": {
+     "errors": [
+      "\"Hora is the Taijutsu ability\" conflicts with the rapier ability identified in the supplied replies.",
+      "\"has to end the moment a drain pulse empties the bar\" presents immediate execution that its later presence-check description does not prove.",
+      "\"Per-tick poll ... next tick, not at the pulse\" does not establish a timing disadvantage relative to the existing tag wait.",
+      "\"ADR 0038 ... rejects both of those\" ambiguously attributes rejection of three listed alternatives, including drain-effect wiring, to an ADR that rejects polling and an attribute race.",
+      "\"ADR names gates, cues, and effect conditions as readers\" misstates potential consumers as existing readers."
+     ],
+     "note": "Shows the race and settlement path and admits prospective reuse, but its opening and deciding rule still rely on an unsupported timing distinction.",
+     "scores": [
+      4,
+      3,
+      4,
+      2,
+      3,
+      3
+     ],
+     "total": 19
+    }
+   }
+  },
+  "codex": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It is honest that the tag wait is polled too, but it is too thin: no code, and no concrete cost of the inline check.",
+     "scores": [
+      2,
+      2,
+      2,
+      4,
+      2,
+      4
+     ],
+     "total": 16
+    },
+    "codex": {
+     "errors": [
+      "\"For Hora alone, checking stamina === 0 would be simpler\" does not account for adding a place in the runtime to execute that check.",
+      "\"reuse across NRO's gameplay systems\" leaves unstated that Hora is the only current Empty Tag reader."
+     ],
+     "note": "Avoids the false immediate-callback argument, but omits the code and concrete runtime cost needed to judge the proposed simplification.",
+     "scores": [
+      3,
+      3,
+      2,
+      4,
+      3,
+      5
+     ],
+     "total": 20
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [],
+     "note": "It correctly says the tag wait is itself read at each step and that Hora is the only reader, but it leaves out the Health floor and gives no rule for deciding next time.",
+     "scores": [
+      4,
+      4,
+      4,
+      4,
+      3,
+      4
+     ],
+     "total": 23
+    },
+    "codex": {
+     "errors": [
+      "\"For Hora alone ... a direct check needs less machinery\" is not established after including the runtime support that the reply says must be added."
+     ],
+     "note": "Makes the comparison reviewable with code and correctly separates tag maintenance from the runtime's presence checks.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      4
+     ],
+     "total": 28
+    }
+   }
+  },
+  "gemini": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"every system can instantly react\" overclaims, because nothing but Hora reads the tag",
+      "\"instantly predictable on both client and server\" is unsupported, and Hora waits for the server",
+      "Calls the ability system GAS without introducing the term"
+     ],
+     "note": "It relays the ADR's labels with no code, no consequences, and no admission that only one reader exists.",
+     "scores": [
+      3,
+      2,
+      2,
+      2,
+      2,
+      3
+     ],
+     "total": 14
+    },
+    "codex": {
+     "errors": [
+      "\"every system can instantly react\" overclaims immediate reaction and omits that no other gameplay consumer reads Empty Tags today.",
+      "\"would require ... poll ... every tick\" omits the attribute-watching race alternative until a later point.",
+      "\"polling can go wrong if the check runs between changes\" asserts failure without showing how it occurs.",
+      "\"instantly predictable on both client and server\" is not established by shared container code.",
+      "\"without any extra wiring\" omits per-bar declarations and tag settlement after every attribute change."
+     ],
+     "note": "Mostly relays architectural verdicts without code, costs, or a concrete failure sequence.",
+     "scores": [
+      3,
+      2,
+      1,
+      2,
+      2,
+      3
+     ],
+     "total": 13
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "\"Wakes up and strikes the exact moment the tag goes on\" is wrong: the runtime reads tag presence at each step",
+      "Says the engine would spend CPU cycles polling, but the tag wait is also checked every step",
+      "\"read by abilities that drain it\" overclaims, because Hora is the only reader"
+     ],
+     "note": "Its central argument, event versus polling, is contradicted by how the runtime actually evaluates OnTagAdded.",
+     "scores": [
+      3,
+      3,
+      4,
+      2,
+      2,
+      4
+     ],
+     "total": 18
+    },
+    "codex": {
+     "errors": [
+      "\"go to sleep\" and \"stops executing until one happens\" misdescribe the runtime's repeated evaluation of waits.",
+      "\"Wakes up and strikes the exact moment the tag goes on\" incorrectly presents a tag-presence check as an immediate callback.",
+      "\"read by abilities that drain it\" implies multiple current consumers; Hora is the only one.",
+      "\"wake up 20 times a second\" is an unsupported performance comparison with the existing tag wait.",
+      "\"instead of letting the ability sleep\" invents a CPU-saving distinction absent from the shown implementation."
+     ],
+     "note": "Its central argument depends on an event-driven execution model that the runtime code in the candidates contradicts.",
+     "scores": [
+      3,
+      2,
+      3,
+      1,
+      2,
+      3
+     ],
+     "total": 14
+    }
+   }
+  },
+  "mimo": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Activation gates, effect conditions and gameplay cues can all see 'empty' for free\" is presented as current, but no gate, condition or cue reads an Empty Tag today",
+      "\"misses the empty moment if it doesn't happen to run between the change and the next drain pulse\" ignores that the tag wait is also read at each phase step",
+      "\"recorded decision, not an accident\" is a verdict"
+     ],
+     "note": "It explains the structural cost of an inline check well, but it shows no annotated code and never says that Hora is the only reader.",
+     "scores": [
+      4,
+      3,
+      3,
+      3,
+      3,
+      4
+     ],
+     "total": 20
+    },
+    "codex": {
+     "errors": [
+      "\"misses the empty moment ... between the change and the next drain pulse\" does not establish a failure: another drain pulse need not remove the empty state.",
+      "\"a brand-new mechanism only Hora could use\" overclaims; an attribute-watching race could serve other abilities.",
+      "\"onTagAdded fires consistently on both machines\" is not established by shared attribute code.",
+      "\"would have to reimplement that prediction seam\" is not demonstrated for a direct attribute check."
+     ],
+     "note": "Identifies the missing attribute wait, but substitutes architectural labels and unsupported timing claims for shown code.",
+     "scores": [
+      4,
+      2,
+      2,
+      2,
+      3,
+      3
+     ],
+     "total": 16
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "The knockdown reaction and the \"relentless\" blocker are hypothetical consumers presented as sequences, though partly flagged"
+     ],
+     "note": "It is the most complete reply: annotated code, the Health-floor failure as a sequence, a concession that the tag doesn't change timing, and honest unknowns, though it is long.",
+     "scores": [
+      5,
+      5,
+      5,
+      4,
+      5,
+      3
+     ],
+     "total": 27
+    },
+    "codex": {
+     "errors": [
+      "\"a buff that floors stamina at ... 10\" is not established by a declaration-level floor or a ReducedAtFloor change type; those do not prove buffs can change floors.",
+      "\"the two cannot disagree\" conflicts with the reply's later claim that a blocker can deliberately prevent the Empty Tag.",
+      "\"That is the seam a 'relentless' ... effect plugs into\" proposes an unverified gameplay effect and consequence.",
+      "\"ADR 0038 says gates, cues and conditions read the Empty Tag\" misstates an enabled benefit as a claim of existing consumers.",
+      "\"the only readers ... in game code ... and ... assertions\" mixes tests with game-code consumers."
+     ],
+     "note": "Provides extensive code and a useful timing correction, but buries the answer under speculative buffs, suppression behavior, and repeated arguments.",
+     "scores": [
+      5,
+      4,
+      5,
+      2,
+      4,
+      1
+     ],
+     "total": 21
+    }
+   }
+  },
+  "muse": {
+   "baseline": {
+    "claude-opus": {
+     "errors": [
+      "\"Activation gates, runsWhileTagged effect conditions, and cues can all read that same tag\" suggests current readers, but Hora is the only one",
+      "\"number and tag flip atomically\" and \"Prediction is free\" are claims with no evidence shown"
+     ],
+     "note": "It is a compact list of ADR benefits. The Health-floor point is useful, but the reply shows no code and mostly gives labels.",
+     "scores": [
+      3,
+      2,
+      2,
+      3,
+      3,
+      4
+     ],
+     "total": 17
+    },
+    "codex": {
+     "errors": [
+      "\"Prediction is free\" overstates what shared container code proves.",
+      "\"races when the check runs between changes\" supplies no event sequence showing a wrong outcome or distinguishing tag evaluation.",
+      "\"A stamina == 0 check only helps Hora\" overstates the limitation; a reusable attribute condition could serve other abilities."
+     ],
+     "note": "Compactly names the implementation costs, but asks the reader to trust linked code and unexplained race claims.",
+     "scores": [
+      3,
+      3,
+      2,
+      3,
+      3,
+      4
+     ],
+     "total": 18
+    }
+   },
+   "skill": {
+    "claude-opus": {
+     "errors": [
+      "The claim that the sequence runtime carries `UntilInputReleasedOrResourceFull` is not verified by the ground truth",
+      "In the Health sequence, the ability \"holding a phase it should leave\" is a hypothetical consequence with no real reader behind it"
+     ],
+     "note": "It is thorough and honest: annotated code, the Health-floor case, an admission that the check works for Stamina, and a list of what it couldn't confirm. It is long.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      4,
+      3
+     ],
+     "total": 25
+    },
+    "codex": {
+     "errors": [
+      "\"holding a phase it should leave, or starting when it should refuse\" describes hypothetical Health consumers rather than an observed repository failure.",
+      "\"the only code that knows where its floor is\" overstates exclusivity; the floor is available in the attribute declaration."
+     ],
+     "note": "Shows the code needed to assess both mechanisms and acknowledges one reader today, but greatly expands a stamina question into hypothetical Health behavior.",
+     "scores": [
+      5,
+      4,
+      5,
+      4,
+      4,
+      2
+     ],
+     "total": 24
+    }
+   }
+  }
+ }
+}

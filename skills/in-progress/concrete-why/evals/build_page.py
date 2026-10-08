@@ -10,7 +10,7 @@ LANE_NAMES = {
     "claude-opus": "Claude Opus 5.5 · medium",
     "claude-sonnet": "Claude Sonnet 5.5 · medium",
     "codex": "Codex · gpt-6.1-sol · medium",
-    "muse": "Muse · default model · ultra",
+    "muse": "Muse · default model · max",
     "mimo": "MiMo v2.6 Pro (via pi) · max",
     "gemini": "Gemini 3.1 Pro (via agy) · high",
 }

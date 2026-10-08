@@ -1,0 +1,9 @@
+exit 0 after 225s
+muse: workspace root: /home/ozzy-desktop/dev/skills-concrete-why/skills/in-progress/concrete-why/evals/runs/2026-10-07-v3/s3 (explicit)
+muse: Skills: 231 loaded · 10 warnings · 62 details hidden
+muse:   `skills_catalog` was trimmed to fit its size limit (32 KB): 230 descriptions compacted, 9 skill ids omitted
+muse:   wait-what: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   wayfinder: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   webmcp: skill omitted to keep the startup catalog within its aggregate budget of 32000 bytes
+muse:   Run `muse skills list --source all` for full diagnostics.
+muse: Agent delegation: auto unavailable: workspace is untrusted.

@@ -13,13 +13,13 @@ CRITERIA = ["side_asked", "concrete", "self_contained", "honest", "usable", "eco
 
 RUBRIC = """Score each reply 1-5 on each criterion. Be strict; most replies should not get 5s.
 1. side_asked: a "why not X" question gets the costs of X; a "what's the benefit" question gets the benefit.
-2. concrete: every reason names an observable consequence (who or what sees a difference). Deduct for any label used as a reason ("cleaner", "robust", "stale", "best practice", "no real gain", "for consistency").
-3. self_contained: every issue, file, type, incident or rule the argument rests on is introduced with what it is and how much it matters, so the reader can judge without opening anything. A bare "#123" or bare identifier with no explanation loses points.
-4. honest: no claim beyond the evidence; inferred numbers are marked; admits when the earlier answer was a label or wrong and flips when the facts say so. Deduct hard for invented facts or APIs.
+2. concrete: starts from what actually happens, not a verdict ("on purpose", "costs more than it saves", "by design"). Every reason names an observable consequence. Every bug or failure is a step-by-step sequence of real events with real names ending in what someone sees; a bare symptom ("the bar never greys out") loses points. Deduct for labels used as reasons and for truisms true of any two options ("they solve different problems").
+3. self_contained: the reader can judge without opening anything. Every issue, file, type, function, incident or rule is introduced with what it is, where it sits, and who uses it. When the argument rests on code, the relevant lines are shown with file:line, and comments explain what the lines do. Relaying a source's phrasing that only makes sense after reading the code loses points.
+4. honest: no claim beyond the evidence; inferred numbers are marked; unverified things are said to be unverified; admits when the earlier answer was a label or wrong and flips when the facts say so. Deduct hard for invented facts or APIs, and for consequences inflated past the facts.
 5. usable: the reader can act on it and could apply the deciding rule themselves next time.
-6. economy: no padding, repetition, or unasked sections. Longer is not better."""
+6. economy: no repetition, truisms, filler, or sections nobody asked about. Length itself is not penalised when every line carries a fact."""
 
-JUDGE_PROMPT = """You are a blind judge of assistant replies. The user who asks these questions hates answers that justify a decision with labels instead of saying what concretely happens, and hates bare references that force them to trust the agent.
+JUDGE_PROMPT = """You are a blind judge of assistant replies. The user who asks these questions hates answers that justify a decision with labels or verdicts instead of saying what concretely happens, hates bare references that force them to trust the agent, and is often away from their editor, so wants to see the code an argument rests on.
 
 {context}
 

@@ -1,0 +1,172 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Under either implementation... String-only validation rejects it with HTTP 400\": a hand-rolled check that throws a plain Error returns 500, not 400, which contradicts its own earlier sequence"
+  ],
+  "note": "It admits the earlier answer was a label and correctly says it cannot quote source, but it ends noncommittal and shows no code at all."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [
+   "Quotes errors.ts code (instanceof check, issues.map with path.join) as real source, but the facts include no code excerpts",
+   "\"I read errors.ts and confirmed it matches ZodError by instanceof\" is unsupported",
+   "\"I did not find a ValidationError base class\" claims an investigation that never happened"
+  ],
+  "note": "The null-to-500 retry sequence is excellent, but it presents invented middleware code and an invented code reading as verified."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It opens on a verdict ('better fit'), then gives a clear guest-checkout sequence and a correct point that .nullable() is needed either way, without inventing middleware source."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It labels the sketch as not repo code, adds the real TypeError-to-500 path for a missing data field, admits the earlier convention answer, and states a rule the reader can reuse."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"One bad payload could then be retried for 3 days and page on-call along the way\": a single payload retried with backoff is unlikely to exceed 5/min, so the paging is inflated"
+  ],
+  "note": "Tight and actionable, with a good null-customer decision, but files and the pager are thinly introduced and there is no failure sequence."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"safely handles the recent Stripe change where customer can be null\": zod only accepts null with .nullable(), which is never mentioned",
+   "\"page on-call if it happens 5 times in a minute\": the threshold is more than 5 per minute"
+  ],
+  "note": "The core mechanism is right, but it is thinly explained and overclaims that zod handles null by itself."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"a manual typeof check would 500 + page + retry\": paging only happens above 5/min, so stating it unconditionally is inflated"
+  ],
+  "note": "The mechanism is correct but compressed into shorthand with no sequence, no code and no introductions."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "It is vague and summary-level: no names, no sequence, no code, and nothing the reader could apply next time."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "The strongest overall: proposed code is labelled, it admits the earlier label, contrasts null under both options, says what it couldn't confirm, and states a clear deciding rule."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "Presents invented errors.ts code (res.status(500).send(\"Internal Server Error\"), issues: err.issues) as real",
+   "\"When 5 webhook failures happen per minute\": the threshold is more than 5",
+   "Treats zod returning 400 and dropping the null-customer event as a good outcome, even though it silently loses valid guest-checkout events",
+   "Calls pager.ts an \"alerting script\", which is an invented detail"
+  ],
+  "note": "The sequences are clear, but it fabricates middleware source and misses that dropping valid null-customer events is itself a bug."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "Invented line number \"src/middleware/errors.ts:14\" and invented middleware code",
+   "Invented event type \"checkout.completed\"",
+   "Its zod schema has no .nullable() and it endorses guest checkouts failing as a 400, so valid events are silently dropped"
+  ],
+  "note": "It buries a correct sequence under a glossary of padded definitions and fabricated source, and its recommended schema drops valid events."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"20 lines of validation code\" is an invented number",
+   "\"multi-day retry storm plus pages\" inflates the consequences of a single bad payload",
+   "Uses labels as reasons: \"consistency is load-bearing\", \"working around the wiring\""
+  ],
+  "note": "The key mechanism is buried in labels and rhetoric instead of a step-by-step sequence, and no code is shown."
+ }
+}

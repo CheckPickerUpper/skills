@@ -1,0 +1,193 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\u201cFixing it would mean reverting that decision\u201d is unsupported; fixing older builds need not restore Android 9 support in current builds."
+  ],
+  "note": "Explains the release block and corrects the blanket closure, but invents a constraint on fixing the Android 9 crash."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\u201cCan't be fixed on the current builds\u201d confuses inability to install with inability to fix.",
+   "\u201cKeep #401 / #403 open until you decide won't-fix or move them out\u201d offers deferral without completing the required bug determination."
+  ],
+  "note": "Makes the cost of leaving completed work open clear, but treats moving unresolved bugs as an adequate endpoint."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\u201cLose the record of it\u201d is false; closing preserves the issue.",
+   "\u201cClosing it as \u2018not planned\u2019 means officially dropping Android 9\u201d misstates a support change already made in v3.0.",
+   "\u201cOnce that PR merges \u2026 v3.2 is unblocked\u201d omits the unresolved #403 decision.",
+   "\u201cLeaving it open says the feature is missing\u201d overstates what an open issue establishes."
+  ],
+  "note": "Gives actionable outcomes but inflates closing into lost history, a support decision, and guaranteed release eligibility."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\u201cClears a bug that is no longer possible to hit\u201d overlooks older installed Android 9 builds.",
+   "Treating #403 as ready to close omits the user's required won't-fix decision."
+  ],
+  "note": "Answers the release-gate question briefly, but bare issue references and the missing Android 9 decision weaken it."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\u201cEnds the notification/triage stream\u201d is unsupported; closed issues can still receive activity and notifications.",
+   "\u201cNo further work planned\u201d is not the meaning of every closure, including completed work.",
+   "\u201cCheap to fix by setting the background color before first paint\u201d invents a diagnosis, fix, and effort estimate.",
+   "\u201cClose #402, #403, #404\u201d bypasses the user's required won't-fix decision for #403.",
+   "\u201cThe gate is the only thing forcing the decision\u201d ignores the standing no-bug-backlog rule."
+  ],
+  "note": "Useful release-gate information is undermined by invented notification behavior and an unverified flicker fix."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cAnyone can reopen it\u201d ignores GitHub permissions.",
+   "\u201cGitHub only closes an issue automatically when the PR says something like \u2018Closes #402\u2019\u201d excludes other automatic closure paths.",
+   "\u201cThe tracker says CSV export doesn't exist and the typo is still there\u201d overstates what open status means.",
+   "\u201cNeither PR's description mentioned its issue\u201d specifies a location beyond the supplied fact that the PRs did not reference them."
+  ],
+  "note": "Provides concrete user sequences and careful Android 9 uncertainty, but repeats the gate argument and adds inaccurate GitHub mechanics."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cThat is the only thing that would make #403 matter\u201d excludes other relevant facts, such as support obligations or the same crash on newer Android versions.",
+   "\u201cI confirmed #455 and #470 from their titles and the issue labels\u201d invents how the earlier verification was performed.",
+   "Moving #401 to a later milestone conflicts with completing the bug determination under the no-backlog rule.",
+   "\u201cAn issue is closed only if its work has shipped or can no longer happen\u201d excludes the user's authorized won't-fix outcome for a reproducible bug."
+  ],
+  "note": "Explains the gate but invents verification history and ends by parking decisions the standing rule requires resolving."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Connects each open issue to release blocking, shows the observable bug sequences, and preserves the user's authority over won't-fix decisions."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cThe three already solved: #402, #403, and #404\u201d incorrectly treats dropping platform support as fixing #403.",
+   "\u201cAlready resolved in the codebase\u201d is unsupported for the Android 9 crash.",
+   "\u201cClose the three\u201d bypasses the user's required won't-fix decision for #403.",
+   "Closing those three does not by itself \u201callow \u2026 the release to proceed\u201d while #401 remains open.",
+   "\u201cDrops the bug from the milestone\u201d conflates closing an issue with removing its milestone assignment."
+  ],
+  "note": "Repeated gate sequences cannot compensate for treating an unsupported-platform crash as already fixed."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\u201cRemove it from the milestone \u2026 so the gate opens\u201d ignores the other unresolved blockers and offers deferral contrary to the no-backlog rule."
+  ],
+  "note": "Mostly distinguishes evidence from inference, but excessive repetition and procedural commentary bury the answer."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\u201cClosing it would unblock the gate\u201d is too broad if read as unblocking the whole release; the other open issues still block it."
+  ],
+  "note": "Gives the essential correction economically, but omits the verified PRs, Android minimum, and cold-start sequence needed to judge the cases independently."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\u201cThe only thing the v3.2 release gate looks at\u201d excludes unverified additional release conditions.",
+   "\u201cThe only reason #402 is still open\u201d asserts an exclusive cause not established by the facts.",
+   "\u201cThe window paints before the theme is applied to the first frame\u201d invents the flicker's implementation cause.",
+   "\u201cHappens on every cold start today\u201d expands one reproduced case into universal frequency.",
+   "\u201cClosing it as stale would record \u2018this no longer happens\u2019\u201d assigns a meaning closure does not necessarily carry.",
+   "\u201cOpen is a false statement about the app\u201d overstates what issue status establishes.",
+   "\u201cOne of my four closures I'm taking back\u201d understates the correction because #403 also requires the user's decision."
+  ],
+  "note": "Shows consequences clearly but substitutes an invented rendering diagnosis and exaggerated tracker semantics for verified evidence."
+ }
+}

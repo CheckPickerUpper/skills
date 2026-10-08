@@ -1,0 +1,216 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 5,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "It explains the conditional failure sequence and permits handwritten validation when it produces the required response, but repeats that conclusion."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "'Hand-rolled validation throws an Error' assumes an implementation the user has not chosen.",
+   "'Exactly one validation-shaped branch' and the displayed instanceof check and path.join mapping are not established by the supplied facts.",
+   "'I read errors.ts' and 'I did not find a ValidationError base class' invent an inspection.",
+   "'The schema should be z.string().nullable()' assumes the endpoint must process guest-checkout events.",
+   "'There is one way to hand-roll safely' incorrectly excludes other ways to route validation failures to HTTP 400.",
+   "'The checks and the type' must be separately maintained assumes handwritten validation necessarily uses the illustrated casts.",
+   "'If one does, it has this same defect' attributes a defect to an uninspected handler without checking its response handling.",
+   "'Any rejection that isn't a ZodError takes the second path' contradicts the acknowledged option of returning HTTP 400 directly."
+  ],
+  "note": "Its detailed examples are undermined by fabricated source inspection and by treating one flawed handwritten implementation as unavoidable."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "'Retries ... for 3 days' turns an upper bound into a guaranteed duration.",
+   "'Several guest checkouts ... push the count past 5/min' asserts a threshold crossing without enough delivery or timing evidence.",
+   "'Nothing is broken' dismisses the illustrated incorrect 500 response.",
+   "'Dropped without anyone noticing' invents the absence of logging, monitoring, or other visibility.",
+   "'That .nullable() matters whichever approach we pick' assumes accepting guest-checkout events is required before establishing the endpoint's intended event scope."
+  ],
+  "note": "It shows how a plain Error becomes a retryable response, but opens with a verdict and overstates paging, duration, and silent loss."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "'Hand-rolling the check makes a bad body return 500' overgeneralizes from the proposed throwing implementation.",
+   "'The 14 existing route handlers ... all take the 400 path' assumes their exact validation and error propagation behavior.",
+   "'If that shape changes, this route won't change with it' asserts a future maintenance failure rather than a possible need to update the route.",
+   "'I've made customer nullable so they pass validation' selects acceptance before establishing how customer-less events should be handled.",
+   "'Hand-written checks produce a plain Error unless you copy that mapping' excludes other ways of using the existing validation-error path."
+  ],
+  "note": "Clearly marked proposed code and conditional paging make the comparison useful, although the opening and conclusion still overgeneralize handwritten validation."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "'The code would be about the same size' is an unsupported size estimate presented as fact.",
+   "'One bad payload could ... page on-call' lacks evidence that its retry timing or other failures could cross the paging threshold.",
+   "'This route has its own error format instead of the shared one' assumes a direct response cannot match the shared format.",
+   "'Zod also adds no weight' overstates the narrower fact that no new dependency is needed.",
+   "'With ... a hand-written typeof customer === \"string\" check, those events get a 400' assumes rejection handling that the check alone does not provide.",
+   "'Dropped silently' invents the absence of visibility.",
+   "'I'll use zod with .nullable()' assumes acceptance of guest-checkout events before determining the intended event scope."
+  ],
+  "note": "It acknowledges that manual checks can work, but several compressed claims exceed the facts and it decides the null contract prematurely."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "'Page on-call if it happens 5 times in a minute' uses the wrong threshold; the facts say more than five.",
+   "'Retry the bad webhook for 3 days' replaces an upper bound with a guaranteed duration.",
+   "'It safely handles ... customer can be null' implies choosing Zod automatically accepts null; the schema must explicitly permit it."
+  ],
+  "note": "The conditional Error-to-500 explanation is concise, but the reply supplies no code and misstates both the paging threshold and null handling."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "'A manual typeof !== 'string' check would 500 + page + retry' assumes a plain Error rejection and omits the paging threshold condition.",
+   "'Here it changes the status code' implies the library choice itself determines the response, although manual validation can return HTTP 400."
+  ],
+  "note": "It identifies the response-handling concern quickly but compresses a conditional sequence into an inevitable failure and offers no actionable manual alternative."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "'I'll accept that in the schema so those valid events don't fail validation' assumes the endpoint should process guest-checkout events without establishing its intended event scope."
+  ],
+  "note": "It gives a concise, fair comparison and acknowledges direct HTTP 400 responses, but omits the code and details needed to independently assess the argument."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "'Works only if your code also sends the same 400 response' excludes routing handwritten failures through existing error handling.",
+   "'Customer has to accept null' and 'the check must accept null' assume an event scope the reply admits is unknown.",
+   "'The 14 route handlers ... just by calling .parse()' invents their exact method usage.",
+   "'This the one route that builds that response shape itself' assumes no other route builds it directly.",
+   "'That event is lost and nobody is told' invents permanent loss and absence of visibility.",
+   "'Stripe redelivers it for 3 days' turns an upper bound into a guaranteed duration."
+  ],
+  "note": "The proposed code and conditional failure sequence help, but repeated conclusions and unsupported absolutes weaken the explanation."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "'Hand-rolling the validation throws a standard error' assumes all handwritten validation uses that rejection mechanism.",
+   "The displayed errors.ts implementation, including err.issues and send(\"Internal Server Error\"), is invented source code.",
+   "'The hand-rolled check throws' on customer: null is not supported by the shown check, which only checks id.",
+   "'When 5 webhook failures happen per minute' uses the wrong paging threshold.",
+   "'Zod throws a ZodError' on null assumes an unspecified schema rejects null.",
+   "'The exact same invalid payload' calls a documented null customer invalid without establishing the endpoint's intended contract.",
+   "'An if statement does not' provide a catchable error type ignores that handwritten validation can throw a suitable error or return HTTP 400."
+  ],
+  "note": "Its central reproduction does not follow from its own code, and it presents invented middleware source as evidence."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 1
+  },
+  "errors": [
+   "'src/middleware/errors.ts:14' fabricates a source line number and implementation.",
+   "'Parse() ... those handlers call' invents the existing handlers' exact method usage.",
+   "'Error ... for any other throw' incorrectly implies every thrown value is a built-in Error.",
+   "'True only when a zod schema rejected the body' ignores manually constructed ZodError instances.",
+   "The displayed default response '{ error: \"internal\" }' is not supplied by the facts.",
+   "'Which this endpoint must now accept' assumes guest-checkout events belong to its intended scope.",
+   "The sample Stripe event type 'checkout.completed' is not a verified event type and is not marked as fictitious.",
+   "'Which on-call waits on for server failures' invents an operational practice."
+  ],
+  "note": "It supplies a detailed conditional failure sequence, but fabricated source evidence, excessive definitions, and contradictory null guidance make it unreliable."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "'20 lines of validation code' supplies an unsupported size estimate.",
+   "'A multi-day retry storm plus pages' inflates possible backoff retries and conditional paging into an inevitable incident.",
+   "'Redeliver for 3 days' turns an upper bound into a guaranteed duration.",
+   "'z.string().nullable() or .nullish()' treats schemas with different acceptance behavior as interchangeable; nullish also accepts undefined.",
+   "'Hand-rolled, it's scattered typeof checks' assumes handwritten validation cannot be centralized.",
+   "'No new cost' overstates the fact that Zod is already a dependency.",
+   "'Hammering us for three days' exaggerates retries that occur with backoff for up to three days."
+  ],
+  "note": "Labels such as 'load-bearing' substitute for concrete maintenance consequences, while exaggerated retries and an unnecessary permission question obscure the deciding rule."
+ }
+}
