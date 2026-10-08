@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+"""Stand-in for `gh api graphql` that answers from captured responses.
+
+Serves $ISSUES_CHECK_FIXTURES/<number>.json for the issue named by
+`-F number=N`, only for the repository named by $ISSUES_CHECK_REPOSITORY.
+A missing fixture answers the way gh does for a missing issue: the GraphQL
+NOT_FOUND response on stdout, a message on stderr, exit 1.
+"""
+
+import json
+import os
+from pathlib import Path
+import sys
+
+arguments = sys.argv[1:]
+if arguments[:2] != ["api", "graphql"] or not any(a.startswith("query=") for a in arguments):
+    print(f"fake gh: unexpected arguments {arguments}", file=sys.stderr)
+    sys.exit(1)
+fields = dict(arguments[i + 1].split("=", 1) for i, a in enumerate(arguments) if a == "-F")
+if f"{fields.get('owner')}/{fields.get('name')}" != os.environ["ISSUES_CHECK_REPOSITORY"]:
+    print(f"gh: Could not resolve to a Repository with the name '{fields.get('owner')}/{fields.get('name')}'.", file=sys.stderr)
+    sys.exit(1)
+fixture = Path(os.environ["ISSUES_CHECK_FIXTURES"]) / f"{fields['number']}.json"
+if not fixture.exists():
+    message = f"Could not resolve to an Issue with the number of {fields['number']}."
+    print(json.dumps({"data": {"repository": {"issue": None}},
+                      "errors": [{"type": "NOT_FOUND", "path": ["repository", "issue"], "message": message}]}))
+    print(f"gh: {message}", file=sys.stderr)
+    sys.exit(1)
+print(fixture.read_text(), end="")

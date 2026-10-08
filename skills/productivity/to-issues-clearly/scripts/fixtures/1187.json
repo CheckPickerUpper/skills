@@ -1,0 +1,52 @@
+{
+  "data": {
+    "repository": {
+      "issue": {
+        "number": 1187,
+        "title": "Issue 1187",
+        "state": "OPEN",
+        "url": "https://github.com/example-org/example-app/issues/1187",
+        "body": "## Section\nRedacted line.\n\nRedacted line.\n\n## Section\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.",
+        "labels": {
+          "totalCount": 2,
+          "nodes": [
+            {
+              "name": "ready-for-agent"
+            },
+            {
+              "name": "kind:tech-debt"
+            }
+          ]
+        },
+        "milestone": {
+          "number": 5,
+          "title": "Milestone 5"
+        },
+        "subIssuesSummary": {
+          "total": 1
+        },
+        "blockedBy": {
+          "totalCount": 2,
+          "nodes": [
+            {
+              "number": 1201,
+              "title": "Issue 1201",
+              "state": "CLOSED",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1199,
+              "title": "Issue 1199",
+              "state": "CLOSED",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
