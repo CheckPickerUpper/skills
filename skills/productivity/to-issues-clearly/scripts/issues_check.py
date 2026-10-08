@@ -57,7 +57,8 @@ missing reason line. Then run this check again until it exits 0."""
 BLOCKED_BY_HEADING = re.compile(r"^##\s+Blocked by\s*$", re.IGNORECASE)
 HEADING = re.compile(r"^#{1,2}\s")
 FENCE = re.compile(r"^\s*(```|~~~)")
-REASON_LINE = re.compile(r"^- #(\d+)\b")
+# "- #N ..." names an issue in the checked repository; "- owner/repo#N ..." names one in another repository.
+REASON_LINE = re.compile(r"^- (?:([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+))?#(\d+)\b")
 
 FindingKind = Literal["stale-blocker", "parent-blocker", "missing-reason", "orphan-reason"]
 
@@ -118,8 +119,15 @@ def reason_lines(body: str) -> list[str]:
     return lines
 
 
-def named_issue(line: str) -> int:
-    return int(REASON_LINE.match(line).group(1))
+def named_issue(line: str, repository: str) -> tuple[str, int]:
+    """The (repository, number) a reason line names; same-numbered issues in two repositories differ."""
+    match = REASON_LINE.match(line)
+    return (match.group(1) or repository).lower(), int(match.group(2))
+
+
+def shown(key: tuple[str, int], repository: str) -> str:
+    named_repository, number = key
+    return f"#{number}" if named_repository == repository.lower() else f"{named_repository}#{number}"
 
 
 def is_valid_reason(line: str) -> bool:
@@ -161,17 +169,17 @@ def run_gh(repository: str, number: int) -> dict:
 def read_issue(repository: str, number: int) -> Issue:
     raw = run_gh(repository, number)
     lines = reason_lines(raw["body"] or "")
-    valid: dict[int, str] = {}
+    valid: dict[tuple[str, int], str] = {}
     for line in lines:
         if is_valid_reason(line):
-            valid.setdefault(named_issue(line), line)
+            valid.setdefault(named_issue(line, repository), line)
     blocked_by = []
     for node in raw["blockedBy"]["nodes"]:
-        same_repository = node["repository"]["nameWithOwner"].lower() == repository.lower()
+        blocker_repository = node["repository"]["nameWithOwner"]
         blocked_by.append(Blocker(
             number=node["number"], title=node["title"], state=node["state"],
-            repository=node["repository"]["nameWithOwner"],
-            reason=valid.get(node["number"]) if same_repository else None,
+            repository=blocker_repository,
+            reason=valid.get((blocker_repository.lower(), node["number"])),
         ))
     return Issue(
         repository=repository, number=raw["number"], title=raw["title"], state=raw["state"],
@@ -192,7 +200,7 @@ def findings(issue: Issue) -> list[Finding]:
     def add(kind: FindingKind, blocker: int, detail: str) -> None:
         found.append(Finding(kind, issue.number, issue.title, blocker, detail))
 
-    edges = {b.number for b in issue.blocked_by if b.repository.lower() == issue.repository.lower()}
+    edges = {(b.repository.lower(), b.number) for b in issue.blocked_by}
     for blocker in issue.blocked_by:
         name = blocker_name(issue, blocker)
         if blocker.state == "CLOSED":
@@ -200,15 +208,17 @@ def findings(issue: Issue) -> list[Finding]:
                 f"blocked by {name}, which is closed; a closed issue blocks nothing.")
         if blocker.reason is None:
             add("missing-reason", blocker.number,
-                f"blocked by {name} with no reason line: no `- #{blocker.number} ...: cannot ...` line under `## Blocked by`.")
+                f"blocked by {name} with no reason line: no `- {shown((blocker.repository.lower(), blocker.number), issue.repository)} "
+                "...: cannot ...` line under `## Blocked by`.")
         if issue.sub_issues and (blocker.reason is None or not says_cannot_start(blocker.reason)):
             add("parent-blocker", blocker.number,
                 f"has {issue.sub_issues} sub-issues and is blocked by {name}, but no reason line says the whole issue "
                 "cannot start; put the edge on the sub-issue that depends on it.")
     for line in issue.reason_lines:
-        if named_issue(line) not in edges:
-            add("orphan-reason", named_issue(line),
-                f"reason line names #{named_issue(line)}, which is not a blocked-by edge: {line}")
+        key = named_issue(line, issue.repository)
+        if key not in edges:
+            add("orphan-reason", key[1],
+                f"reason line names {shown(key, issue.repository)}, which is not a blocked-by edge: {line}")
     return found
 
 

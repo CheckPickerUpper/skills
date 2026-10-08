@@ -121,6 +121,17 @@ class IssuesCheckTest(unittest.TestCase):
         self.assertEqual(found, [("missing-reason", 1224, 830), ("orphan-reason", 1224, 830)])
         self.assertIn("other-org/other-app#830", json.loads(result.stdout)["findings"][0]["detail"])
 
+    def test_qualified_reason_line_covers_a_blocker_in_another_repository(self):
+        def change(issue):
+            issue["blockedBy"]["nodes"][1]["repository"]["nameWithOwner"] = "other-org/other-app"
+            issue["body"] = reasons(
+                "- #1284 Issue 1284: cannot meet the save criterion until it lands, because the writer is unscoped.",
+                "- other-org/other-app#830 Issue 830: cannot start until it lands, because it replaces the query layer.")
+        self.edit(1224, change)
+        result, found = self.findings(1224)
+        self.assertEqual(found, [], result.stdout)
+        self.assertEqual(result.returncode, 0)
+
     def test_text_report_names_issues_and_summarises_what_exists(self):
         result = self.run_check("318", "1224")
         self.assertEqual(result.returncode, 1)

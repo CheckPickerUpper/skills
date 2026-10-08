@@ -224,7 +224,7 @@ Every edge that passes gets one reason line in the blocked issue's body, under a
 - #1212 Idempotency-key binding: cannot pass "a retried charge with the same key is rejected" until it lands, because keys are not bound to charges yet.
 ~~~
 
-The shape is fixed, because `scripts/issues_check.py` and `conductor-mode` both read it: `- #N <title>: cannot <what> until it lands, because <why>.` A reason line on an issue with sub-issues says the whole issue `cannot start`. If you cannot write the line, the edge is not real; drop it.
+The shape is fixed, because `scripts/issues_check.py` and `conductor-mode` both read it: `- #N <title>: cannot <what> until it lands, because <why>.` A blocker in another repository is named in full, `- owner/repo#N <title>: ...`; a bare `#N` always means this repository. A reason line on an issue with sub-issues says the whole issue `cannot start`. If you cannot write the line, the edge is not real; drop it.
 
 Use words a maintainer would recognise. Keep file paths and proposed APIs out of the title unless the user has already made that decision.
 
