@@ -1,0 +1,66 @@
+{
+  "data": {
+    "repository": {
+      "issue": {
+        "number": 318,
+        "title": "Issue 318",
+        "state": "OPEN",
+        "url": "https://github.com/example-org/example-app/issues/318",
+        "body": "## Section\n\nRedacted line.\n\n## Section\nRedacted line.\n## Section\nRedacted line.\n## Section\nRedacted line.\nRedacted line.\nRedacted line.\n",
+        "labels": {
+          "totalCount": 4,
+          "nodes": [
+            {
+              "name": "task"
+            },
+            {
+              "name": "ready-for-agent"
+            },
+            {
+              "name": "kind:bug"
+            },
+            {
+              "name": "bug:high"
+            }
+          ]
+        },
+        "milestone": {
+          "number": 5,
+          "title": "Milestone 5"
+        },
+        "subIssuesSummary": {
+          "total": 0
+        },
+        "blockedBy": {
+          "totalCount": 3,
+          "nodes": [
+            {
+              "number": 814,
+              "title": "Issue 814",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 820,
+              "title": "Issue 820",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 597,
+              "title": "Issue 597",
+              "state": "CLOSED",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

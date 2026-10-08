@@ -1,0 +1,58 @@
+{
+  "data": {
+    "repository": {
+      "issue": {
+        "number": 1224,
+        "title": "Issue 1224",
+        "state": "OPEN",
+        "url": "https://github.com/example-org/example-app/issues/1224",
+        "body": "## Section\n\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.\nRedacted line.\nRedacted line.\n\nRedacted line.\n\nRedacted line.\nRedacted line.\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\n\n\n## Section\n\nRedacted line.\n\nRedacted line.\nRedacted line.\nRedacted line.\n\nRedacted line.\n\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\n## Section\n\nRedacted line.\n\nRedacted line.\n\nRedacted line.",
+        "labels": {
+          "totalCount": 4,
+          "nodes": [
+            {
+              "name": "ready-for-agent"
+            },
+            {
+              "name": "kind:bug"
+            },
+            {
+              "name": "area:foundation"
+            },
+            {
+              "name": "bug:high"
+            }
+          ]
+        },
+        "milestone": {
+          "number": 5,
+          "title": "Milestone 5"
+        },
+        "subIssuesSummary": {
+          "total": 0
+        },
+        "blockedBy": {
+          "totalCount": 2,
+          "nodes": [
+            {
+              "number": 1284,
+              "title": "Issue 1284",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 830,
+              "title": "Issue 830",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}

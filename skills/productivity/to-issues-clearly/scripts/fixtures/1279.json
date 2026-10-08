@@ -1,0 +1,116 @@
+{
+  "data": {
+    "repository": {
+      "issue": {
+        "number": 1279,
+        "title": "Issue 1279",
+        "state": "OPEN",
+        "url": "https://github.com/example-org/example-app/issues/1279",
+        "body": "Redacted line.\n\n## Section\n\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\n\n## Section\n\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.\nRedacted line.",
+        "labels": {
+          "totalCount": 2,
+          "nodes": [
+            {
+              "name": "ready-for-agent"
+            },
+            {
+              "name": "kind:tech-debt"
+            }
+          ]
+        },
+        "milestone": {
+          "number": 5,
+          "title": "Milestone 5"
+        },
+        "subIssuesSummary": {
+          "total": 8
+        },
+        "blockedBy": {
+          "totalCount": 10,
+          "nodes": [
+            {
+              "number": 1265,
+              "title": "Issue 1265",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1274,
+              "title": "Issue 1274",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1273,
+              "title": "Issue 1273",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1272,
+              "title": "Issue 1272",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1271,
+              "title": "Issue 1271",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1270,
+              "title": "Issue 1270",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1269,
+              "title": "Issue 1269",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1268,
+              "title": "Issue 1268",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1267,
+              "title": "Issue 1267",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            },
+            {
+              "number": 1266,
+              "title": "Issue 1266",
+              "state": "OPEN",
+              "repository": {
+                "nameWithOwner": "example-org/example-app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
