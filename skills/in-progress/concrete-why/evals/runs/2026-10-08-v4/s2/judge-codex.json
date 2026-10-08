@@ -1,0 +1,211 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 5,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "It fairly explains the conditional cost of manual validation and preserves the unresolved null contract, but cannot show the middleware code supporting its recommendation."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "'The hand-written check would throw errors ... every mistake in it becomes a 500' assumes manual validation necessarily throws unrecognized errors.",
+   "'Whatever you assume about that field, you are guessing from the events you have seen' invents the basis for the developer's assumptions.",
+   "'the 14 other handlers already read to know what a route accepts' asserts an unverified use of the schema.",
+   "'a throw type that only this endpoint uses' is not established by the supplied facts.",
+   "'a string throw ... reaches the default 500 handler' extends the verified behavior for Error objects to an unverified thrown value.",
+   "'I'll also write my own error type, my own 400 response' describes unnecessary work; a handler can directly return 400 without creating an error type.",
+   "'fixed ... z.string().nullable()' assumes this endpoint should accept guest checkout events before its intended event types are confirmed."
+  ],
+  "note": "Its detailed failure sequences are useful, but it repeatedly turns one illustrative manual implementation into an unavoidable property of manual validation."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "'A batch of bad events pushes it past 5 per minute' asserts a threshold crossing without specifying the batch size or timing.",
+   "'the schema needs to allow null' assumes the endpoint must process the affected event types.",
+   "'this adds nothing new to the project' overstates the verified fact that no new dependency is required."
+  ],
+  "note": "It shows both implementation options and their consequences clearly, but presents accepting null as settled without knowing the endpoint's intended events."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "'If that shape changes, this route is the one that doesn't' assumes a future change will omit updating the manual route.",
+   "'That is about the same length as the hand-written version' compares a complete schema with an incomplete manual example.",
+   "'That is why the schema above uses .nullable()' settles acceptance of null without confirming which events the endpoint should handle.",
+   "'a 5xx makes Stripe retry for 3 days and page on-call' turns an upper retry duration and a conditional paging threshold into guaranteed consequences."
+  ],
+  "note": "It fairly distinguishes throwing from returning 400, but repeats the argument and ends with a stronger retry-and-paging claim than the facts support."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "'A malformed delivery would then retry for 3 days' replaces 'up to 3 days' with a definite duration.",
+   "'nothing would make the next person do the same' asserts the absence of safeguards or enforcement that were not investigated.",
+   "'A plain z.string() or typeof === \"string\" check would reject those events with a 400' incorrectly assigns 400 to manual validation independently of its response handling.",
+   "'they'd be dropped permanently' goes beyond the verified absence of automatic retries.",
+   "'this adds no new weight' equates an existing dependency with no implementation or runtime cost.",
+   "'it must accept null' assumes the endpoint must accept the affected event types."
+  ],
+  "note": "The examples make the response difference accessible, but several unconditional claims obscure the actual decision about manual error handling and null acceptance."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "'miss that ... customer can now be null and cause a runtime crash' introduces a crash without identifying an operation that would cause it.",
+   "'what is actually just a bad payload' conflates malformed input with potentially valid null-customer events.",
+   "'guarantee that validation failures map to the correct HTTP status' assumes the schema's rejection criteria are correct; valid events could still receive 400."
+  ],
+  "note": "It explains the conditional retry and paging mechanism briefly, but supplies no code and never explains how manual validation can use the same 400 response."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "'Anything else you throw becomes a 500' extends the verified Error behavior to all thrown values.",
+   "'one malformed webhook ... turns into 3 days of retries and pages' invents a guaranteed duration and threshold crossing from one delivery.",
+   "'it's 3 lines' supplies an unsupported implementation-size claim without code.",
+   "'It also forces us to handle last week's change' is false; zod permits a strict string schema that rejects null.",
+   "'a typeof === \"string\" check would 500 on' assumes a particular error-handling implementation."
+  ],
+  "note": "Its brevity comes at the expense of accuracy: it presents conditional failures as inevitable and incorrectly claims zod forces null handling."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "'so valid events aren't rejected' assumes the affected guest checkout events belong within this endpoint's intended contract."
+  ],
+  "note": "It fairly states the conditional cost without repetition, but gives neither code nor the retry duration and paging threshold needed to independently assess that cost."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "'A check you write yourself turns into a 500 unless you also write the 400 response by hand' excludes other possible ways of using the recognized validation-error path.",
+   "'every route's errors pass through' asserts middleware coverage beyond the verified facts.",
+   "'Every other route gets that format from errors.ts' expands the 14 verified zod handlers to all other routes.",
+   "'Any later change ... won't reach this route' assumes the manual route will not be updated.",
+   "'the schema has to allow customer to be null' settles an event-contract decision the reply later admits is unconfirmed.",
+   "'nothing alerts anyone' claims the absence of all alerting rather than just the specified 500 paging path."
+  ],
+  "note": "The explicit manual 400 example helps the user act, but the answer repeats itself and overstates both route coverage and the requirement to accept null."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "'A hand-rolled check throws a standard error' assumes manual validation must use that implementation.",
+   "'pages ... and causes Stripe to retry bad payloads for three days' makes both conditional paging and an upper retry duration definite.",
+   "'If 5 guest checkouts arrive in a minute ... trigger' contradicts the verified threshold of more than five 500s per minute.",
+   "'a hand-rolled check falls into the 500 path' excludes a manual check that directly returns 400."
+  ],
+  "note": "Its event-to-response sequence is easy to follow, but the threshold is wrong and the recommendation depends on treating an avoidable manual implementation as inevitable."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 2,
+   "economy": 1
+  },
+  "errors": [
+   "'Hand-written checks on this endpoint return 500' asserts behavior for an endpoint still being added.",
+   "'Keep the existing schema validation for this endpoint' implies the new endpoint already has schema validation.",
+   "'catches throws from every route handler' asserts unverified middleware coverage.",
+   "'one entry per bad field' asserts an unverified one-to-one relationship between fields and Zod issues.",
+   "'the plain throw type hand-written checks use' treats ordinary Error throws as intrinsic to manual validation.",
+   "'the same id keeps getting 500' includes the case where id is missing.",
+   "'a body that should have been accepted' assumes guest checkout events are within the endpoint's intended scope.",
+   "'everything else is a 500' extends the supplied facts beyond thrown Error objects."
+  ],
+  "note": "It supplies detailed failure sequences, but excessive introductions and repetition still leave the user without a correct manual alternative or a resolved null contract."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 2,
+   "economy": 2
+  },
+  "errors": [
+   "'redelivered continuously' contradicts the specified backoff.",
+   "'every validation failure you throw yourself lands on the paging path' ignores recognized error types and makes paging sound inevitable.",
+   "'guest-checkout events 500, page on-call, and retry for 3 days' makes a conditional threshold and maximum duration definite.",
+   "'If you genuinely want zero dependency' invents a user preference and ignores that zod is already installed.",
+   "'has to throw something errors.ts maps to 400' excludes directly returning the structured 400 response.",
+   "'getting it wrong costs a page' makes paging unconditional.",
+   "The nullable schema assumes the endpoint should accept the affected event types without confirming that contract."
+  ],
+  "note": "It shows the proposed schema, but its forceful conclusion rests on inflated consequences and a false restriction on how manual validation can return 400."
+ }
+}

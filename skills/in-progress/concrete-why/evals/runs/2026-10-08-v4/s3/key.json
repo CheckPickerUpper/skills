@@ -1,0 +1,14 @@
+{
+ "R01": "gemini-skill",
+ "R02": "claude-sonnet-baseline",
+ "R03": "muse-baseline",
+ "R04": "claude-sonnet-skill",
+ "R05": "claude-opus-skill",
+ "R06": "codex-baseline",
+ "R07": "codex-skill",
+ "R08": "muse-skill",
+ "R09": "mimo-skill",
+ "R10": "mimo-baseline",
+ "R11": "gemini-baseline",
+ "R12": "claude-opus-baseline"
+}

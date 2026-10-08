@@ -1,0 +1,172 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 5,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "Honest and gives a correct five-step 500 sequence, but shows no code, gives no nullable fix for the guest-checkout case, and its opening is confusing."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"every mistake in it becomes a 500\" overstates, since a hand check can return 400",
+   "\"what the 14 other handlers already read to know what a route accepts\" is invented",
+   "\"src/middleware/errors.ts catches one thing: ZodError\" goes beyond the verified facts"
+  ],
+  "note": "Strong TypeError-traversal sequence and labeled illustration, but it overstates the case and repeats the throw-type point in three sections."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [],
+  "note": "Tight and concrete, with the 400/500 sequence, the copied-response-shape cost of returning 400 by hand, and a nullable schema, though it never admits the earlier convention-only reason."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 5,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Covers throw-Error, crash-TypeError and explicit-400 hand-rolled paths, the null drop, labeled code and unverified items, with a clear deciding rule."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 5
+  },
+  "errors": [
+   "\"nothing would make the next person do the same\" is vague and unsupported"
+  ],
+  "note": "Concise, with commented code, a nullable schema and the dropped-guest-event consequence, though the failure is a list rather than a full sequence."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"miss that data.object.customer can now be null and cause a runtime crash\": a typeof check does not crash on null",
+   "\"guarantee that validation failures map to the correct HTTP status\" ignores that strict zod also drops guest events"
+  ],
+  "note": "Gets the 500/retry/page chain but uses verdicts, shows no code and mishandles the null case."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"It also forces us to handle last week's change\": zod forces nothing",
+   "\"one malformed webhook ... turns into 3 days of retries and pages\": one webhook alone does not exceed 5/min"
+  ],
+  "note": "Terse and on point but inflates consequences and shows no code."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [],
+  "note": "Correct but thin, with \"useful 400\" and \"enough failures\" in place of named consequences or code."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"the Express error handler every route's errors pass through\" is slightly beyond the verified facts"
+  ],
+  "note": "Admits the earlier label, gives a full sequence, a labeled illustration of the explicit-400 cost, and a both-sides null comparison with the nullable fix."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "invents the body of errors.ts as an illustration",
+   "implies zod handles a null customer, when a strict z.string() also rejects it",
+   "\"If 5 guest checkouts arrive in a minute\": the threshold is more than 5",
+   "ignores that a hand check can return 400"
+  ],
+  "note": "Has a clear sequence but a misleading null story and an invented middleware body."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"Keep the existing schema validation for this endpoint\": the endpoint has no existing validation",
+   "its zod illustration uses z.string() and would also reject a null customer, which it leaves unaddressed",
+   "\"catches throws from every route handler\" goes beyond the verified facts"
+  ],
+  "note": "Buried in glossary-style appositives, and its own zod schema repeats the null bug it criticises."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"gets redelivered continuously\" inflates retries that use backoff",
+   "\"If you genuinely want zero dependency\": zod is already a dependency"
+  ],
+  "note": "Solid contract argument with a nullable schema, but ends in verdicts (\"rebuilt the one thing zod does\", \"Use it\") and some inflation."
+ }
+}

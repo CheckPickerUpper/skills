@@ -1,0 +1,3 @@
+You can clean it up — you meet the bar in [#882 Remove legacy checkout after new flow is stable](https://github.com/acme/storefront/issues/882): `new_checkout_flow` at 100% since 2026-09-15 (~3 weeks) with no incidents and no toggles.
+
+The concrete downside is slower rollback. Right now if the new checkout breaks you flip the flag off in LaunchDarkly in ~1 minute — that's how you mitigated both checkout incidents last month. Once you delete `src/checkout/legacy/` (412 lines, 6 files) and the flag in `src/flags.ts`, that option is gone and a fix needs a revert + deploy, ~12 minutes from merge to live. In exchange you drop that dead code plus `tests/checkout/legacy.spec.ts` (31 tests, ~40s per CI run). I'd do the cleanup — want me to?

@@ -1,0 +1,50 @@
+exit 0 after 31s
+ncrete-why/skills/in-progress/concrete-why/evals/runs/2026-10-08-v4/s3
+model: gpt-6.1-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: medium
+reasoning summaries: concise
+session id: 01a11ab9-64ab-7731-9841-8e60877ffd3b
+--------
+user
+You are the assistant in the conversation below. Every fact listed was verified by you earlier in this session. Do not run commands or open files. Write your next reply to the user exactly as you would send it, and output only that reply.
+
+<scenario>
+# Scenario: migrations on boot vs separate step
+
+## Facts verified earlier in this session
+- Service `acme/orders` runs on Kubernetes with 3 replicas. Today each pod runs `prisma migrate deploy` in its entrypoint before starting the server.
+- Prisma takes a Postgres advisory lock during `migrate deploy`, so concurrent pods do not apply the same migration twice; the 2nd and 3rd pods wait on the lock.
+- The readiness probe in `deploy/orders.yaml` has `failureThreshold: 12, periodSeconds: 10` (pod marked unready after 120s) and the liveness probe restarts a pod after 180s of failures.
+- Incident [INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212), 2026-09-14: migration `20260914_add_orders_customer_idx` took 4m10s. All three pods were killed by the liveness probe mid-migration, restarted, re-waited on the lock; orders API was down 19 minutes.
+- Most migrations in the last 6 months took under 5 seconds; 2 of 41 took over 2 minutes (both index builds).
+- The deploy pipeline (`.github/workflows/deploy.yml`) can run a one-off Kubernetes Job before rolling the Deployment.
+
+## Conversation so far
+**User:** set up the deploy for the new orders schema change
+**Assistant:** I'll move migrations out of the pod entrypoint into a pre-deploy Job. It's the cleaner, more robust pattern.
+**User:** whats the actual benefit tho it works fine now
+
+</scenario>
+2026-10-08T08:55:28.789821Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer realm=\"OAuth\", resource_metadata=\"https://mcp.canva.com/.well-known/oauth-protected-resource/mcp\", error=\"invalid_token\", error_description=\"Missing or invalid access token\"" })
+2026-10-08T08:55:28.804010Z ERROR rmcp::transport::worker: worker quit with fatal: Transport channel closed, when AuthRequired(AuthRequiredError { www_authenticate_header: "Bearer resource_metadata=\"https://api.mobbin.com/.well-known/oauth-protected-resource/mcp\"" })
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+warning: Codex is ignoring 2 unrecognized configuration settings. Check for typos or deprecated settings.
+  user (/home/ozzy-desktop/.codex/config.toml): `ai_lab` is ignored.
+  user (/home/ozzy-desktop/.codex/config.toml): `features.remote_connections` is ignored.
+hook: SessionStart
+hook: SessionStart Completed
+codex
+The benefit is that a slow migration won’t keep restarting the API pods. “Cleaner” was too vague.
+
+That happened in [INC-212 Orders outage during index migration](https://acme.atlassian.net/browse/INC-212): the index migration took 4m10s, but liveness restarted each pod after 3 minutes. They restarted and waited on the migration lock again, leaving orders down for 19 minutes. Prisma’s lock prevents duplicate migrations; it doesn’t prevent those restarts.
+
+With a pre-deploy Job, the existing API pods keep serving while the migration runs. The pipeline rolls out the new pods only after it succeeds. That requires the schema change to remain compatible with the running version.
+
+Most migrations finish in under 5 seconds, so you usually won’t notice a difference. I recommend the Job to prevent another outage from the occasional slow index build.
+tokens used
+13,623

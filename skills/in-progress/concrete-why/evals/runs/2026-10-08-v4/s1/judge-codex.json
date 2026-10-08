@@ -1,0 +1,201 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 5,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [],
+  "note": "Explains the lost mitigation with measured timings and their limits, corrects the earlier recommendation, and avoids inventing unavailable code snippets."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 4,
+   "economy": 4
+  },
+  "errors": [
+   "\"the one real downside is small\" is not established by the incident-free period.",
+   "\"it takes effect in about a minute\" turns historical time to mitigate into a measured flag propagation time.",
+   "\"a checkout outage would last about 12 minutes instead of 1\" excludes detection and preparation time and assumes either intervention resolves the future incident."
+  ],
+  "note": "Makes the cleanup scope clear but presents deployment duration as a guaranteed future outage duration."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"if the new checkout breaks you flip the flag off ... in ~1 minute\" assumes the historical mitigation will work for a future failure.",
+   "\"a fix needs a revert + deploy\" presents one possible recovery procedure as necessary."
+  ],
+  "note": "Answers the downside compactly, but omits the issue's actual two-week rule and overgeneralizes the historical recovery."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 3,
+   "honest": 1,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"roughly 11 extra minutes of live breakage\" is not established by comparing historical mitigation time with merge-to-live deployment time.",
+   "\"there's no way to disable the new checkout at all\" is unsupported; other operational controls were not investigated.",
+   "\"Everything else is in favor of deleting\" claims completeness beyond the supplied evidence.",
+   "\"a flag that will otherwise live forever\" is unsupported.",
+   "\"the 3-week window proves the new flow survives normal traffic\" overstates what an incident-free record proves.",
+   "\"the revert of that merge serves the same purpose at the same ~12-minute cost as any other fix\" assumes preparation time and effectiveness are equivalent."
+  ],
+  "note": "Names the recovery tradeoff but repeatedly converts limited measurements into absolute claims."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 3
+  },
+  "errors": [
+   "\"today a broken new checkout can be switched off in about a minute\" assumes the fallback still works and resolves the future failure.",
+   "\"Checkout stays broken until that deploy lands\" assumes no other mitigation and a continuous failure.",
+   "\"a possible 11-minute-longer outage\" is an incomplete estimate because restoration preparation time is unknown."
+  ],
+  "note": "Gives a useful sequence and explicitly includes preparation time, but repeats the argument and partially undermines its own uncertainty about the fallback."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"I have no concrete reason not to delete it\" disregards the concrete lost mitigation option described immediately afterward.",
+   "\"currently takes about 1 minute to mitigate a checkout incident\" treats two historical results as a current general guarantee.",
+   "\"mitigating an incident requires reverting the code\" is unsupported as a universal recovery requirement.",
+   "\"the 40-second CI cost ... outweighs the lost 1-minute toggle mitigation\" is a judgment presented as following necessarily from the stability threshold."
+  ],
+  "note": "Introduces the relevant files and cleanup rule clearly, but its opening denies the downside its own explanation identifies."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 3,
+   "honest": 3,
+   "usable": 3,
+   "economy": 5
+  },
+  "errors": [
+   "\"a code rollback would take about 12 minutes to reach production\" substitutes deployment duration for total rollback duration."
+  ],
+  "note": "Directly answers the question with little waste, but leaves the removal threshold and recovery timing limitations unstated."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 1,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 2,
+   "economy": 4
+  },
+  "errors": [
+   "\"wastes ~40 seconds\" assumes the fallback tests provide no useful value.",
+   "\"riskier than relying on the 12-minute deploy for a forward fix\" has no supporting comparison of failure likelihood or recovery effectiveness.",
+   "\"unexercised code\" ignores the 31 legacy-path tests unless explicitly limited to recent production traffic."
+  ],
+  "note": "Answers the costs of keeping the flag instead of the requested costs of deleting it, and invents a comparative risk assessment."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 3,
+   "economy": 2
+  },
+  "errors": [
+   "\"about 13 minutes to undo instead of 1\" invents a restoration preparation duration.",
+   "\"the only way back to the old checkout\" is unsupported; code restoration is itself another way.",
+   "\"checkout stays broken for roughly 13 minutes\" assumes both an unverified duration and continuous failure until recovery.",
+   "\"the only evidence that the flag has ever been needed\" exceeds the supplied incident history.",
+   "\"If a big peak is coming ... that is a reason to wait for it\" adds an unsupported exception to the agreed cleanup condition."
+  ],
+  "note": "Provides context and a sequence, but its central thirteen-minute estimate is invented and repeated as evidence."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"if checkout breaks ... it's fixed in about 1 minute\" guarantees future mitigation from historical incidents.",
+   "\"A checkout outage would last roughly 12 times longer\" compares unlike timing measurements and assumes both recovery methods succeed.",
+   "\"every future checkout change has to consider\" the flag is broader than the verified facts.",
+   "\"the flag check in src/flags.ts\" invents the location of the checkout branching logic; only the flag's location was verified.",
+   "\"wait until after your next high-traffic period\" introduces an additional safeguard without evidence that this period changes the decision."
+  ],
+  "note": "Offers an actionable cleanup scope, but exaggerates the timing comparison and invents where the flag check lives."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 3,
+   "self_contained": 4,
+   "honest": 1,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"mitigation goes from about 1 minute to about 12\" treats deployment duration as total future mitigation time.",
+   "\"The only mitigation left is code\" excludes uninvestigated operational alternatives.",
+   "\"Checkout is broken for every user\" inflates a hypothetical payment failure into a universal outage.",
+   "\"about 11 minutes of reduced exposure per checkout incident\" assumes every incident can be mitigated by the flag and both historical timings generalize.",
+   "\"both in the rollout month, while it was actively moving traffic\" contradicts the supplied timing of incidents in the month before rollout and invents rollout activity.",
+   "\"The flag branch in src/flags.ts\" invents the location of the checkout branching logic.",
+   "\"my only evidence is the 31 tests\" implies evidence of fallback functionality without verified test results."
+  ],
+  "note": "Explains many names, but buries the answer in repetition while adding unsupported incident history and universal failure claims."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 1
+  },
+  "errors": [
+   "\"the only code reachable in the off position\" reverses the verified condition: the legacy path is reachable only when off, not necessarily the only reachable code.",
+   "\"the two entries ... list a flag flip\" invents details of the incident log's contents beyond the supplied summary.",
+   "\"~12 minutes instead of ~1 minute\" omits preparation time from the future recovery comparison.",
+   "\"waiting longer ... only keeps charging the test and review cost\" invents a measured review cost and excludes the possible value of additional production observation.",
+   "\"I have no concrete reason to wait\" overlooks the lost fast fallback that the reply subsequently describes."
+  ],
+  "note": "Marks the future timing comparison as an inference, but excessive definitions and repetition obscure the answer and its deciding rule."
+ }
+}

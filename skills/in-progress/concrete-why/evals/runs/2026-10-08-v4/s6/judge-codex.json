@@ -1,0 +1,207 @@
+{
+ "R01": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"a fact many systems need\" presents prospective consumers as demonstrated demand; only Hora reads Empty Tags today.",
+   "\"only place that knows the exact moment\" does not establish why an attribute watcher could not observe the same change.",
+   "\"predicts cleanly instead of waiting on a server round trip\" assumes a direct attribute check would require a server round trip.",
+   "\"free everywhere else\" omits each bar's declaration and settlement after every attribute change.",
+   "\"it can't be wrong about when the bar emptied\" overstates timing guarantees without showing the ability runtime's execution."
+  ],
+  "note": "It addresses both alternatives but substitutes ownership labels and timing assurances for code the reader can inspect."
+ },
+ "R02": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 4
+  },
+  "errors": [
+   "\"gates/cues/conditions would each need their own copy\" treats hypothetical future demand and duplicated implementations as inevitable.",
+   "\"Prediction comes free\" omits the tag maintenance cost and does not show that an attribute-watching alternative would lose prediction."
+  ],
+  "note": "It concisely explains the missing attribute wait, but provides almost no code and does not disclose that reuse beyond Hora is prospective."
+ },
+ "R03": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 4,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"a held flurry always bottoms out\" does not follow from net drain because the hold also ends at its maximum duration or on release.",
+   "\"a prediction story for that read\" is presented as additional required work without establishing why the existing shared attribute reading would be insufficient.",
+   "\"new gate/condition kind per consumer\" overstates the duplication required; consumers could share an attribute condition."
+  ],
+  "note": "It supplies unusually inspectable evidence and distinguishes verified behavior from timing uncertainty, but buries the answer under extensive peripheral detail."
+ },
+ "R04": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 5,
+   "self_contained": 4,
+   "honest": 4,
+   "usable": 5,
+   "economy": 4
+  },
+  "errors": [
+   "\"the tag does not give Hora an immediate notification\" is stronger than the shown presence read proves; notification-triggered execution has not been ruled out."
+  ],
+  "note": "It makes the actual tradeoff understandable with relevant code, acknowledges maintenance cost and the single current consumer, and offers a reusable decision rule."
+ },
+ "R05": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"not pushed when the tag goes on\" is not established merely by showing a presence read inside Advance.",
+   "\"would strike on exactly the same step\" assumes unverified execution and notification ordering.",
+   "\"the project's own rule ... in CLAUDE.md\" invokes a Claude-only instruction as a governing project rule for this Codex answer."
+  ],
+  "note": "Its runtime edit comparison is useful, but it overstates the timing investigation and spends substantial space on an unasked Exhaustion distinction."
+ },
+ "R06": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 4,
+   "usable": 4,
+   "economy": 5
+  },
+  "errors": [
+   "\"For Hora alone, checking stamina === 0 would be simpler\" conflates the simpler comparison with the additional runtime support needed to execute it.",
+   "\"the tag buys reuse\" does not disclose that Hora is the only current Empty Tag consumer."
+  ],
+  "note": "It states the tradeoff economically and avoids claiming superior timing, but leaves the user trusting descriptions instead of seeing the supporting code."
+ },
+ "R07": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 2,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"like an enemy's drain or exhaustion\" introduces unverified causes of stamina reaching zero.",
+   "\"the client and server can disagree about which tick saw zero\" asserts a failure sequence without tracing either machine's execution.",
+   "\"Build the spine before the limbs\" is invoked as a governing rule without an applicable source.",
+   "\"Adding it later would mean ... changing every place\" assumes additional numeric consumers will exist before adoption."
+  ],
+  "note": "It explains why the declared phase needs a runtime condition, but supports several consequences with hypothetical claims and bare references."
+ },
+ "R08": {
+  "scores": {
+   "side_asked": 2,
+   "concrete": 2,
+   "self_contained": 2,
+   "honest": 1,
+   "usable": 1,
+   "economy": 2
+  },
+  "errors": [
+   "\"tag container can notify the ability the moment it needs to stop\" claims unverified notification wiring for Hora.",
+   "\"Gate ... for both starting and continuing\" is used to explain Hora's exit, which actually uses a phase race leading to its strike.",
+   "\"drains stamina each frame\" replaces the repeating drain with an unsupported per-frame implementation.",
+   "\"player keeps flurrying with 0 stamina\" ignores the release and maximum-hold exits.",
+   "\"whatever drains the stamina grants the tag\" misidentifies the owner; the attribute container settles it.",
+   "\"re-evaluates its Gate ... and ends itself\" invents Hora's empty-stamina response.",
+   "\"Sprint and dodge ... require stamina\" and their tag-based refusal are not established by the evidence.",
+   "\"exhaustion tag ... Status.Exhausted\" substitutes speculative terminology for the actual stamina Empty Tag."
+  ],
+  "note": "Despite admitting it could not inspect Hora, it invents the central execution path and argues against a start-only check the user did not propose."
+ },
+ "R09": {
+  "scores": {
+   "side_asked": 3,
+   "concrete": 2,
+   "self_contained": 1,
+   "honest": 2,
+   "usable": 2,
+   "economy": 3
+  },
+  "errors": [
+   "\"instantly react to exhaustion\" claims immediate reactions without establishing runtime delivery and blurs Empty Tag terminology.",
+   "\"inside its tick loop\" implies Hora has a handwritten tick loop, whereas it declares a phase race.",
+   "\"flurry cancellation\" misdescribes the empty-stamina transition, which proceeds to the final strike.",
+   "\"tags are already predicted over the network\" substitutes an unsupported network claim for the verified shared-container prediction rationale.",
+   "\"entire rest of the game ... react\" omits that no other game code currently consumes Empty Tags."
+  ],
+  "note": "It repeats architectural slogans without showing the phase race or the tag settlement code needed to judge the proposed simplification."
+ },
+ "R10": {
+  "scores": {
+   "side_asked": 4,
+   "concrete": 3,
+   "self_contained": 2,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"The tag is that event\" assumes event delivery rather than establishing how the runtime evaluates the wait.",
+   "\"Polling is the only way\" contradicts the attribute-watching alternative the reply subsequently describes.",
+   "\"Other systems need the same fact\" presents prospective demand as established.",
+   "\"every bar gets its Empty Tag for free\" omits per-bar declarations and repeated settlement work.",
+   "\"CLAUDE.md forbids\" relies on the wrong instruction surface rather than the verified AGENTS.md rule."
+  ],
+  "note": "It covers both rejected alternatives and acknowledges machinery, but weakens that honesty by calling the generic implementation free and offering no substantial code."
+ },
+ "R11": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 5,
+   "honest": 2,
+   "usable": 4,
+   "economy": 2
+  },
+  "errors": [
+   "\"not a subscription that can miss a moment\" wrongly suggests a sampled presence read cannot miss an empty-then-refill interval.",
+   "\"run once per tick per open wait\" claims an execution frequency without establishing the live caller.",
+   "\"bar already empty ... strikes at once\" overstates timing beyond the next runtime evaluation.",
+   "\"drain empties the bar ~1 s later\" assumes an unstated starting stamina amount.",
+   "\"all five bars ... use ordinaryZeroFloor\" is an unsupported repository-wide declaration claim.",
+   "\"both would be sampled at the same tick\" assumes unverified scheduling for the proposed alternative.",
+   "\"build the spine before the limbs\" is invoked without establishing an applicable Codex instruction."
+  ],
+  "note": "The code excerpts make the ownership and runtime costs inspectable, but the answer adds unsupported timing and resource declarations while repeating its main argument."
+ },
+ "R12": {
+  "scores": {
+   "side_asked": 5,
+   "concrete": 4,
+   "self_contained": 4,
+   "honest": 3,
+   "usable": 3,
+   "economy": 3
+  },
+  "errors": [
+   "\"Every arm ... is an event the game announces\" asserts notification behavior without inspecting the runner.",
+   "\"Stamina is 0 has to become an event\" excludes a runtime condition that samples the number.",
+   "\"In that same step ... onTagAdded arm fires\" claims immediate phase execution that the reply later admits it did not verify.",
+   "\"Only a tag, or a new watcher ... gives it an event\" preserves an unverified event-delivery premise in the deciding rule."
+  ],
+  "note": "It shows the actual declaration and settlement path and admits weak timing evidence, but does not revise the event-based claims that depend on that missing evidence."
+ }
+}
