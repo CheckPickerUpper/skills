@@ -90,6 +90,46 @@ The channel and the agent kind are not settings: they depend on what the user
 can use at the time, so step 3 asks for them each effort.
 </what-to-do>
 
+## Check in
+
+<what-to-do>
+The board, not the conversation, says what to do next. Run this from the
+effort's checkout, naming the effort's parent issue or milestone:
+
+~~~sh
+python3 <folder of this SKILL.md>/scripts/conductor_board.py check-in --repo OWNER/REPO --parent N   # or --milestone "TITLE"
+~~~
+
+It reads issues, blocked-by edges and their reason lines, PRs, and the herdr
+agents in the checkout's worktrees fresh on every run, prints one line per
+thing that needs action with the rule for each kind, and exits 1 while
+anything does (0 when nothing does, 2 when a read failed; `--json` prints the
+same findings for a loop).
+
+Run it at the start of the effort, after every implementer report, after every
+merge, and on a loop for the whole effort. In Claude Code the loop is `/loop`
+without an interval, whose body is "run check-in and act on every line"; in
+other clients, re-run it on a timer. Each pass re-reads the board instead of
+trusting the conversation.
+
+Act on every line before doing anything else:
+
+- `ready`: start it, up to `max_implementers` running at once (step 3).
+- `stale-blocker`: remove the edge and its reason line, then start the issue.
+- `parent-blocker`: move the edge down to the sub-issue that truly needs the
+  blocker, with its reason line there.
+- `missing-reason` and `orphan-reason`: ask the issue's author to record the
+  reason line or drop the edge; record it yourself when you set the edge.
+- `review`: review the PR (step 7) and record the result as a PR review on its
+  head commit.
+- `idle`: prompt the implementer with its next step, or release it (step 7).
+- `unmapped`: put the issue number in the worktree's branch, or release the
+  agent and remove the worktree when its work is done.
+
+Every check-in report says what is running and what was just started. Never
+forecast what will not finish.
+</what-to-do>
+
 ## 1. Settle the job
 
 <what-to-do>
@@ -115,6 +155,26 @@ can use at the time, so step 3 asks for them each effort.
 - Cut the work along real, independently landable seams, one implementer per
   issue, so the independent issues run in parallel up to `max_implementers`.
   Each issue has an owner; overlapping file ownership is a seam cut wrong.
+- An issue is blocked by X only when doing it now would duplicate or conflict
+  with work in X that must land first: it cannot start at all, or cannot meet
+  one of its acceptance criteria, until X lands. Merge order, rebase-time
+  checks (such as taking the next free migration number at merge), "cleaner
+  after X", "extra work if done now", and anything already merged or closed
+  are never blockers. When only one piece of an issue depends on X, the edge
+  goes on that piece's own issue, never on the lane or parent above it.
+- Whenever you add a native blocked-by edge, write its reason line in the
+  blocked issue's body, one per blocking issue, under a `## Blocked by`
+  heading:
+
+  ~~~markdown
+  ## Blocked by
+  - #1212 Idempotency-key binding: cannot pass "a retried charge with the same key is rejected" until it lands, because keys are not bound to charges yet.
+  ~~~
+
+  The line starts with `- #N`, names an issue that is a blocked-by edge, and
+  says what this issue `cannot` start or meet until it lands, and why. On an
+  issue with sub-issues, the reason says "cannot start until it lands";
+  anything narrower belongs on the sub-issue.
 - When a task is a poor fit for delegation, say why and do it yourself.
 
 Done when every implementer job is an issue with acceptance criteria and its
@@ -360,8 +420,8 @@ An implementer's report is a claim. Before accepting:
    With `merge = "implementer"`, send the implementer acceptance and let it
    merge. Either way, run branch and worktree cleanup only after `state` reads
    `MERGED`.
-6. Release the implementer, then start the next queued issue only if that kind's
-   usage state is `normal`. When its PR reads `MERGED` and no follow-up is
+6. Release the implementer, run check-in, then start its `ready` issues only if
+   that kind's usage state is `normal`. When its PR reads `MERGED` and no follow-up is
    pending, or its job was dropped or reassigned, remove a worktree workspace
    you created with `herdr worktree remove --workspace <workspace_id>`, which
    deletes the checkout and closes the workspace and its panes, then delete the
