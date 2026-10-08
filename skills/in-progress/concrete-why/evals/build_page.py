@@ -10,8 +10,9 @@ LANE_NAMES = {
     "claude-opus": "Claude Opus 5.5 · medium",
     "claude-sonnet": "Claude Sonnet 5.5 · medium",
     "codex": "Codex · gpt-6.1-sol · medium",
-    "muse": "Muse · default model · medium",
-    "pi": "Pi · mimo-v2.6-pro · medium",
+    "muse": "Muse · default model · ultra",
+    "mimo": "MiMo v2.6 Pro (via pi) · max",
+    "gemini": "Gemini 3.1 Pro (via agy) · high",
 }
 TITLES = {
     "s1": ("Feature flag cleanup", "why not just delete it tho whats actually the downside"),
@@ -19,6 +20,7 @@ TITLES = {
     "s3": ("Migrations on boot vs a Job", "whats the actual benefit tho it works fine now"),
     "s4": ("Closing old issues", "thats not an answer, im asking why not leave them open. what does closing actualy do"),
     "s5": ("NRO: why mutations return their change", None),
+    "s6": ("NRO: why an empty bar is a tag", None),
 }
 
 

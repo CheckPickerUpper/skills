@@ -12,14 +12,15 @@ HERE = pathlib.Path(__file__).resolve().parent
 SKILL = (HERE.parent / "SKILL.md").read_text()
 NRO = pathlib.Path.home() / "dev" / "NRO"
 
-# Every lane runs at medium reasoning effort so lanes differ by model and harness, not effort.
+# Claude and Codex run at medium effort, to test whether the skill still holds when strong models are not
+# thinking hard. Every other lane runs at the highest effort its harness offers.
 LANES = {
     "claude-opus":   lambda p, cwd, out: (["claude", "-p", p, "--model", "opus", "--effort", "medium", "--no-session-persistence", "--tools", "Read,Grep,Glob"], None),
     "claude-sonnet": lambda p, cwd, out: (["claude", "-p", p, "--model", "sonnet", "--effort", "medium", "--no-session-persistence", "--tools", "Read,Grep,Glob"], None),
     "codex":         lambda p, cwd, out: (["codex", "exec", "-s", "read-only", "--skip-git-repo-check", "--ephemeral", "-c", "model_reasoning_effort=medium", "-C", str(cwd), "-o", str(out), p], out),
-    "muse":          lambda p, cwd, out: (["muse", "exec", "--reasoning-effort", "medium", "--workspace", str(cwd), p], None),
-    "pi":            lambda p, cwd, out: (["pi", "-p", "--no-session", "--thinking", "medium", "--tools", "read,grep,find,ls", p], None),
-    "gemini":        lambda p, cwd, out: (["pi", "-p", "--no-session", "--model", "google/gemini-3.7-flash", "--thinking", "medium", "--tools", "read,grep,find,ls", p], None),
+    "muse":          lambda p, cwd, out: (["muse", "exec", "--reasoning-effort", "ultra", "--workspace", str(cwd), p], None),
+    "mimo":          lambda p, cwd, out: (["pi", "-p", "--no-session", "--model", "xiaomi-token-plan-sgp/mimo-v2.6-pro", "--thinking", "max", "--tools", "read,grep,find,ls", p], None),
+    "gemini":        lambda p, cwd, out: (["agy", "-p", p, "--model", "gemini-3.1-pro-high", "--mode", "plan"], None),
 }
 
 FIXTURE_PROMPT = """You are the assistant in the conversation below. Every fact listed was verified by you earlier in this session. Do not run commands or open files. Write your next reply to the user exactly as you would send it, and output only that reply.

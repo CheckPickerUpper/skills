@@ -1,97 +1,164 @@
 ---
 name: concrete-why
-description: "Explain a decision so the reader can judge it without trusting you. Use when the user asks why, why not, what the rationale or benefit is, or pushes back on a recommendation — and always when they ask about the same point a second time, because that means the first explanation failed. Every reason names an observable consequence, never a label; every issue, PR, file, or component the argument rests on is introduced with what it is and how much it matters; and a side with no concrete consequence left is admitted, flipping the recommendation if needed."
+description: "Explain a decision so the reader can judge it without trusting you or opening an editor. Use whenever the user asks why, why not, what the rationale or benefit is, or pushes back on a recommendation. Answer the side that was asked; start from what the code or system does, never a verdict; describe every bug as a numbered sequence of real events; translate sources instead of relaying their phrasing; cut truisms; show the real code with added line-by-line comments; introduce every issue, file, or type with what it is, where it sits, and who uses it; say what you could not verify; and admit an empty side, flipping the recommendation when nothing concrete is left."
 ---
 
 # /concrete-why
 
-Explain a decision so the reader can check it without trusting you.
+Explain a decision so the reader can check it without trusting you and without opening an editor.
 
 ## The failure this prevents
 
-An explanation fails when it restates the conclusion in other words:
+An explanation fails when the reader has to take your word for it or go read the code anyway:
 
-> "Moving them changes only how they're displayed. It also means editing old planning issues for no real gain. Leave all seven where they are."
+> "NRO hands back the removal on purpose, and subscribing would cost more than it saves. Claim calls the release path while it is still running, because a blocker arriving ends what it blocks. The return value and the HUD subscription solve different problems."
 
-Nothing in that reply tells the reader what goes wrong if they do the opposite. "No real gain", "old", "live work item", "defining spec" are labels. They describe the speaker's verdict, not the world. The reader is left to trust the verdict or ask again.
+The first sentence is a verdict. The second is the source's own phrasing relayed untranslated; nobody understands it without reading the code. The third is true of any two things. None of it says what happens.
 
 ## The rules
 
 ### 1. Answer the side that was asked
 
-Restate the question to yourself in decision form before answering.
+Restate the question to yourself in decision form first.
 
-- "Why X?" asks for what X gains.
-- "Why not X?" asks for what X **costs** or breaks.
+- "Why X?" asks what X gains.
+- "Why not X?" asks what X **costs** or breaks.
 - "What's the benefit?" asks for the gain, then whether it beats the cost.
 
-Answering "why not move them" with "the benefit of moving is small" answers a different question. Name what goes wrong if they are moved, or say nothing does.
+"Why not move them" answered with "the benefit of moving is small" answers a different question.
 
-### 2. A reason is an observable consequence
+### 2. Start from what happens, never from a verdict
 
-Each reason says **who or what sees a difference, where, and when**: a progress bar that drops an item, a session that no longer finds the bug, a build that takes 40 seconds longer, a user who loses a save.
+Do not open with a ruling ("on purpose", "costs more than it saves", "the right call", "by design"). Open with what the code, system, or process actually does today, and let the reasons follow from it.
 
-A consequence comes from the facts, at the size the facts give it. When you project one forward, say what it rests on and write "can", not "will". Never upgrade a fact into a worse one: a "checkout incident" is not "customers unable to pay", and "most migrations" is not "39 of 41".
+### 3. A bug is a numbered sequence of real events
 
-These words never stand alone as a reason. Use one only after stating the consequence it summarises:
+A symptom ("the bar never greys out") is not an explanation. Write the failure as numbered steps: what runs, in what order, using the real names (tags, functions, frames, requests), and what the user or player sees at the end. Say when it happens and when it doesn't ("only when spawn setup runs before the HUD").
 
-stale · live · old · cleaner · simpler · consistent · best practice · idiomatic · no real gain · not worth it · for tracking · proper · defining · canonical · risky · overkill · just cosmetic
+### 4. Translate sources; never relay their phrasing
 
-### 3. Introduce everything the argument rests on
+An ADR, comment, or doc is evidence, not an explanation. If a sentence would only make sense after reading the code it describes, rewrite it as the steps it stands for. Quote a source only to show where a fact comes from.
 
-The reader should be able to judge the reasoning without opening a link or remembering a number.
+### 5. Cut truisms and labels
 
-- An issue or PR appears as a link with its title, then one line saying what it is.
-- When the argument depends on how much the thing matters, say so concretely: what breaks or stays blocked while it is open, its priority or deadline, who is waiting on it.
-- A file, component, or setting gets one clause saying what it does.
+Delete any sentence that would be true of any two options ("they solve different problems", "each has trade-offs"). These words never stand alone as a reason; use one only after the consequence it summarises:
 
-A bare `#1187` or `the old parent` forces the reader to trust you. Do not write one.
+stale · live · old · cleaner · simpler · consistent · best practice · idiomatic · robust · no real gain · not worth it · for tracking · proper · defining · canonical · risky · overkill · just cosmetic · on purpose · by design
 
-### 4. Check every reason before sending
+### 6. A consequence keeps the size the facts give it
 
-- **So-what test.** Ask "so what?" of each reason once. If the answer is the conclusion again, the reason is circular. Cut it.
-- **Both-sides test.** If the reason would hold whichever option is chosen, it does not separate them. Cut it.
-- **Source test.** Each fact comes from something you read in this session (a command output, a file, an issue body). If you are inferring, say "I infer" and from what, and do not give an inferred number more precision than its inputs. If you have not checked something checkable, check it before answering. Do not add detail to an incident or a timeline that the source does not contain.
+State each consequence as an observable difference: who or what sees it, where, when. When you project one forward, say what it rests on and write "can", not "will". Never upgrade a fact into a worse one: a "checkout incident" is not "customers unable to pay", and "most migrations" is not "39 of 41".
 
-### 5. Admit an empty side, and flip if it is empty
+### 7. Introduce everything the argument rests on
 
-If one option has no concrete consequence left after step 4, say so in plain words:
+The first time an issue, PR, file, type, function, incident, or rule appears, give:
+
+- **What it is**: a linked title for issues and PRs; one clause for code ("the server code that sends each player their health and stamina bars").
+- **Where it sits now**: its path, parent issue, milestone, status, or owner, when that bears on the decision.
+- **Who uses it or waits on it**: the callers, lane, session, or person that depend on it. Check this; it often changes the answer ("only tests read this return value").
+- **How much it matters**, when that changes the recommendation: priority, deadline, what breaks while it is open.
+
+A bare `#1187`, a bare path, or a bare identifier makes the reader trust you. Do not write one.
+
+### 8. Show the code the argument rests on
+
+When a reason depends on code, show it. The reader is often away from their editor.
+
+- Quote the real lines with `file:line`, keeping the code's own comments exactly as they are.
+- Between the lines, add comments that say what each part does in plain language, marked `// ▸` so they are never mistaken for the code's own comments.
+- When comparing two shapes, show both: before and after, or option A and option B.
+- Trim unrelated lines with `// ...`. Show only what the argument needs.
+
+```ts
+// GameplayTagContainer.ts:231, inside ApplyGameplayTag
+appliedTag.Applications.push(application);
+// ▸ FireImmune is on from this line.
+
+this.removeTagsBlockedBy(tag, application.Since);
+// ▸ Takes off every Burning grant, one at a time.
+```
+
+### 9. Verify, and say what you could not
+
+Every fact comes from something you read in this session. Check what can be checked before answering: grep for callers, read the function, confirm the rule is actually configured. If you infer, say "I infer" and from what. If something could not be confirmed, say so in its own line ("ADR 0003 says a lint rule enforces this; I could not find it configured"). Never add detail to an incident or timeline that the source does not contain.
+
+### 10. Admit an empty side, and flip if it is empty
+
+If an earlier answer leaned on a label or a convention ("same as the other routes", "cleaner"), quote it and say it was not a reason, even if the recommendation survives. If one option has no concrete consequence left after these rules, say so plainly and change the recommendation:
 
 > "I have no concrete reason not to. My earlier recommendation was a default, not an argument. Move them."
-
-Defending an earlier recommendation is never a reason. When the analysis contradicts what you said before, lead with the change. When the earlier answer leaned on a label or a convention ("same as the other routes", "cleaner"), quote it and say it was not a reason, even if the recommendation survives.
 
 When the items in the question do not all come out the same way, split them and say what separates the groups.
 
 ## Output shape
 
 <what-to-do>
-1. **Short answer**: one or two sentences with the recommendation. If it changed from before, say so here.
-2. **One block per item or option.** For each:
-   - what it is (linked title, one line, how much it matters)
-   - where it stands now, if that matters
-   - *If we do X:* the concrete consequences
-   - *If we don't:* the concrete consequences
-3. **What decides it**: one line naming the fact that separates the options, so the reader can apply it themselves next time. It must give the right answer for every item above; if no single fact does, name one per group or leave the line out.
+1. **Short answer**: what happens and what to do, in one or two sentences. No verdict words. If the recommendation changed, say so here.
+2. **One block per item or option**, each opening with its introduction (rule 7), then the code (rule 8) and the consequences under each option (rules 3 and 6). Group items whose reasoning is identical.
+3. **What I couldn't confirm**, when anything is unverified.
+4. **What decides it**: one line naming the fact that separates the options, true for every item above, so the reader can apply it next time.
 </what-to-do>
 
-Keep it as short as the decision allows. A single decision usually fits in under 200 words; each further item adds about 60. Introducing an item takes one line, not a paragraph. The reply is plain prose and lists: never copy this skill's tags or section names into it.
-
-- Group items whose reasoning is identical ("#402 and #404 both shipped through PRs that never linked them") instead of repeating a block.
-- Write both *If we do* and *If we don't* only when both sides have a consequence worth stating. For three or more items with the same shape, a table (item, what it is, what each option does) is shorter.
-- Do not add sections for options nobody is weighing. Do not end with a menu of follow-ups.
+There is no length budget. Cut repetition, truisms, and sections for options nobody is weighing; keep every line that carries a fact. Do not end with a menu of follow-ups. The reply is prose, lists, and code; never copy this skill's tags or section names into it.
 
 ## Example
 
-Question: "Why NOT move #318 and #254 under their lane issues so everything is in one place?"
+Question: "in NRO why does RemoveGrantedTag hand back a GrantedTagRemoval instead of just letting the hud subscribe to tag changes like unreal does with OnGameplayTagAdded? why not just subscribe its way less wiring"
 
-> **Short answer:** No reason not to. Move them. I recommended leaving them earlier out of a default against touching old issues, not because of a cost.
+> The HUD doesn't get tag updates from that return value at all; it checks a change counter. Subscribing would add two specific failures, shown below with the code.
 >
-> **[#254 Save slot overwritten on rapid exit](https://github.com/owner/repo/issues/254)**: high-priority data-loss bug; a player who quits twice within a second loses their save. It blocks lane 7. It sits under [#88 Q2 persistence planning](https://github.com/owner/repo/issues/88), a planning issue closed in June.
-> - *If moved under [#1272 Lane 7: persistence](https://github.com/owner/repo/issues/1272):* it appears in the sub-issue list and progress bar the lane 7 session works from, so the session sees it without reading the brief.
-> - *What moving costs:* it leaves the sub-issue list of a closed issue nobody opens. Nobody loses anything.
+> **How the HUD learns about tags today**
 >
-> **[#1187 Inventory desyncs after reconnect](https://github.com/owner/repo/issues/1187)**: medium-priority; items duplicate until the next sync. Its parent is [#1150 Reconnect protocol rewrite](https://github.com/owner/repo/issues/1150), the issue lane 3 is actively working from.
-> - *What moving costs:* an issue has one parent. Moving it drops it from #1150's progress bar, and lane 3 would read reconnect as finished while this bug is open.
+> `ParticipantResourceBarsPublisher` (`src/Shared/Server/Participant/ParticipantResourceBars.Server.ts`) is the server code that sends each player their health, stamina and chakra bars and their party panel. Nothing tells it a tag changed. After effects run, it compares a number:
 >
-> **What decides it:** whether anyone tracks work from the current parent.
+> ```ts
+> // ParticipantResourceBars.Server.ts:71
+> const tagVersion = this.tags.ReadTagVersion();
+> // ▸ Total number of tag changes on this player so far.
+> if (tagVersion > this.publishedTagVersion) {
+> // ▸ Bigger than at the last send means something changed since.
+> 	this.publishedTagVersion = tagVersion;
+> 	this.partyActions.PublishParticipant(this.player);
+> 	// ▸ Resends the player's state to the party panel.
+> }
+> ```
+>
+> When the publisher is created it sends the current bars at once and records the counter, so a tag added before it existed is already in what it sent.
+>
+> **What `RemoveGrantedTag` returns, and who reads it**
+>
+> `RemoveGrantedTag` (`GameplayTagContainer.ts:266`) takes off one grant: one cause's hold on a tag, such as one of two enemies' `Burning`. It returns `GrantedTagRemoval` (`AppliedTag.Types.ts:212`): `Removed` with what is left of the tag, or `NotActive` when the grant was already gone. All 8 calls that read this return value are in `src/_Testing_/_Tests_/`; no game code reads it.
+>
+> **What subscribing would break** (reasoning recorded in `docs/adr/0003-a-mutation-returns-its-change.md`; `AGENTS.md` only says listener lists are banned)
+>
+> *1. The HUD misses a stun at spawn.*
+> 1. A player spawns. On frame 1, spawn setup adds `Stunned`.
+> 2. On frame 2, the HUD starts and registers "tell me when a tag is added".
+> 3. "Stunned added" fired on frame 1, before anyone was listening.
+> 4. The player is stunned, but their bars look normal for the whole stun.
+>
+> It happens only when spawn setup runs before the HUD. The counter cannot miss it, because the publisher sends current state when it starts.
+>
+> *2. A listener sees fire immunity and burning at once.*
+>
+> ```ts
+> // GameplayTagContainer.ts:231, inside ApplyGameplayTag
+> appliedTag.Applications.push(application);
+> // ▸ FireImmune is on from this line.
+> this.removeTagsBlockedBy(tag, application.Since);
+> // ▸ Takes off each Burning grant, one at a time, through RemoveGrantedTag.
+> // ...
+> this.tagVersion += 1;
+> // ▸ The counter the HUD checks goes up only after every removal is done.
+> ```
+>
+> 1. The player is burning from two enemies, then gets `FireImmune`.
+> 2. Enemy A's `Burning` grant comes off; "Burning removed" listeners run.
+> 3. A listener asks "is the player burning?" and gets **yes**, because enemy B's grant is still on. The HUD keeps the burn icon on an immune player.
+> 4. Enemy B's grant comes off and the listeners run again.
+>
+> **"Way less wiring"**: a listener needs a listener list on the tag container, a connect call in the HUD, and a disconnect when the player leaves. Today the publisher is handed `Tags` in its constructor (`ParticipantResourceBars.Server.ts:30`) and reads one number.
+>
+> **What I couldn't confirm:** ADR 0003 says `perfect-typescripter/unconsumed-outcome` makes ignoring a returned change a build error. I could not find that rule configured in the repo, and `removeTagsBlockedBy` itself ignores the return value, so today ignoring it compiles.
+>
+> **What decides it:** can the reader miss a change that happened before it started looking? A counter cannot; a listener can.
