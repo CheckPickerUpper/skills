@@ -657,6 +657,76 @@ def print_claim(claim: dict) -> None:
     print(f"  rule (claimed): {claim['rule']}")
 
 
+LEFTOVER_RULES = {
+    "merged": "Its PR merged at this head and nothing local remains: remove the worktree and delete its local branch.",
+    "merged-with-local-work": "Its PR merged, but work remains here that the merge does not hold: commit and push it "
+                              "on a new branch, or discard it on purpose, before removing the worktree.",
+    "closed": "Its PR closed without merging: push any unpushed commits, then remove the worktree when the job was "
+              "dropped, or reopen the PR when it was not.",
+}
+
+
+def read_branch_prs(repo: str, branch: str) -> list[dict]:
+    return run_json(["gh", "pr", "list", "--repo", repo, "--state", "all", "--head", branch, "--limit", "5",
+                     "--json", "number,state,headRefOid,title"], f"PRs opened from {branch}")
+
+
+def local_only_commits(worktree: str, merged_head: str) -> tuple[int, str]:
+    """Count commits here that the merge does not hold, and say what they were counted against.
+
+    A worktree behind its merged head holds nothing extra. When the merged head was never fetched, the
+    commits are counted against every remote branch instead; this reads only what is already local.
+    """
+    have_head = subprocess.run(["git", "-C", worktree, "cat-file", "-e", f"{merged_head}^{{commit}}"],
+                               capture_output=True).returncode == 0
+    if have_head:
+        count = run_text(["git", "-C", worktree, "rev-list", "--count", f"{merged_head}..HEAD"], f"commits of {worktree}")
+        return int(count), "the merged head does not contain"
+    count = run_text(["git", "-C", worktree, "rev-list", "--count", "HEAD", "--not", "--remotes"],
+                     f"commits of {worktree}")
+    return int(count), "no remote branch contains (the merged head is not fetched here)"
+
+
+def leftovers(repo: str, checkout: str) -> dict:
+    """Find worktrees whose PR is finished: merged (clean or still holding work) or closed without merging."""
+    _, linked = read_worktrees(checkout, repo)
+    findings = []
+    for worktree in linked:
+        if not worktree.branch:
+            continue  # A detached worktree has no branch a PR could have been opened from.
+        prs = read_branch_prs(repo, worktree.branch)
+        if not prs or any(pr["state"] == "OPEN" for pr in prs):
+            continue
+        pr = next((pr for pr in prs if pr["state"] == "MERGED"), prs[0])
+        where = f"{tilde(worktree.path)}, branch {worktree.branch}, PR #{pr['number']}"
+        detail = {"worktree": worktree.path, "branch": worktree.branch, "pr": pr["number"]}
+        if pr["state"] != "MERGED":
+            findings.append({"kind": "closed", "line": f"{where} closed without merging", **detail})
+            continue
+        dirty = run_text(["git", "-C", worktree.path, "status", "--porcelain"], f"status of {worktree.path}").splitlines()
+        local_only, against = local_only_commits(worktree.path, pr["headRefOid"])
+        if dirty:
+            count = f"{len(dirty)} uncommitted file{'' if len(dirty) == 1 else 's'}"
+            findings.append({"kind": "merged-with-local-work", "line": f"{where} merged, {count}", **detail})
+        elif local_only:
+            count = f"{local_only} local commit{'' if local_only == 1 else 's'} {against}"
+            findings.append({"kind": "merged-with-local-work", "line": f"{where} merged, {count}", **detail})
+        else:
+            findings.append({"kind": "merged", "line": f"{where} merged", **detail})
+    return {"repo": repo, "findings": findings,
+            "rules": {kind: LEFTOVER_RULES[kind] for kind in LEFTOVER_RULES if any(f["kind"] == kind for f in findings)}}
+
+
+def print_leftovers(result: dict) -> None:
+    if not result["findings"]:
+        print("no leftover worktrees")
+    for kind, rule in result["rules"].items():
+        for finding in result["findings"]:
+            if finding["kind"] == kind:
+                print(f"{kind}: {finding['line']}")
+        print(f"  rule ({kind}): {rule}")
+
+
 def print_board(board: dict) -> None:
     slots = board["slots"]
     print(f"slots: {slots['running']} running, max {slots['max_implementers']} -> {slots['free']} free, "
@@ -696,6 +766,7 @@ def main() -> None:
     effort.add_argument("--milestone", help="the effort's milestone title")
     claim_command = command_for("claim-check", "before assigning an issue, list what already holds it")
     claim_command.add_argument("issue", type=int, help="the issue about to be assigned")
+    command_for("leftovers", "list worktrees whose PR merged or closed and that are still open")
 
     arguments = parser.parse_args()
     if not re.fullmatch(r"[^/\s]+/[^/\s]+", arguments.repo):
@@ -708,9 +779,12 @@ def main() -> None:
             result = check_in(arguments.repo, checkout, ("parent", str(arguments.parent))
                               if arguments.parent is not None else ("milestone", arguments.milestone), now)
             needs_action, show = bool(result["findings"]), print_board
-        else:
+        elif arguments.command == "claim-check":
             result = claim_check(arguments.repo, checkout, arguments.issue, now)
             needs_action, show = bool(result["holders"]), print_claim
+        else:
+            result = leftovers(arguments.repo, checkout)
+            needs_action, show = bool(result["findings"]), print_leftovers
     except ReadFailed as error:
         fail(error, arguments.json)
     if arguments.json:
