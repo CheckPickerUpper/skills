@@ -586,6 +586,16 @@ class CheckInTest(unittest.TestCase):
         self.assertFalse(path.exists())
         self.assertNotIn("codex/1212-claims", self.branches())
 
+    def test_land_leaves_a_worktree_it_is_told_to_keep(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        self.landing(self.pr_state(head, "codex/1212-claims"), self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        done = self.land("--keep-worktree")
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(len(self.calls("gh", "pr", "merge")), 1)
+        self.assertTrue(path.exists())
+        self.assertIn("codex/1212-claims", self.branches())
+
     def test_land_stops_before_cleanup_when_the_merge_itself_fails(self):
         path = self.worktree("example-app-1212-claims", "codex/1212-claims")
         head = self.head_of(path)

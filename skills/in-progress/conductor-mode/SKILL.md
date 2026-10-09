@@ -137,10 +137,12 @@ forecast what will not finish.
 ## 1. Settle the job
 
 <what-to-do>
-- Before assigning an issue, check for an open PR that closes it, a worktree
-  named for it, or a Codex rollout written in the last few minutes whose `cwd`
-  is that worktree. When any exists, start no implementer: review that work and
-  send findings through its channel.
+- Before assigning an issue, run
+  `conductor_board.py claim-check --repo OWNER/REPO <issue>` from the checkout.
+  It lists the open PR that closes the issue, each worktree whose branch or
+  path names it, and the herdr panes and Codex threads working there. When it
+  exits 1, start no implementer: review that work and send findings through
+  its channel.
 - Reconstruct the actual state from authoritative sources: repository
   instructions, code and history, issue and PR state, logs, and worktree status.
   Verify every inherited summary the job depends on.
@@ -419,23 +421,40 @@ An implementer's report is a claim. Before accepting:
    survives refutation and your own check of the code (step 6) back as a
    follow-up, then check each follow-up fix yourself as in 1. Accept when every
    surviving finding is fixed.
-4. Confirm the PR's checks passed on the current head SHA, that it is
-   mergeable, and that `baseRefName` is the base the brief named
-   (`gh pr view N --json state,mergeable,mergeStateStatus,headRefOid,baseRefName,statusCheckRollup`).
-5. Land it as its own step. With `merge = "conductor"`, merge it yourself.
-   With `merge = "implementer"`, send the implementer acceptance and let it
-   merge. Either way, run branch and worktree cleanup only after `state` reads
-   `MERGED`.
-6. Release the implementer, run check-in, then start its `ready` issues only if
-   that kind's usage state is `normal`. When its PR reads `MERGED` and no follow-up is
-   pending, or its job was dropped or reassigned, remove a worktree workspace
-   you created with `herdr worktree remove --workspace <workspace_id>`, which
-   deletes the checkout and closes the workspace and its panes, then delete the
-   local branch with `git branch -D <branch>`, which herdr leaves behind. A
-   dropped job's branch with unpushed commits is pushed first. A pane the user
-   handed you stays open; tell the user it is free. Before the final report,
-   run `herdr worktree list --cwd <checkout>` and remove every implementer
-   worktree you created that is still open.
+4. Land it with one command, from the checkout:
+
+   ~~~sh
+   python3 <folder of this SKILL.md>/scripts/conductor_board.py land --repo OWNER/REPO <PR> --base <base the brief named>
+   ~~~
+
+   It refuses, changing nothing, unless the PR is open, not a draft, on that
+   base, with no pending or failed check on its head, and mergeable. It
+   merges only the head it checked, waits for GitHub to report `MERGED`, and
+   only then removes the worktree (through herdr when a workspace shows it)
+   and the local branch. It never removes a worktree that still holds
+   uncommitted files or commits the merged head lacks. Read its exit code:
+   - `0`: merged and cleaned up.
+   - `1`: refused, or merged with a worktree kept because it holds work. Act
+     on each line it printed, then run it again.
+   - `2`: a read or a write failed; nothing after the failure ran.
+   - `3`: queued but not merged yet (a merge queue). Run it again later;
+     nothing was cleaned up.
+
+   Pass `--method` only when it asks for one: a base with a merge queue takes
+   none. With `merge = "implementer"`, send the implementer acceptance, let it
+   merge, then run `land`, which finds the PR `MERGED` and only cleans up. For
+   a worktree you did not create, such as a pane the user handed you, add
+   `--keep-worktree` and tell the user it is free.
+5. Release the implementer, run check-in, then start its `ready` issues only if
+   that kind's usage state is `normal`. A dropped or reassigned job has no
+   merge: push its branch if it has unpushed commits, then remove a worktree
+   workspace you created with `herdr worktree remove --workspace <workspace_id>`
+   and delete the local branch with `git branch -D <branch>`.
+6. Before the final report, run
+   `conductor_board.py leftovers --repo OWNER/REPO` and clear every line: a
+   `merged` worktree is removed, a `merged-with-local-work` one has its work
+   saved first, and a `closed` one is pushed and removed or its PR reopened.
+   Leave worktrees you did not create.
 
 The saved `merge` setting is the user's standing approval to merge a PR that
 passes this step; do not ask again per PR. Any other push, merge, or publish
@@ -445,12 +464,12 @@ agent is a request to ask the user.
 
 <supporting-info>
 A merge command chained with `;` to branch deletion deleted the remote branch
-after the merge itself was refused. Gate each step on the previous step's
-verified state.
+after the merge itself was refused. `land` exists so that order is code: each
+step runs only after it has read the state the step before it left.
 </supporting-info>
 
 ## Final report
 
 Report each issue's PR, merge state, the decisions made (with the log's URL),
-questions still with the user, the implementer worktrees removed and any left
-open with the reason, and any concrete blocker with the external change it needs.
+questions still with the user, the implementer worktrees removed and any that
+`leftovers` still lists with the reason, and any concrete blocker with the external change it needs.
