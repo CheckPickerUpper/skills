@@ -19,13 +19,15 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import sys
+import time
 from typing import NoReturn
 
 import conductor_config
 
-EXIT_CLEAR, EXIT_ACTION, EXIT_READ_FAILED = 0, 1, 2
+EXIT_CLEAR, EXIT_ACTION, EXIT_READ_FAILED, EXIT_PENDING = 0, 1, 2, 3
 READ_WORKERS = 8
 PASSED_CONCLUSIONS = {"SUCCESS", "NEUTRAL", "SKIPPED"}
 PENDING_STATES = {"PENDING", "EXPECTED", "QUEUED", "IN_PROGRESS", "WAITING", "REQUESTED"}
@@ -129,9 +131,22 @@ class Finding:
     detail: dict
 
 
-def run_json(argv: list[str], read: str) -> object:
+class WriteFailed(ReadFailed):
+    """A command that changes something exited non-zero; nothing after it may run."""
+
+
+def run_write(argv: list[str], write: str, env: dict | None = None) -> None:
     try:
-        done = subprocess.run(argv, capture_output=True, text=True)
+        done = subprocess.run(argv, capture_output=True, text=True, env=env)
+    except OSError as error:
+        raise WriteFailed(write, f"{argv[0]} could not run: {error}") from error
+    if done.returncode != 0:
+        raise WriteFailed(write, f"`{' '.join(argv)}` exited {done.returncode}: {done.stderr.strip()}")
+
+
+def run_json(argv: list[str], read: str, env: dict | None = None) -> object:
+    try:
+        done = subprocess.run(argv, capture_output=True, text=True, env=env)
     except OSError as error:
         raise ReadFailed(read, f"{argv[0]} could not run: {error}") from error
     if done.returncode != 0:
@@ -727,6 +742,116 @@ def print_leftovers(result: dict) -> None:
         print(f"  rule ({kind}): {rule}")
 
 
+PR_VIEW_FIELDS = "number,title,state,isDraft,mergeable,headRefOid,headRefName,baseRefName,statusCheckRollup"
+MERGE_QUEUE_QUERY = "query($o:String!,$n:String!,$b:String!){repository(owner:$o,name:$n){mergeQueue(branch:$b){id}}}"
+MERGE_METHODS = {"merge": "allow_merge_commit", "squash": "allow_squash_merge", "rebase": "allow_rebase_merge"}
+
+
+def read_pr(repo: str, number: int) -> dict:
+    return run_json(["gh", "pr", "view", str(number), "--repo", repo, "--json", PR_VIEW_FIELDS], f"PR #{number}")
+
+
+def merge_flags(repo: str, base: str, method: str | None) -> tuple[list[str], str | None]:
+    """Return the `gh pr merge` method flags, or the reason no merge can be asked for.
+
+    A base with a merge queue takes no method: GitHub queues the PR and merges it its own way.
+    """
+    owner, name = repo.split("/")
+    queue = run_json(["gh", "api", "graphql", "-f", f"query={MERGE_QUEUE_QUERY}", "-F", f"o={owner}", "-F", f"n={name}",
+                      "-F", f"b={base}"], f"merge queue of {base}")["data"]["repository"]["mergeQueue"]
+    if queue:
+        return [], None
+    settings = run_json(["gh", "api", f"repos/{repo}", "--jq", "{allow_merge_commit,allow_squash_merge,allow_rebase_merge}"],
+                        "repository merge methods")
+    allowed = [name for name, key in MERGE_METHODS.items() if settings.get(key)]
+    if method is None and len(allowed) != 1:
+        return [], f"this repository allows {' and '.join(allowed) or 'no'} merges; pass --method"
+    if method is not None and method not in allowed:
+        return [], f"this repository does not allow {method} merges"
+    return [f"--{method or allowed[0]}"], None
+
+
+def herdr_workspace(checkout: str, worktree: str) -> str | None:
+    """The open herdr workspace showing a worktree, which herdr must close when the worktree goes."""
+    if shutil.which("herdr") is None:
+        return None
+    listed = run_json(["herdr", "worktree", "list", "--cwd", checkout], "herdr worktrees",
+                      env={**os.environ, "HERDR_ENV": "1"})
+    return next((entry.get("open_workspace_id") for entry in listed["result"]["worktrees"]
+                 if entry.get("path") == worktree), None)
+
+
+def land(repo: str, checkout: str, number: int, base: str, method: str | None, wait: float, poll: float) -> dict:
+    """Merge a PR and clean up after it, each step only once the state before it is read and right.
+
+    Refuses without changing anything unless the PR is open, not a draft, targets `base`, has no pending or
+    failed check on its head, and is mergeable. Merges only the head it checked. Removes the worktree and
+    local branch only after GitHub reports MERGED and nothing local would be lost.
+    """
+    label = f"PR #{number}"
+    pr = read_pr(repo, number)
+    head = pr["headRefOid"]
+    if pr["state"] == "CLOSED":
+        return {"outcome": "refused", "lines": [f"refused: {label} is closed without merging"]}
+    if pr["state"] == "OPEN":
+        reasons = []
+        if pr["baseRefName"] != base:
+            reasons.append(f"{label} targets {pr['baseRefName']}, not {base}")
+        if pr["isDraft"]:
+            reasons.append(f"{label} is a draft")
+        checks, _ = check_state(pr)
+        if checks == "pending":
+            reasons.append(f"checks are still running on {head[:7]}")
+        if checks == "failed":
+            reasons.append(f"checks failed on {head[:7]}")
+        if pr["mergeable"] != "MERGEABLE":
+            reasons.append(f"GitHub reports the PR as {pr['mergeable']}")
+        flags: list[str] = []
+        if not reasons:
+            flags, reason = merge_flags(repo, base, method)
+            if reason:
+                reasons.append(reason)
+        if reasons:
+            return {"outcome": "refused", "lines": [f"refused: {reason}" for reason in reasons]}
+        run_write(["gh", "pr", "merge", str(number), "--repo", repo, *flags, "--match-head-commit", head],
+                  f"merge of {label}")
+        deadline = time.monotonic() + wait
+        while True:
+            pr = read_pr(repo, number)
+            if pr["state"] == "MERGED":
+                break
+            if time.monotonic() >= deadline:
+                return {"outcome": "queued", "lines": [f"queued: {label} is not merged yet; run land again to finish. "
+                                                       "Nothing was cleaned up."]}
+            time.sleep(poll)
+
+    lines = [f"merged: {label} {pr['title']} at {head[:7]}"]
+    branch = pr["headRefName"]
+    _, linked = read_worktrees(checkout, repo)
+    worktree = next((w for w in linked if w.branch == branch), None)
+    if worktree is None:
+        lines.append(f"cleanup: no local worktree is on branch {branch}")
+        return {"outcome": "landed", "lines": lines}
+    dirty = run_text(["git", "-C", worktree.path, "status", "--porcelain"], f"status of {worktree.path}").splitlines()
+    local_only, against = local_only_commits(worktree.path, head)
+    if dirty or local_only:
+        held = (f"{len(dirty)} uncommitted file{'' if len(dirty) == 1 else 's'}" if dirty
+                else f"{local_only} local commit{'' if local_only == 1 else 's'} {against}")
+        lines.append(f"kept: {tilde(worktree.path)} holds {held}; save it, then run land again")
+        return {"outcome": "kept", "lines": lines}
+    workspace = herdr_workspace(checkout, worktree.path)
+    if workspace:
+        run_write(["herdr", "worktree", "remove", "--workspace", workspace], f"removal of workspace {workspace}",
+                  env={**os.environ, "HERDR_ENV": "1"})
+    else:
+        run_write(["git", "-C", checkout, "worktree", "remove", worktree.path], f"removal of {worktree.path}")
+    if Path(worktree.path).exists():
+        raise WriteFailed(f"removal of {worktree.path}", "the worktree still exists, so its branch was kept")
+    run_write(["git", "-C", checkout, "branch", "-D", branch], f"deletion of branch {branch}")
+    lines.append(f"removed: {tilde(worktree.path)} and local branch {branch}")
+    return {"outcome": "landed", "lines": lines}
+
+
 def print_board(board: dict) -> None:
     slots = board["slots"]
     print(f"slots: {slots['running']} running, max {slots['max_implementers']} -> {slots['free']} free, "
@@ -745,7 +870,7 @@ def print_board(board: dict) -> None:
 def fail(error: ReadFailed, as_json: bool) -> NoReturn:
     if as_json:
         print(json.dumps({"read_failed": error.read, "error": str(error)}))
-    print(f"read failed: {error}", file=sys.stderr)
+    print(f"{'write' if isinstance(error, WriteFailed) else 'read'} failed: {error}", file=sys.stderr)
     sys.exit(EXIT_READ_FAILED)
 
 
@@ -767,6 +892,13 @@ def main() -> None:
     claim_command = command_for("claim-check", "before assigning an issue, list what already holds it")
     claim_command.add_argument("issue", type=int, help="the issue about to be assigned")
     command_for("leftovers", "list worktrees whose PR merged or closed and that are still open")
+    land_command = command_for("land", "merge a ready PR, wait for MERGED, then remove its worktree and branch")
+    land_command.add_argument("pr", type=int, help="the PR to land")
+    land_command.add_argument("--base", required=True, help="the base branch the brief named")
+    land_command.add_argument("--method", choices=sorted(MERGE_METHODS),
+                              help="merge method, needed only when the repository allows more than one and has no queue")
+    land_command.add_argument("--wait", type=float, default=900, help="seconds to wait for MERGED (default 900)")
+    land_command.add_argument("--poll", type=float, default=10, help="seconds between reads while waiting")
 
     arguments = parser.parse_args()
     if not re.fullmatch(r"[^/\s]+/[^/\s]+", arguments.repo):
@@ -782,15 +914,21 @@ def main() -> None:
         elif arguments.command == "claim-check":
             result = claim_check(arguments.repo, checkout, arguments.issue, now)
             needs_action, show = bool(result["holders"]), print_claim
-        else:
+        elif arguments.command == "leftovers":
             result = leftovers(arguments.repo, checkout)
             needs_action, show = bool(result["findings"]), print_leftovers
+        else:
+            result = land(arguments.repo, checkout, arguments.pr, arguments.base, arguments.method, arguments.wait,
+                          arguments.poll)
+            needs_action, show = result["outcome"] in ("refused", "kept"), lambda landed: print("\n".join(landed["lines"]))
     except ReadFailed as error:
         fail(error, arguments.json)
     if arguments.json:
         print(json.dumps(result, indent=2))
     else:
         show(result)
+    if arguments.command == "land" and result["outcome"] == "queued":
+        sys.exit(EXIT_PENDING)
     sys.exit(EXIT_ACTION if needs_action else EXIT_CLEAR)
 
 

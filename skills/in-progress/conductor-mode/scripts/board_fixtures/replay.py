@@ -80,15 +80,34 @@ def record(tool: str, argv: list[str]) -> None:
                                                               indent=1) + "\n")
 
 
+# Commands that change something. Recording runs the real executable, so it must never be handed one of these.
+WRITES = (["gh", "pr", "merge"], ["herdr", "worktree", "remove"])
+
+
 def main() -> None:
     tool, argv = Path(sys.argv[0]).name, sys.argv[1:]
     if os.environ.get("BOARD_RECORD") == "1":
+        if [tool, *argv][:3] in WRITES:
+            sys.exit(f"refusing to record a command that writes: {tool} {' '.join(argv)}")
         record(tool, argv)
         return
+    # Every call is logged, so a test can show that a write was, or was not, attempted.
+    with (Path(os.environ["BOARD_RESPONSES"]) / "calls.log").open("a") as log:
+        log.write(json.dumps([tool, *argv]) + "\n")
     path = response_file([tool, *argv])
     if not path.is_file():
         sys.exit(f"no recorded response for: {tool} {' '.join(argv)}")
-    print(json.dumps(json.loads(path.read_text())["stdout"]))
+    recorded = json.loads(path.read_text())
+    if "sequence" in recorded:
+        # The same read answers differently over time (a PR is open, then merged): the Nth call gets the Nth answer.
+        counter = path.with_suffix(".count")
+        call = int(counter.read_text()) if counter.is_file() else 0
+        counter.write_text(str(call + 1))
+        recorded = recorded["sequence"][min(call, len(recorded["sequence"]) - 1)]
+    sys.stderr.write(recorded.get("stderr", ""))
+    if "stdout" in recorded:
+        print(json.dumps(recorded["stdout"]))
+    sys.exit(recorded.get("exit", 0))
 
 
 if __name__ == "__main__":

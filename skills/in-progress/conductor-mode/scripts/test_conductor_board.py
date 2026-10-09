@@ -457,6 +457,161 @@ class CheckInTest(unittest.TestCase):
         done = self.board("leftovers")
         self.assertEqual((done.returncode, done.stdout.strip()), (0, "no leftover worktrees"))
 
+    # ---- land -------------------------------------------------------------------------------------------------
+
+    PR_VIEW_FIELDS = "number,title,state,isDraft,mergeable,headRefOid,headRefName,baseRefName,statusCheckRollup"
+    PASSED_CHECK = {"__typename": "CheckRun", "completedAt": "2026-10-08T17:28:18Z", "conclusion": "SUCCESS",
+                    "name": "verify", "startedAt": "2026-10-08T17:28:03Z", "status": "COMPLETED",
+                    "workflowName": "Pull request verification"}
+
+    def respond(self, argv, **recorded):
+        key = re.sub(r"[^A-Za-z0-9]+", "_", " ".join(argv)).strip("_")
+        self.response(key).write_text(json.dumps({"argv": argv, **recorded}))
+        self.response(key).with_suffix(".count").unlink(missing_ok=True)
+
+    def calls(self, *prefix):
+        log = self.responses / "calls.log"
+        made = [json.loads(line) for line in log.read_text().splitlines()] if log.is_file() else []
+        return [call for call in made if call[:len(prefix)] == list(prefix)]
+
+    def pr_state(self, head, branch, **changes):
+        return {"baseRefName": "main", "headRefName": branch, "headRefOid": head, "isDraft": False,
+                "mergeable": "MERGEABLE", "number": 1285, "state": "OPEN", "statusCheckRollup": [self.PASSED_CHECK],
+                "title": "Issue 1285", **changes}
+
+    def landing(self, *states, methods=("squash",), queue=False, merge_exit=0):
+        """Record what GitHub and herdr answer while PR 1285 lands: its state over time, the repository's merge
+        methods, whether its base has a merge queue, and the merge call itself."""
+        self.respond(["gh", "pr", "view", "1285", "--repo", REPO, "--json", self.PR_VIEW_FIELDS],
+                     sequence=[{"stdout": state} for state in states])
+        self.respond(["gh", "api", f"repos/{REPO}", "--jq",
+                      "{allow_merge_commit,allow_squash_merge,allow_rebase_merge}"],
+                     stdout={"allow_merge_commit": "merge" in methods, "allow_squash_merge": "squash" in methods,
+                             "allow_rebase_merge": "rebase" in methods})
+        owner, name = REPO.split("/")
+        self.respond(["gh", "api", "graphql", "-f",
+                      "query=query($o:String!,$n:String!,$b:String!){repository(owner:$o,name:$n)"
+                      "{mergeQueue(branch:$b){id}}}", "-F", f"o={owner}", "-F", f"n={name}", "-F", "b=main"],
+                     stdout={"data": {"repository": {"mergeQueue": {"id": "MQ_1"} if queue else None}}})
+        self.respond(["herdr", "worktree", "list", "--cwd", str(self.checkout)],
+                     stdout={"result": {"type": "worktree_list", "worktrees": []}})
+        head = states[0]["headRefOid"]
+        for flags in (["--squash"], ["--merge"], ["--rebase"], []):
+            self.respond(["gh", "pr", "merge", "1285", "--repo", REPO, *flags, "--match-head-commit", head],
+                         exit=merge_exit, stderr="merge refused by GitHub\n" if merge_exit else "")
+
+    def land(self, *arguments):
+        # A short wait, so a version that merges when it should refuse fails fast instead of polling for minutes.
+        return self.board("land", 1285, "--base", "main", "--poll", 0, *(("--wait", 1) if "--wait" not in arguments else ()),
+                          *arguments)
+
+    def branches(self):
+        return subprocess.run(["git", "-C", str(self.checkout), "branch", "--format=%(refname:short)"], check=True,
+                              capture_output=True, text=True).stdout.split()
+
+    def test_land_merges_at_the_checked_head_then_removes_the_worktree_and_branch(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        self.landing(self.pr_state(head, "codex/1212-claims"), self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        done = self.land()
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(self.calls("gh", "pr", "merge"),
+                         [["gh", "pr", "merge", "1285", "--repo", REPO, "--squash", "--match-head-commit", head]])
+        self.assertFalse(path.exists())
+        self.assertNotIn("codex/1212-claims", self.branches())
+        self.assertIn("merged: PR #1285 Issue 1285 at " + head[:7], done.stdout)
+
+    def test_land_refuses_and_changes_nothing_when_the_pr_is_not_ready(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        pending = {**self.PASSED_CHECK, "status": "IN_PROGRESS", "conclusion": ""}
+        failed = {**self.PASSED_CHECK, "conclusion": "FAILURE"}
+        for changes, reason in (
+                ({"baseRefName": "production"}, "refused: PR #1285 targets production, not main"),
+                ({"isDraft": True}, "refused: PR #1285 is a draft"),
+                ({"statusCheckRollup": [pending]}, "refused: checks are still running on " + head[:7]),
+                ({"statusCheckRollup": [failed]}, "refused: checks failed on " + head[:7]),
+                ({"mergeable": "CONFLICTING"}, "refused: GitHub reports the PR as CONFLICTING"),
+                ({"state": "CLOSED"}, "refused: PR #1285 is closed without merging")):
+            with self.subTest(reason=reason):
+                self.landing(self.pr_state(head, "codex/1212-claims", **changes))
+                done = self.land()
+                self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+                self.assertIn(reason, done.stdout.splitlines())
+                self.assertEqual(self.calls("gh", "pr", "merge"), [])
+                self.assertTrue(path.exists())
+                self.assertIn("codex/1212-claims", self.branches())
+
+    def test_land_needs_a_method_when_the_repository_allows_several_and_uses_the_one_given(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        open_then_merged = (self.pr_state(head, "codex/1212-claims"),
+                            self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        self.landing(*open_then_merged, methods=("squash", "rebase"))
+        done = self.land()
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertIn("refused: this repository allows squash and rebase merges; pass --method", done.stdout.splitlines())
+        self.assertEqual(self.calls("gh", "pr", "merge"), [])
+        self.landing(*open_then_merged, methods=("squash", "rebase"))
+        self.assertEqual(self.land("--method", "rebase").returncode, 0)
+        self.assertEqual(self.calls("gh", "pr", "merge")[0][6:], ["--rebase", "--match-head-commit", head])
+
+    def test_land_joins_a_merge_queue_without_a_method_and_cleans_up_nothing_until_merged(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        self.landing(self.pr_state(head, "codex/1212-claims"), queue=True)
+        done = self.land("--wait", 0)
+        self.assertEqual(done.returncode, 3, done.stdout + done.stderr)
+        self.assertEqual(self.calls("gh", "pr", "merge"),
+                         [["gh", "pr", "merge", "1285", "--repo", REPO, "--match-head-commit", head]])
+        self.assertIn("queued: PR #1285 is not merged yet; run land again to finish. Nothing was cleaned up.",
+                      done.stdout.splitlines())
+        self.assertTrue(path.exists())
+        self.assertIn("codex/1212-claims", self.branches())
+
+    def test_land_on_a_merged_pr_only_cleans_up_and_keeps_a_worktree_that_holds_work(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        (path / "notes.txt").write_text("not committed\n")
+        self.landing(self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        done = self.land()
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertEqual(self.calls("gh", "pr", "merge"), [])
+        self.assertTrue(path.exists())
+        self.assertIn("codex/1212-claims", self.branches())
+        self.assertIn(f"kept: {self.shown('example-app-1212-claims')} holds 1 uncommitted file", done.stdout)
+        (path / "notes.txt").unlink()
+        self.landing(self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        self.assertEqual(self.land().returncode, 0)
+        self.assertFalse(path.exists())
+        self.assertNotIn("codex/1212-claims", self.branches())
+
+    def test_land_stops_before_cleanup_when_the_merge_itself_fails(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        self.landing(self.pr_state(head, "codex/1212-claims"), self.pr_state(head, "codex/1212-claims", state="MERGED"),
+                     merge_exit=1)
+        done = self.land()
+        self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+        self.assertIn("merge refused by GitHub", done.stderr)
+        self.assertTrue(path.exists())
+        self.assertIn("codex/1212-claims", self.branches())
+
+    def test_land_removes_a_herdr_workspace_through_herdr_and_checks_it_is_gone(self):
+        path = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        head = self.head_of(path)
+        self.landing(self.pr_state(head, "codex/1212-claims", state="MERGED"))
+        self.respond(["herdr", "worktree", "list", "--cwd", str(self.checkout)],
+                     stdout={"result": {"type": "worktree_list", "worktrees": [
+                         {"branch": "codex/1212-claims", "open_workspace_id": "w9Z", "path": str(path)}]}})
+        self.respond(["herdr", "worktree", "remove", "--workspace", "w9Z"], stdout={"result": {"type": "removed"}})
+        done = self.land()
+        self.assertEqual(self.calls("herdr", "worktree", "remove"), [["herdr", "worktree", "remove", "--workspace", "w9Z"]])
+        # The stand-in removes nothing, so land must notice the checkout is still there and keep the branch.
+        self.assertEqual(done.returncode, 2, done.stdout + done.stderr)
+        self.assertIn("still exists", done.stderr)
+        self.assertIn("codex/1212-claims", self.branches())
+
     def test_milestone_board_with_nothing_to_do_exits_zero(self):
         milestone = ("--milestone", "Milestone 3")
         done = self.check_in(*milestone)
