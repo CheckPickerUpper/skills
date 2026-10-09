@@ -616,6 +616,47 @@ def check_in(repo: str, checkout: str, effort: tuple[str, str], now: datetime) -
     }
 
 
+CLAIMED_RULE = ("Something already holds this issue: start no implementer. Review that work and send your findings "
+                "through its own channel.")
+
+
+def named_for(worktree: Worktree, primary: str, number: int) -> bool:
+    return number in [int(token) for token in NUMBER_TOKEN.findall(worktree.branch)] + path_numbers(worktree, primary)
+
+
+def claim_check(repo: str, checkout: str, number: int, now: datetime) -> dict:
+    """List everything that already holds an issue: an open PR closing it, a worktree named for it, and who works there."""
+    primary, linked = read_worktrees(checkout, repo)
+    holders = [{"kind": "pr", "line": f"PR #{pr['number']} {pr['title']} closes #{number}", "pr": pr["number"]}
+               for pr in read_prs(repo) if number in closes(pr, repo)]
+    claimed = [worktree for worktree in linked if named_for(worktree, primary.path, number)]
+    if claimed:
+        agents = read_agents()
+        threads = read_codex_threads([primary.path] + [w.path for w in linked], now - timedelta(days=1))
+    for worktree in claimed:
+        holders.append({"kind": "worktree", "line": f"{tilde(worktree.path)}, branch {worktree.branch}",
+                        "worktree": worktree.path})
+        for agent in agents:
+            if under(agent["cwd"], worktree.path) and agent["pane_id"] != os.environ.get("HERDR_PANE_ID"):
+                holders.append({"kind": "implementer", "pane_id": agent["pane_id"],
+                                "line": f"pane {agent['pane_id']}, agent_status {agent['agent_status']}"})
+        for thread in threads:
+            if under(thread.works_in, worktree.path) and thread.id != os.environ.get("CODEX_THREAD_ID"):
+                holders.append({"kind": "implementer", "thread_id": thread.id,
+                                "line": f"{thread.originator} thread {thread.id}, "
+                                        f"last written{ago(thread.written.isoformat(), now)}"})
+    return {"repo": repo, "issue": number, "holders": holders, "rule": CLAIMED_RULE if holders else None}
+
+
+def print_claim(claim: dict) -> None:
+    if not claim["holders"]:
+        print(f"free: #{claim['issue']} has no open PR, worktree or implementer")
+        return
+    for holder in claim["holders"]:
+        print(f"{holder['kind']}: {holder['line']}")
+    print(f"  rule (claimed): {claim['rule']}")
+
+
 def print_board(board: dict) -> None:
     slots = board["slots"]
     print(f"slots: {slots['running']} running, max {slots['max_implementers']} -> {slots['free']} free, "
@@ -641,28 +682,42 @@ def fail(error: ReadFailed, as_json: bool) -> NoReturn:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     commands = parser.add_subparsers(dest="command", required=True)
-    command = commands.add_parser("check-in", help="print what needs action on the effort's board")
-    command.add_argument("--repo", required=True, help="OWNER/REPO")
-    effort = command.add_mutually_exclusive_group(required=True)
+
+    def command_for(name: str, help_text: str) -> argparse.ArgumentParser:
+        command = commands.add_parser(name, help=help_text)
+        command.add_argument("--repo", required=True, help="OWNER/REPO")
+        command.add_argument("--checkout", help="a local checkout of the repository (default: the current repository)")
+        command.add_argument("--json", action="store_true", help="print the result as one JSON object")
+        return command
+
+    board_command = command_for("check-in", "print what needs action on the effort's board")
+    effort = board_command.add_mutually_exclusive_group(required=True)
     effort.add_argument("--parent", type=int, help="the effort's parent issue; its sub-issues are read recursively")
     effort.add_argument("--milestone", help="the effort's milestone title")
-    command.add_argument("--checkout", help="a local checkout of the repository (default: the current repository)")
-    command.add_argument("--json", action="store_true", help="print the findings as one JSON object")
+    claim_command = command_for("claim-check", "before assigning an issue, list what already holds it")
+    claim_command.add_argument("issue", type=int, help="the issue about to be assigned")
+
     arguments = parser.parse_args()
     if not re.fullmatch(r"[^/\s]+/[^/\s]+", arguments.repo):
         parser.error("--repo must be OWNER/REPO")
+    now = datetime.now(timezone.utc)
     try:
         checkout = arguments.checkout or run_text(["git", "rev-parse", "--show-toplevel"], "current checkout").strip()
-        board = check_in(arguments.repo, str(Path(checkout).resolve()),
-                         ("parent", str(arguments.parent)) if arguments.parent is not None
-                         else ("milestone", arguments.milestone), datetime.now(timezone.utc))
+        checkout = str(Path(checkout).resolve())
+        if arguments.command == "check-in":
+            result = check_in(arguments.repo, checkout, ("parent", str(arguments.parent))
+                              if arguments.parent is not None else ("milestone", arguments.milestone), now)
+            needs_action, show = bool(result["findings"]), print_board
+        else:
+            result = claim_check(arguments.repo, checkout, arguments.issue, now)
+            needs_action, show = bool(result["holders"]), print_claim
     except ReadFailed as error:
         fail(error, arguments.json)
     if arguments.json:
-        print(json.dumps(board, indent=2))
+        print(json.dumps(result, indent=2))
     else:
-        print_board(board)
-    sys.exit(EXIT_ACTION if board["findings"] else EXIT_CLEAR)
+        show(result)
+    sys.exit(EXIT_ACTION if needs_action else EXIT_CLEAR)
 
 
 if __name__ == "__main__":

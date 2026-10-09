@@ -134,6 +134,16 @@ class CheckInTest(unittest.TestCase):
                      "--checkout", str(self.checkout), *(["--json"] if as_json else [])]
         return subprocess.run(arguments, env=env, capture_output=True, text=True, timeout=60)
 
+    def board(self, command, *arguments):
+        self.edit("herdr_agent_list", lambda listed: listed["result"].update(agents=self.agents))
+        env = {**os.environ, "PATH": f"{FIXTURES / 'bin'}{os.pathsep}{os.environ['PATH']}",
+               "BOARD_RESPONSES": str(self.responses), "XDG_CONFIG_HOME": str(self.root / "config"),
+               "CODEX_HOME": str(self.root / "codex")}
+        for name in ("HERDR_PANE_ID", "CODEX_THREAD_ID", "BOARD_RECORD"):
+            env.pop(name, None)
+        return subprocess.run([sys.executable, str(SCRIPT), command, "--repo", REPO, "--checkout", str(self.checkout),
+                               *map(str, arguments)], env=env, capture_output=True, text=True, timeout=60)
+
     def shown(self, name):
         return str(self.root / name).replace(str(Path.home()), "~", 1)
 
@@ -356,6 +366,33 @@ class CheckInTest(unittest.TestCase):
                              codex_thread=TUI_RUNNING)
         self.rollout(TUI_RUNNING, path)
         self.assertIn("slots: 1 running", self.check_in().stdout)
+
+    def test_claim_check_passes_an_issue_nothing_holds(self):
+        self.worktree("example-app-820-queries", "codex/820-queries", status="working")
+        done = self.board("claim-check", 819)
+        self.assertEqual(done.returncode, 0, done.stdout + done.stderr)
+        self.assertEqual(done.stdout.strip(), "free: #819 has no open PR, worktree or implementer")
+
+    def test_claim_check_names_the_open_pr_that_closes_the_issue(self):
+        done = self.board("claim-check", 858)
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertEqual(self.lines(done, "pr"), [f"pr: PR #{PASSED_PR} Issue {PASSED_PR} closes #858"])
+        self.assertEqual(done.stdout.count("rule (claimed):"), 1)
+
+    def test_claim_check_names_the_worktree_and_whoever_works_in_it(self):
+        path = self.worktree("example-app-lane-queries", "codex/819-endpoint", status="done", pane="wQ:p9")
+        self.rollout(DESKTOP_RUNNING, path)
+        done = self.board("claim-check", 819)
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertEqual(self.lines(done, "worktree"),
+                         [f"worktree: {self.shown('example-app-lane-queries')}, branch codex/819-endpoint"])
+        self.assertEqual(self.lines(done, "implementer"), [
+            "implementer: pane wQ:p9, agent_status done",
+            f"implementer: Codex Desktop thread {DESKTOP_RUNNING}, last written 0m ago"])
+
+    def test_claim_check_ignores_a_worktree_whose_number_only_contains_the_issue(self):
+        self.worktree("example-app-8190-other", "codex/8190-other")
+        self.assertEqual(self.board("claim-check", 819).returncode, 0)
 
     def test_milestone_board_with_nothing_to_do_exits_zero(self):
         milestone = ("--milestone", "Milestone 3")
