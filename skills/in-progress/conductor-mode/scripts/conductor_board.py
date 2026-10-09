@@ -9,6 +9,13 @@ its worktrees, fresh on every run. A thread works in the worktree its latest
 tool call names, not where it started. It prints one line per finding plus, once per
 kind, the rule that says what to do about it.
 Exit 0: nothing needs action. Exit 1: something does. Exit 2: a read failed.
+
+`claim-check ISSUE` lists what already holds an issue before it is assigned: the
+open PR that closes it, each worktree named for it, and who works there.
+`leftovers` lists worktrees whose PR merged or closed and that are still open.
+`land PR --base BRANCH` is the only command that writes: it merges a ready PR,
+waits for MERGED, then removes its worktree and local branch, each step only
+after reading the state the step before it left. Exit 3: queued, not merged yet.
 """
 
 import argparse
@@ -781,7 +788,8 @@ def herdr_workspace(checkout: str, worktree: str) -> str | None:
                  if entry.get("path") == worktree), None)
 
 
-def land(repo: str, checkout: str, number: int, base: str, method: str | None, wait: float, poll: float) -> dict:
+def land(repo: str, checkout: str, number: int, base: str, method: str | None, wait: float, poll: float,
+         keep_worktree: bool = False) -> dict:
     """Merge a PR and clean up after it, each step only once the state before it is read and right.
 
     Refuses without changing anything unless the PR is open, not a draft, targets `base`, has no pending or
@@ -827,6 +835,9 @@ def land(repo: str, checkout: str, number: int, base: str, method: str | None, w
 
     lines = [f"merged: {label} {pr['title']} at {head[:7]}"]
     branch = pr["headRefName"]
+    if keep_worktree:
+        lines.append(f"cleanup: skipped; any worktree and local branch {branch} are left as they are")
+        return {"outcome": "landed", "lines": lines}
     _, linked = read_worktrees(checkout, repo)
     worktree = next((w for w in linked if w.branch == branch), None)
     if worktree is None:
@@ -899,6 +910,8 @@ def main() -> None:
                               help="merge method, needed only when the repository allows more than one and has no queue")
     land_command.add_argument("--wait", type=float, default=900, help="seconds to wait for MERGED (default 900)")
     land_command.add_argument("--poll", type=float, default=10, help="seconds between reads while waiting")
+    land_command.add_argument("--keep-worktree", action="store_true",
+                              help="merge only; leave the worktree and local branch (for one you did not create)")
 
     arguments = parser.parse_args()
     if not re.fullmatch(r"[^/\s]+/[^/\s]+", arguments.repo):
@@ -919,7 +932,7 @@ def main() -> None:
             needs_action, show = bool(result["findings"]), print_leftovers
         else:
             result = land(arguments.repo, checkout, arguments.pr, arguments.base, arguments.method, arguments.wait,
-                          arguments.poll)
+                          arguments.poll, arguments.keep_worktree)
             needs_action, show = result["outcome"] in ("refused", "kept"), lambda landed: print("\n".join(landed["lines"]))
     except ReadFailed as error:
         fail(error, arguments.json)
