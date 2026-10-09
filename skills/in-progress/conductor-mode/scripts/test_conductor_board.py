@@ -11,6 +11,7 @@ their tool calls name are moved from ~/dev to the test's root.
 from datetime import datetime
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -393,6 +394,68 @@ class CheckInTest(unittest.TestCase):
     def test_claim_check_ignores_a_worktree_whose_number_only_contains_the_issue(self):
         self.worktree("example-app-8190-other", "codex/8190-other")
         self.assertEqual(self.board("claim-check", 819).returncode, 0)
+
+    def branch_pr(self, branch, state, head, number=1285):
+        """Record the answer GitHub gives for the PRs opened from one branch (shape captured from a real merged PR)."""
+        argv = ["gh", "pr", "list", "--repo", REPO, "--state", "all", "--head", branch, "--limit", "5",
+                "--json", "number,state,headRefOid,title"]
+        key = re.sub(r"[^A-Za-z0-9]+", "_", " ".join(argv)).strip("_")
+        found = [] if state is None else [{"headRefOid": head, "number": number, "state": state,
+                                           "title": f"Issue {number}"}]
+        self.response(key).write_text(json.dumps({"argv": argv, "stdout": found}))
+
+    def head_of(self, path):
+        return subprocess.run(["git", "-C", str(path), "rev-parse", "HEAD"], check=True, capture_output=True,
+                              text=True).stdout.strip()
+
+    def test_leftovers_lists_a_clean_worktree_whose_pr_merged_at_its_head(self):
+        merged = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        self.branch_pr("codex/1212-claims", "MERGED", self.head_of(merged))
+        still_open = self.worktree("example-app-819-endpoint", "codex/819-endpoint")
+        self.branch_pr("codex/819-endpoint", "OPEN", self.head_of(still_open), number=1290)
+        self.worktree("example-app-820-queries", "codex/820-queries")
+        self.branch_pr("codex/820-queries", None, None)
+        done = self.board("leftovers")
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertEqual([line for line in done.stdout.splitlines() if not line.startswith("  rule")],
+                         [f"merged: {self.shown('example-app-1212-claims')}, branch codex/1212-claims, PR #1285 merged"])
+
+    def test_leftovers_keeps_a_merged_worktree_that_still_holds_work(self):
+        dirty = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        self.branch_pr("codex/1212-claims", "MERGED", self.head_of(dirty))
+        (dirty / "notes.txt").write_text("not committed\n")
+        ahead = self.worktree("example-app-819-endpoint", "codex/819-endpoint")
+        self.branch_pr("codex/819-endpoint", "MERGED", self.head_of(ahead), number=1290)
+        git(ahead, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "more")
+        done = self.board("leftovers")
+        self.assertEqual(done.returncode, 1, done.stdout + done.stderr)
+        self.assertEqual(self.lines(done, "merged"), [])
+        self.assertEqual(self.lines(done, "merged-with-local-work"), [
+            f"merged-with-local-work: {self.shown('example-app-1212-claims')}, branch codex/1212-claims, PR #1285 "
+            "merged, 1 uncommitted file",
+            f"merged-with-local-work: {self.shown('example-app-819-endpoint')}, branch codex/819-endpoint, PR #1290 "
+            "merged, 1 local commit the merged head does not contain"])
+
+    def test_leftovers_counts_a_worktree_behind_its_merged_head_as_merged(self):
+        behind = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        git(behind, "-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty", "-m", "pushed")
+        self.branch_pr("codex/1212-claims", "MERGED", self.head_of(behind))
+        git(behind, "reset", "-q", "--hard", "HEAD~1")
+        done = self.board("leftovers")
+        self.assertEqual(self.lines(done, "merged"), [
+            f"merged: {self.shown('example-app-1212-claims')}, branch codex/1212-claims, PR #1285 merged"])
+        self.assertEqual(self.lines(done, "merged-with-local-work"), [])
+
+    def test_leftovers_reports_a_closed_unmerged_pr_and_exits_zero_when_nothing_is_left(self):
+        dropped = self.worktree("example-app-1212-claims", "codex/1212-claims")
+        self.branch_pr("codex/1212-claims", "CLOSED", self.head_of(dropped))
+        done = self.board("leftovers")
+        self.assertEqual(self.lines(done, "closed"), [
+            f"closed: {self.shown('example-app-1212-claims')}, branch codex/1212-claims, PR #1285 closed without merging"])
+        self.assertEqual(done.returncode, 1)
+        self.branch_pr("codex/1212-claims", "OPEN", self.head_of(dropped))
+        done = self.board("leftovers")
+        self.assertEqual((done.returncode, done.stdout.strip()), (0, "no leftover worktrees"))
 
     def test_milestone_board_with_nothing_to_do_exits_zero(self):
         milestone = ("--milestone", "Milestone 3")
