@@ -69,6 +69,27 @@ class CheckPage(unittest.TestCase):
         page = self.page("page.html", '<pre><code class="language-ts">ReadBody(): Body</code></pre>')
         self.assertEqual(self.check(page).returncode, 0)
 
+    def test_abbreviated_line_reference_is_refused_with_its_line(self):
+        page = self.page(
+            "page.html",
+            "<table>\n<tr><td>Caster hangs in the air</td>\n<td>FS:113,136</td></tr>\n"
+            "<tr><td>Stomp</td><td>animation, see\nFS:170-185</td></tr></table>",
+        )
+        result = self.check(page)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("2 line references name no file", result.stdout)
+        self.assertIn("line 3: FS:113,136", result.stdout)
+        self.assertIn("line 5: FS:170-185", result.stdout)
+
+    def test_line_reference_with_a_file_path_passes(self):
+        page = self.page(
+            "page.html",
+            "<p>Shared/FrostStomp.ts:170-185, Body.ts:41, at 18:30, "
+            '<a href="http://localhost:34873">local</a></p>',
+        )
+        result = self.check(page)
+        self.assertEqual(result.returncode, 0, result.stdout)
+
     def test_inline_code_in_a_sentence_is_not_a_code_block(self):
         page = self.page("page.html", "<p>Call <code>ReadBody</code> first.</p>")
         self.assertEqual(self.check(page).returncode, 0)

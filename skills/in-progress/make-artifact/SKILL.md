@@ -23,6 +23,7 @@ Pick the job from the table. It sets the first screen and where records live.
 | Job | First screen shows | Below it | Records live in |
 |---|---|---|---|
 | Decide | the choice being made and the recommendation | each option: what it costs, what it unblocks, its evidence | page source |
+| Plan (spec, port, migration, roadmap) | what is missing: each gap between today and the goal, stated as a fact and grouped by what it stops | the build order as numbered steps, each ending in something the reader can try; then the decisions the reader owns; acceptance detail last | page source |
 | Understand (report, audit, explainer, diagram) | the answer or finding in one sentence | one scannable unit per item, then detail | page source |
 | Monitor (dashboard) | current state and what needs attention now | trends and breakdowns | live data or the `db` capability |
 | Record (tracker, form, checklist, sign-up) | the action control and the current records | history | the `db` capability |
@@ -125,6 +126,11 @@ Rules for the parts:
   in the detail layer under the drawing.
 - Replace each figurative or coined phrase with the fact it stands for: "thin
   coverage" becomes "3 of 11 endpoints have tests".
+- **References support a claim; they never stand in for one.** A row whose
+  content is `FS:170-185` tells the reader nothing. Write what those lines do,
+  then cite them by their real path (`Shared/FrostStomp.ts:170-185`) as a link
+  or with the lines shown. Use no abbreviation or internal code (`FS`, `T2`,
+  `Q14`) the page does not spell out where it is used.
 
 Done when a reader of the first screen alone can do the job, every item's
 claim can be checked from what is visible beside it, and no heading needs
@@ -210,6 +216,8 @@ the parts a reader sees wrong first and the author never sees at all.
    | stop tying it to X, show all of them, shouldn't it show Y too | scope | return to step 1's scope and re-enumerate from the source |
    | which of this exists, what's today and what's planned | status | one encoding per state, with a legend, on every view |
    | never asked that, extraneous | relevance | remove it, and remove every other line of the same kind |
+   | doesn't say what's missing, what's the order | plan shape | rebuild to step 1's Plan row: the gaps first, then the numbered order |
+   | what is this reference, what does this code mean | references | write the fact; cite it by full path, shown or linked |
    | wrong, outdated | accuracy | return to step 2 |
 
 3. Apply the change to every item of the same kind. A comment anchored on one

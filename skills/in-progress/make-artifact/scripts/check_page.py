@@ -6,7 +6,8 @@ while any remain; exits 0 when none do and 2 when the page cannot be read.
 Every run: a code block (`<pre>`) must be syntax-coloured. It counts as
 coloured when it holds styled child elements, or when it or its `<code>`
 carries a class naming a language or highlighter that a script on the page
-colours at load.
+colours at load. A line reference must name its file: `FS:170-185` is refused,
+`Shared/FrostStomp.ts:170-185` passes.
 
 With `--previous OLD`: a revision must not lose what the last version showed.
 Reported as dropped are link targets, issue references, inline code names, table
@@ -31,6 +32,9 @@ VOID_TAGS = {"br", "hr", "img", "input", "meta", "link", "wbr", "source", "col"}
 UNSEEN_TAGS = {"script", "style", "template", "title"}
 COLOURED_BY_SCRIPT = re.compile(r"lang|highlight|hljs|prism|shiki", re.IGNORECASE)
 ISSUE_REFERENCE = re.compile(r"(?<![\w&])#\d+\b")
+# Letters, a colon, then line numbers, with no file extension or path before
+# it: an abbreviation the reader cannot open.
+FILELESS_LINE_REFERENCE = re.compile(r"(?<![\w./\\-])[A-Za-z]{1,6}:\d+(?:[-,]\d+)*\b")
 REPEATED_LABEL_MAX_WORDS = 3
 REPEATED_LABEL_MIN_COUNT = 3
 
@@ -57,6 +61,7 @@ class Page:
     column_headings: set[str] = field(default_factory=set)
     leaf_texts: Counter = field(default_factory=Counter)
     uncoloured_code_blocks: list[tuple[int, str]] = field(default_factory=list)
+    fileless_line_references: list[tuple[int, str]] = field(default_factory=list)
 
     def repeated_labels(self):
         return {
@@ -141,6 +146,11 @@ class PageReader(HTMLParser):
         for element in self.open_elements:
             element.text.append(data)
         self.page.issue_references.update(ISSUE_REFERENCE.findall(data))
+        line = self.getpos()[0]
+        for match in FILELESS_LINE_REFERENCE.finditer(data):
+            self.page.fileless_line_references.append(
+                (line + data.count("\n", 0, match.start()), match.group(0))
+            )
 
     def record(self, element):
         text = squeeze("".join(element.text))
@@ -215,6 +225,16 @@ def main():
         )
         for line, excerpt in current.uncoloured_code_blocks:
             print(f"  line {line}: {excerpt}")
+
+    if current.fileless_line_references:
+        findings += len(current.fileless_line_references)
+        print(
+            f"{len(current.fileless_line_references)} line references name no file. "
+            "Rule: say what the lines do, and cite them by their real path, "
+            "linked or shown."
+        )
+        for line, reference in current.fileless_line_references:
+            print(f"  line {line}: {reference}")
 
     if previous is not None:
         dropped_file = arguments.dropped or arguments.page.with_name(
