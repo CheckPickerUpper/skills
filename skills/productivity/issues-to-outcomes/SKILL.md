@@ -1,6 +1,6 @@
 ---
 name: issues-to-outcomes
-description: "Report finished work as what the reader would notice, not as a list of issue or PR titles. Use for any report of work done: a status update, a day or session summary, a handoff, a 'what landed' or 'what did you do' answer, or when the reader says a report means nothing to them, asks what they experience, or asks for it at a high level. Says first how much of the work can be seen in the product, describes each visible change as the situation before and now, and describes the invisible work as what was blocked or silently wrong and now is not."
+description: "Load before writing any report of work: a status update, an end-of-day or session summary, a handoff, a 'what landed' or 'what did you do' answer, or any reply built from a list of issues, PRs or commits. Also load when the reader says a report means nothing to them, asks what they experience, or asks for it at a high level. Turns issue and PR titles into outcomes the reader notices: how much of the work shows in the product, each visible change as before and now, and the invisible work as what was stuck or silently wrong and no longer is. Ships a checker the draft must pass before it is sent."
 short_description: "Turn a list of issues into the outcomes the reader notices."
 allow_implicit_invocation: true
 ---
