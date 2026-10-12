@@ -2,6 +2,8 @@
 
 General workflow tools.
 
+- **[check-protection](./check-protection/SKILL.md)** — Before an expensive or repeated check, name the wrong behaviour it catches and what cheaper evidence already covers. Keep required gates, reuse valid results, and audit every nested step. A script validates the recorded audit decisions.
+
 - **[compose-goal](./compose-goal/SKILL.md)** — Compose or retrieve a gist-backed agent goal with a human outcome, live issue references, traceable implementation scope, and real behavior proof.
 - **[dependency-trace](./dependency-trace/SKILL.md)** — Derive a correctness dependency graph before implementation. Use when determining foundations, dependency order, or a lowest-to-highest flow for a feature.
 - **[grill-with-docs-requiem](./grill-with-docs-requiem/SKILL.md)** — A design interview that asks useful batches, infers obvious answers, and records settled domain language and ADRs as the conversation progresses. Use when sharpening a plan while maintaining docs.
