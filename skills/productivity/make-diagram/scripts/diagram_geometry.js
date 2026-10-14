@@ -277,7 +277,7 @@
       }
       for (const row of shape.rows) {
         if (row.length > MAX_ROW_CHARS) {
-          say("box", `${shape.kind} ${shape.name} has a ${row.length}-character row: ${quote(row)}`);
+          say("rowlength", `${shape.kind} ${shape.name} has a ${row.length}-character row: ${quote(row)}`);
         }
       }
     }
@@ -319,7 +319,7 @@
       for (const shape of boxes) {
         if (shape === arrow.from || shape === arrow.to || !shape.shape) continue;
         if (middle.some((p) => contains(grow(shape.box, -3), p))) {
-          say("crossing", `${arrow.name} runs through ${shape.kind} ${shape.name}`);
+          say("through", `${arrow.name} runs through ${shape.kind} ${shape.name}`);
         }
       }
     }

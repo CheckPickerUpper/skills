@@ -117,6 +117,14 @@ edge from step 2 is in it.
    `<stem>.light.png` and `<stem>.dark.png` beside the file (or in `--out`),
    prints each finding under the rule it breaks, and exits 1 while any remain.
    Fix the drawing and rerun until it exits 0.
+
+   Three rules are judgment calls, marked "Judgment" in the output: a row over
+   32 characters, two arrows that cross, and a non-loop arrow that points up
+   or back. Some layouts are clearer with one of these, such as two lanes
+   that both have to reach the same end box. Leave it standing only when
+   moving it would make the drawing harder to read. Then add a line to
+   `<stem>.accepted.txt` reading `<finding as printed> | <why>`; the owner can
+   read your reasons there. Every other finding gets fixed.
 2. Open both images and look at them. The checker measures geometry; your eyes
    judge the rest: the path reads in order, each label points at the arrow it
    names, nothing is cramped, and the mechanism matches step 1's sources. Fix
