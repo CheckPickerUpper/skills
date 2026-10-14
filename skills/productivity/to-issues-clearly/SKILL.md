@@ -369,12 +369,11 @@ The final draft should stand on its own. A reader should understand the verifier
 
 **Nothing is created until the user has seen the set.** An issue published wrong has to be edited, and a set published wrong has to be edited eleven times.
 
-Show a numbered list. For each: **title**, **kind label** (and priority, for a bug), **blocked by**, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
+Before showing it, settle every blocked-by edge in the set with `settle-blockers`, so each one shown is real and carries its reason. Show a numbered list. For each: **title**, **kind label** (and priority, for a bug), **blocked by** with its reason, **milestone**, and **what it delivers** in one line. Above the list, show any new milestone with its title, description, and due date, and name the existing milestones you chose, each with the line of its description that justifies it. Then show the complete draft body for each issue, including the decision template when the issue is a decision. A title-only breakdown is not enough for the user to review the language or scope.
 
-Then ask three things:
+Then ask:
 
 - Is the granularity right — too coarse, too fine?
-- Is each blocking edge real, or is it just ordering?
 - Should any of these be merged or split?
 - Is each milestone placement right, and should the proposed new milestone exist?
 
@@ -427,16 +426,14 @@ gh api repos/OWNER/REPO/issues/PARENT/sub_issues -F sub_issue_id=$(gh api repos/
 
 Note `-F`, not `-f`. `-f` sends the id as a string and the API rejects it as not an integer.
 
-A blocker is genuine only when the child cannot start, or cannot meet its criteria, until the blocker lands. Ordinary sequencing is not a blocker, and "related" is not a parent.
+A blocker is real only under `settle-blockers`' test: the child cannot be done now, or doing it now means redoing part of it once the blocker lands. A shared file, a merge conflict, ordinary sequencing and relatedness are not blockers, and "related" is not a parent.
 
-Create a "blocked by" edge at creation or afterwards; each flag takes issue numbers or URLs:
+Create each blocked-by edge after both issues exist, with `settle-blockers`' `keep` command, so the link and its reason line under `## Blocked by` land together:
 
 ~~~sh
-gh issue create --repo OWNER/REPO ... --blocked-by 1138,1139
-gh issue edit 1164 --repo OWNER/REPO --add-blocked-by 1161
+python3 <settle-blockers folder>/scripts/blockers.py keep --repo OWNER/REPO --issue 1164 --blocker 1161 \
+  --reason "cannot prove X until #1161 adds Y"
 ~~~
-
-The REST equivalent takes the blocker's database id: `gh api repos/OWNER/REPO/issues/BLOCKED/dependencies/blocked_by -F issue_id=$(gh api repos/OWNER/REPO/issues/BLOCKER --jq .id)`.
 
 **When one issue replaces another**, record it natively:
 
