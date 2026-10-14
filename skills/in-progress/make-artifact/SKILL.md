@@ -121,9 +121,9 @@ Rules for the parts:
   state (solid box for today, dashed for planned; a chip per build state), put
   its legend at the top, and use it in every tab, table and drawing.
 - **Draw it when the subject is what happens where or when.** Steps that move
-  between machines, people or phases are a diagram or a timeline. A table of
-  thirty rows that each open with a code name is a reference appendix; it goes
-  in the detail layer under the drawing.
+  between machines, people or phases are a diagram or a timeline, drawn with
+  `make-diagram`. A table of thirty rows that each open with a code name is a
+  reference appendix; it goes in the detail layer under the drawing.
 - Replace each figurative or coined phrase with the fact it stands for: "thin
   coverage" becomes "3 of 11 endpoints have tests".
 - **References support a claim; they never stand in for one.** A row whose
