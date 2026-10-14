@@ -1,6 +1,6 @@
 ---
 name: to-issues-clearly
-description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; sizes issue sets to independent slices; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
+description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; makes each issue one cause with one fix, adding new sightings to the existing issue; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
 short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
 allow_implicit_invocation: true
 ---
@@ -169,7 +169,7 @@ When a title fights you, look at how you described the issue in prose — in the
 
 Identify the repository and the source material. Read an existing issue, plan, or evidence file when one is supplied. Explore the codebase only when the issue needs a fact the conversation does not establish.
 
-Search existing issues for a duplicate before creating anything. **Read the candidates rather than matching on words** — an issue asking for the opposite change is not a duplicate, it is the reason this one exists, and the new issue should reference it.
+Search existing issues for a duplicate before creating anything, by the cause the evidence names (rule identity, symbol, owner, command) as well as by words. **Read the candidates rather than matching on words** — an issue asking for the opposite change is not a duplicate, it is the reason this one exists, and the new issue should reference it.
 
 Reuse an existing issue when it already represents the same outcome; update it when the user asked to reshape it.
 
@@ -195,21 +195,21 @@ Never write a behavior title for a decision with no chosen behavior. That is whe
 
 An issue whose only symptom is "the type permits nonsense" is a real issue. Say so plainly and stop.
 
-### 3. Shape the issue set — err on granular
+### 3. Shape the issue set — one cause, one fix
 
-One issue per outcome that can be implemented, reviewed, and closed on its own.
+**An issue is one cause with one fix.** Two reports are the same issue when one change to one owner fixes both, whatever file, repository, language, rule instance or agent produced them. A new sighting of a filed cause is evidence: add it to that issue's evidence and stop. Search for the cause (the rule, symbol, owner or command the evidence names) as well as the words, because a second reporter describes the same cause in its own vocabulary.
 
-**When in doubt, split.** Two issues that turn out to be one merge in seconds. One issue that turns out to be four is discovered halfway through implementing it, by somebody who now has a half-finished branch and no way to land any of it. The costs are not symmetrical, so the tie goes to splitting.
+**The same change applied to many targets is one issue.** When one change pattern and one review standard cover every target (each rule's examples, each language's reader, each package's budget), file one issue whose acceptance is the checklist of targets. Several pull requests may each cover part of it; the last one closes it. A target needs its own issue only when it needs a different change or a different decision.
 
-**Count the acceptance criteria — that is the granularity check.** Four to six is an issue. More than eight is a system wearing an issue's clothes, and the split is usually already visible: each cluster of criteria that could be built and reviewed alone is its own issue.
+**Whether work can land separately decides pull requests, not issues.** Split an issue only when its parts have different causes, different fixes, different owners, or one part waits on a decision the others do not.
 
-Split when two outcomes could land separately, when two parts would be reviewed by different people, or when one part could ship while the other waits on a decision. Keep observations together only when they share one end state and one review.
+**Count the acceptance criteria.** Four to six distinct outcomes is an issue; a checklist of targets under one change counts as one. More than eight distinct outcomes is a system wearing an issue's clothes, and the split is usually already visible: each cluster of criteria with its own cause and fix is its own issue.
 
 For a **decision issue**, keep the decision and the questions needed to make it together. Do not make one issue for every question in the decision body. Split only when the choices can be made independently, have different owners, or unblock different implementation work. Once a decision is made, its implementation is a separate issue or child issue unless the user explicitly asks for a decision-and-build issue.
 
 **Cut each issue vertically, not by layer.** One issue is a narrow but complete path through everything it touches — the shape, the code that reads it, the callers, the tests. An issue that is only the schema change, with the callers in a second issue, cannot be verified or landed on its own.
 
-**Size each one to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If finishing it needs more than they can hold at once, it is two issues.
+**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep one issue and let its checklist split the work across pull requests; if the parts have different causes, they are separate issues.
 
 **Apply the atomicity test before finalizing the split.** Can each issue land green on its own? If two slices only make sense together and cannot land separately, they are one issue. Splitting what must land atomically adds tracking overhead without reducing risk.
 
