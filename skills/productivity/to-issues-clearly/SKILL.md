@@ -199,17 +199,17 @@ An issue whose only symptom is "the type permits nonsense" is a real issue. Say 
 
 **An issue is one cause with one fix.** Two reports are the same issue when one change to one owner fixes both, whatever file, repository, language, rule instance or agent produced them. A new sighting of a filed cause is evidence: add it to that issue's evidence and stop. Search for the cause (the rule, symbol, owner or command the evidence names) as well as the words, because a second reporter describes the same cause in its own vocabulary.
 
-**The same change applied to many targets is one issue.** When one change pattern and one review standard cover every target (each rule's examples, each language's reader, each package's budget), file one issue whose acceptance is the checklist of targets. Several pull requests may each cover part of it; the last one closes it. A target needs its own issue only when it needs a different change or a different decision.
+**A cause whose fix lands in pieces is a parent issue with sub-issues.** When one cause needs several pull requests (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), the cause is the parent issue and each piece is a GitHub sub-issue closed by exactly one pull request. One issue, one pull request still holds: the pieces are the sub-issues, not extra pull requests on the parent. A new sighting still goes into the parent's evidence, never into a new issue.
 
-**Whether work can land separately decides pull requests, not issues.** Split an issue only when its parts have different causes, different fixes, different owners, or one part waits on a decision the others do not.
+**Split into separate parent issues only for different causes.** Parts with different causes, different fixes, different owners, or a decision one part waits on are separate issues, each with its own sub-issues if its fix lands in pieces.
 
-**Count the acceptance criteria.** Four to six distinct outcomes is an issue; a checklist of targets under one change counts as one. More than eight distinct outcomes is a system wearing an issue's clothes, and the split is usually already visible: each cluster of criteria with its own cause and fix is its own issue.
+**Count the acceptance criteria.** Four to six distinct outcomes is an issue. More than eight distinct outcomes is a system wearing an issue's clothes: each cluster of criteria with its own cause and fix is its own issue, and each cluster that is one cause landing in pieces becomes sub-issues of one parent.
 
 For a **decision issue**, keep the decision and the questions needed to make it together. Do not make one issue for every question in the decision body. Split only when the choices can be made independently, have different owners, or unblock different implementation work. Once a decision is made, its implementation is a separate issue or child issue unless the user explicitly asks for a decision-and-build issue.
 
 **Cut each issue vertically, not by layer.** One issue is a narrow but complete path through everything it touches — the shape, the code that reads it, the callers, the tests. An issue that is only the schema change, with the callers in a second issue, cannot be verified or landed on its own.
 
-**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep one issue and let its checklist split the work across pull requests; if the parts have different causes, they are separate issues.
+**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep the cause as the parent issue and file each piece as a sub-issue closed by one pull request; if the parts have different causes, they are separate issues.
 
 **Apply the atomicity test before finalizing the split.** Can each issue land green on its own? If two slices only make sense together and cannot land separately, they are one issue. Splitting what must land atomically adds tracking overhead without reducing risk.
 
