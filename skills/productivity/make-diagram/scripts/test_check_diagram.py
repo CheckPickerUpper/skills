@@ -19,6 +19,8 @@ NO_LABEL = '<text class="label" x="712" y="458">no</text>'
 YES_LABEL = '<text class="label" x="889" y="328" text-anchor="middle">yes</text>'
 FIRST_DATA = '<path class="arrow data" d="M250 110 H328" marker-end="url(#head-data)"/>'
 LEGEND_START = '<g class="legend">'
+CROSSING = ('arrow "Copy official stats" → "Settle the bet" crosses'
+            ' the arrow "League box score" → "Settle the bet"')
 
 
 def replaced(old, new, text=EXAMPLE):
@@ -32,12 +34,14 @@ def before_legend(markup):
 
 
 class CheckDiagram(unittest.TestCase):
-    def run_check(self, content, name="diagram.svg", words=None):
+    def run_check(self, content, name="diagram.svg", words=None, accepted=None):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / name
             path.write_text(content)
             if words is not None:
                 path.with_suffix(".words.txt").write_text(words)
+            if accepted is not None:
+                path.with_suffix(".accepted.txt").write_text(accepted)
             result = subprocess.run(
                 ["uv", "run", "--quiet", str(SCRIPT), str(path)],
                 capture_output=True, text=True, timeout=180,
@@ -110,7 +114,29 @@ class CheckDiagram(unittest.TestCase):
     def test_crossing_arrows_are_refused(self):
         self.assert_finding(
             before_legend('<path class="arrow data" d="M150 150 V200 H1100 V298"/>'),
-            'arrow "Copy official stats" → "Settle the bet" crosses the arrow "League box score" → "Settle the bet"')
+            CROSSING)
+
+    def test_a_crossing_accepted_with_a_reason_passes(self):
+        result, _ = self.run_check(
+            before_legend('<path class="arrow data" d="M150 150 V200 H1100 V298"/>'),
+            accepted=CROSSING + " | both lanes must reach the settle box\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("accepted judgment call: " + CROSSING, result.stdout)
+
+    def test_a_crossing_accepted_without_a_reason_is_refused(self):
+        self.assert_finding(
+            before_legend('<path class="arrow data" d="M150 150 V200 H1100 V298"/>'),
+            "without a reason", accepted=CROSSING + "\n")
+
+    def test_a_hard_finding_cannot_be_accepted(self):
+        moved = replaced(YES_LABEL, YES_LABEL.replace('y="328"', 'y="346"'))
+        sits = '"yes" sits on the arrow "Proof clip found" → "Settle the bet"'
+        self.assert_finding(moved, "\n  - " + sits + "\n", accepted=sits + " | looks fine to me\n")
+
+    def test_a_stale_accepted_line_is_refused(self):
+        self.assert_finding(
+            EXAMPLE, "which is not a current judgment finding",
+            accepted=CROSSING + " | from an earlier layout\n")
 
     def test_arrow_through_a_box_is_refused(self):
         self.assert_finding(
