@@ -1,6 +1,6 @@
 ---
 name: implementer-mode
-description: "Implement a job handed over by a conductor: work inside the brief's scope and settled decisions, ask the conductor with options when a choice is unsettled, stop on contradicting evidence, open the PR without merging, and report per acceptance criterion with proof. Use when a brief says to work under implementer-mode, when running as a subagent or herdr-driven agent on an assigned issue, or when receiving review fixes or a rebase request for a PR you opened."
+description: "Implement a job handed over by a conductor: work inside the brief's scope and settled decisions, commit and push your own verified work, ask the conductor only for decisions you cannot make, file collisions and release blockers, open the PR without merging, and report per acceptance criterion in the PR body. Use when a brief says to work under implementer-mode, when running as a subagent or herdr-driven agent on an assigned issue, or when receiving review fixes or a rebase request for a PR you opened."
 short_description: "Implement a conductor's brief, ask with options, report with proof."
 allow_implicit_invocation: true
 ---
@@ -43,26 +43,34 @@ the proof that will show it met.
   pane.
 </what-to-do>
 
-## 3. Ask with options
+## 3. Commit your own work; ask only three things
 
 <what-to-do>
-Ask the conductor, through the channel the brief names, when:
+Build, test, commit and push your own verified work without asking: commit
+each verified step at once, staging only your own exact paths. Work left
+uncommitted in a shared folder gets lost.
 
-- you reach a seam, shape, or behavior the brief does not settle;
-- evidence contradicts the brief or the decisions log;
-- the job needs a change to something you do not own.
+Ask the conductor, through the channel the brief names, only for:
 
-Each question carries: what you found (file, line, command output), the options,
-each option's consequence, your recommendation, and what work is waiting on the
-answer. Stop the affected change and keep building the parts the question does
-not touch. A question that can wait is still asked before you build past it.
+- a product or design decision you truly cannot make, including evidence that
+  contradicts the brief or the decisions log;
+- another group touching a file you need; the conductor settles it with that
+  group's root agent before either of you changes it;
+- a release blocker you cannot fix.
+
+Each question is one line: what you found (file, line, command output), and
+your recommendation. Stop the affected change and keep building the parts the
+question does not touch.
+
+Send no status, acknowledgement, plan or receipt messages; the conductor reads
+your pushed commits and the board. Forward this rule to every subagent you
+start: they ask you, never the conductor.
 </what-to-do>
 
 <supporting-info>
-Asking "options A, B or C, which do you choose?" before building an unsettled
-seam was the single most valuable implementer habit observed: it prevented
-rework every time. The cost of the question is one round trip; the cost of
-guessing is a rebuilt seam and a second review.
+The owner set these rules on 2026-10-17 after status, plan and receipt
+messages from many groups filled the conductor's context, and work waiting on
+permission to commit was lost in a shared folder.
 </supporting-info>
 
 ## 4. Meet enforcement head on
@@ -90,9 +98,9 @@ Once the work is complete, run every review skill the brief names once on your
 diff against its base, as a self-check. Fix every finding that survives a
 review's refutation and commit each fix. The conductor's independent review
 follows your report, so do not rerun the reviews after each fix. A finding you
-cannot fix inside the brief goes to the conductor as a question (step 3). A
-review skill your client does not have is reported as unavailable, and the
-conductor runs it in its own review.
+cannot fix inside the brief goes in the report, or to the conductor when it is
+one of step 3's three questions. A review skill your client does not have is
+reported as unavailable, and the conductor runs it in its own review.
 
 Reach the brief's finish line: pushed, PR open with its closing line, checks
 passed on the pushed head SHA, mergeable. Merge only when the brief's finish
@@ -103,7 +111,7 @@ Before reporting, run `herdr pane list` and close any pane you created that is
 still open. A pane that must stay open, such as a server the conductor will
 review against, goes in the report with its `pane_id` and why.
 
-Report in this shape:
+Write the report into the PR body, not a message, in this shape:
 
 1. PR URL, head SHA, check state on that SHA, mergeable state.
 2. Each acceptance criterion: **met**, with the proof; or **not met**, with the

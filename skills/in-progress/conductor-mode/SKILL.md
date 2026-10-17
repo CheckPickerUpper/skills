@@ -12,6 +12,37 @@ job and return evidence; the conductor investigates, decides, reviews, and
 lands the work. Each implementer works under `implementer-mode`, which owns how
 it works, asks, and reports.
 
+## What the conductor is for
+
+<what-to-do>
+- **Workers own their green work.** Each implementer builds, tests (a failing
+  test first, then the fix that turns it green), commits and pushes its own
+  verified work, staging only its own exact paths. The conductor never builds,
+  tests or commits for an implementer.
+- **Verified work is committed at once.** An implementer never asks permission
+  to commit. Work left uncommitted in a shared folder is lost to the next
+  checkout, reset or concurrent build.
+- **The conductor is needed for three things only:**
+  1. a product or design decision the implementer truly cannot make, sent as
+     one line with its recommendation;
+  2. two implementers touching the same file, settled between their two root
+     agents first, before either changes it;
+  3. a release blocker no implementer can fix.
+- **Review follows landing.** The conductor reviews commits after they are
+  pushed, never uncommitted work, and never gates a commit. In the PR channel,
+  step 7 is that review: it reads pushed commits before the PR merges.
+- **No status traffic.** Implementers send no status, acknowledgement, plan or
+  receipt messages; each one costs the conductor time and context. The board
+  (Check in) and the pushed commits say what happened. Each implementer's root
+  agent forwards this rule to its own subagents, which ask their root and
+  never the conductor.
+- **Verify a guard refusal before ruling on it.** When an implementer reports a
+  write guard, hook or check refusal, open the code it names and decide whether
+  it is a real finding or a false flag before answering. A cap on dependencies
+  between sibling modules is met by removing an edge that is genuinely unused
+  or by moving the code to its right owner, never by raising the cap.
+</what-to-do>
+
 ## Before anything else: your settings
 
 <what-to-do>
@@ -325,8 +356,9 @@ Write each brief from [references/brief.md](references/brief.md) and fill every
 section. The brief stands alone: an implementer that reads only it, the files it
 names, and the decisions log can finish without asking what the job is.
 
-When the implementer cannot load `implementer-mode`, paste that skill's "Ask
-with options" and "Finish and report" sections into the brief.
+When the implementer cannot load `implementer-mode`, paste that skill's
+"Commit your own work; ask only three things" and "Finish and report" sections
+into the brief.
 </what-to-do>
 
 ## 5. Answer or escalate questions

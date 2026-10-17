@@ -66,7 +66,12 @@ names the proof that shows it met>
   acceptance, then confirm it reads MERGED."
 
 ## Asking
-Ask <conductor name and channel> with the question, options with their
-consequences, and your recommendation. Continue on work the question does not
-affect.
+Build, test, commit and push your own verified work; never ask permission to
+commit. Ask <conductor name and channel> only for a product or design decision
+you truly cannot make (one line, with your recommendation), another group
+touching a file you need (I settle it with that group's root first), or a
+release blocker you cannot fix. Continue on work the question does not affect.
+Send no status, acknowledgement, plan or receipt messages: your pushed commits
+and PR are the report. Forward this rule to every subagent you start; they ask
+you, never me.
 ~~~
