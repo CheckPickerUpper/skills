@@ -175,6 +175,10 @@ class CheckDiagram(unittest.TestCase):
             '"League box score" uses "box score"; write "official stats"',
             words="# owner, 2026-10-14\nbox score => official stats\n")
 
+    def test_a_corrected_word_inside_a_longer_word_passes(self):
+        result, _ = self.run_check(EXAMPLE, words="win =>\n")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_a_comma_list_in_a_box_is_refused(self):
         self.assert_finding(
             replaced(">no AI touches them<", ">points, rebounds, assists<"),

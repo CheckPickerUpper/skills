@@ -18,7 +18,8 @@ records the cold read of every word on the drawing and the owner's wording
 corrections, one per line:
     import feed facts => copy official stats
     Project Falcon =>
-A phrase on the left may not appear in the diagram; an empty right side means
+A phrase on the left may not appear in the diagram as whole words (any case;
+"round" does not catch "background"); an empty right side means
 the name is dropped. Lines starting with # are ignored.
 
 Most rules are hard: a finding is fixed in the drawing. Three are judgment
@@ -33,6 +34,7 @@ so the file stays true as the drawing changes.
 
 import argparse
 from pathlib import Path
+import re
 import sys
 
 from playwright.sync_api import Error as PlaywrightError
@@ -126,7 +128,9 @@ def read_words(path):
 def word_findings(texts, corrections):
     findings = []
     for phrase, replacement in corrections:
-        for text in sorted({t for t in texts if phrase.lower() in t.lower()}):
+        # Whole words only: a ban on "round" must not catch "background".
+        pattern = re.compile(rf"(?<!\w){re.escape(phrase)}(?!\w)", re.IGNORECASE)
+        for text in sorted({t for t in texts if pattern.search(t)}):
             fix = f'write "{replacement}"' if replacement else "drop it"
             findings.append({
                 "rule": "words",
