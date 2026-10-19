@@ -2,7 +2,7 @@
 
 General workflow tools.
 
-- **[audit-issues](./audit-issues/SKILL.md)** — Audit a GitHub tracker: a script finds open work hidden under closed issues (open children of closed parents, early closes, duplicates of nothing, decisions closed without their answer), then every open issue gets a checked verdict: done, duplicate, still real, or unsure with the check that settles it. Closes go through close-issues; scope goes to the owner.
+- **[audit-issues](./audit-issues/SKILL.md)** — Audit a GitHub tracker into one issue per cause: a script finds open work hidden under closed issues, suggests likely slices of one cause and milestones over 10 causes, and flags workaround premises; every open issue gets a checked verdict (done, duplicate, slice, cause, wrong premise, out of date, still real, or unsure with why its check cannot run); the owner approves a short before-and-after page before the script applies it. Its draft check stops to-issues-clearly filing what an audit would undo.
 - **[check-protection](./check-protection/SKILL.md)** — Before an expensive or repeated check, name the wrong behaviour it catches and what cheaper evidence already covers. Keep required gates, reuse valid results, and audit every nested step. A script validates the recorded audit decisions.
 - **[close-issues](./close-issues/SKILL.md)** — Close GitHub issues only with proof: a script refuses a close while sub-issues or checklist lines are open, and records the proof, a duplicate's carried details or the owner's not-planned decision in the body. Use whenever an issue is about to close.
 - **[compose-goal](./compose-goal/SKILL.md)** — Compose or retrieve a gist-backed agent goal with a human outcome, live issue references, traceable implementation scope, and real behavior proof.
