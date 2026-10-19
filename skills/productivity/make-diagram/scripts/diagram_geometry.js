@@ -282,6 +282,25 @@
       }
     }
 
+    // One item per row: a comma between words is a list that wants bullet rows.
+    for (const shape of boxes) {
+      for (const row of shape.rows) {
+        if (/,(?!\d)/.test(row.replace(/(\d),(\d)/g, "$1$2"))) {
+          say("list", `${shape.kind} ${shape.name} lists items with commas: ${quote(row)}`);
+        }
+      }
+    }
+
+    // A step both lanes take is drawn once.
+    const byTitle = new Map();
+    for (const shape of boxes) {
+      const title = (shape.rows[0] || "").toLowerCase();
+      if (title) byTitle.set(title, [...(byTitle.get(title) || []), shape]);
+    }
+    for (const same of byTitle.values()) {
+      if (same.length > 1) say("twice", `${same[0].name} is drawn ${same.length} times`);
+    }
+
     // Overlaps, spills and text on lines.
     for (let i = 0; i < textInfo.length; i += 1) {
       for (let j = i + 1; j < textInfo.length; j += 1) {
@@ -361,6 +380,15 @@
       }
       if (nearest && distance <= LABEL_REACH_PX) nearest.labels.push(t.content);
       else say("float", `${quote(t.content)} is loose text that labels no arrow`);
+    }
+
+    // An end says what happens after it.
+    const leavesGroup = (g) => g && (arrows.some((a) => a.from === g) || leavesGroup(g.group));
+    for (const node of nodes) {
+      if (arrows.some((a) => a.from === node) || leavesGroup(node.group)) continue;
+      if (node.rows.length < 2) {
+        say("end", `end ${node.name} says only its name`);
+      }
     }
 
     // Decisions.

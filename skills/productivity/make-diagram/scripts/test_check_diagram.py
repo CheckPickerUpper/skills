@@ -34,7 +34,7 @@ def before_legend(markup):
 
 
 class CheckDiagram(unittest.TestCase):
-    def run_check(self, content, name="diagram.svg", words=None, accepted=None):
+    def run_check(self, content, name="diagram.svg", words="", accepted=None):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / name
             path.write_text(content)
@@ -63,7 +63,7 @@ class CheckDiagram(unittest.TestCase):
     def test_small_text_is_refused(self):
         self.assert_finding(
             replaced("font-size: 15px", "font-size: 12px"),
-            '"final, official" is 12.0px where it is drawn',
+            '"the final score" is 12.0px where it is drawn',
             "Text is 15px or larger")
 
     def test_label_on_its_line_is_refused(self):
@@ -82,7 +82,7 @@ class CheckDiagram(unittest.TestCase):
 
     def test_long_row_that_spills_is_refused(self):
         self.assert_finding(
-            replaced(">final, official<", ">the final official box score feed<"),
+            replaced(">the final score<", ">the final official box score feed<"),
             'has a 33-character row',
             'spills out of node "League box score"')
 
@@ -174,6 +174,24 @@ class CheckDiagram(unittest.TestCase):
             EXAMPLE,
             '"League box score" uses "box score"; write "official stats"',
             words="# owner, 2026-10-14\nbox score => official stats\n")
+
+    def test_a_comma_list_in_a_box_is_refused(self):
+        self.assert_finding(
+            replaced(">no AI touches them<", ">points, rebounds, assists<"),
+            'node "Copy official stats" lists items with commas: "points, rebounds, assists"')
+
+    def test_a_step_drawn_in_both_lanes_is_refused(self):
+        self.assert_finding(
+            replaced(">Label the miss<", ">Settle the bet<"),
+            '"Settle the bet" is drawn 2 times')
+
+    def test_an_end_with_only_its_name_is_refused(self):
+        self.assert_finding(
+            replaced('\n    <text x="1055" y="356" text-anchor="middle">winners paid that day</text>', ""),
+            'end "Settle the bet" says only its name')
+
+    def test_a_diagram_without_a_words_file_is_refused(self):
+        self.assert_finding(EXAMPLE, "diagram.words.txt does not exist", words=None)
 
     def test_a_page_without_the_vocabulary_is_refused(self):
         self.assert_finding(

@@ -37,7 +37,7 @@
   <g class="node">
     <rect x="50" y="70" width="200" height="80" rx="10" fill="#dbeafe"/>
     <text x="150" y="104" text-anchor="middle" class="title">League box score</text>
-    <text x="150" y="126" text-anchor="middle">final, official</text>
+    <text x="150" y="126" text-anchor="middle">the final score</text>
   </g>
   <g class="node">
     <rect x="330" y="70" width="220" height="80" rx="10" fill="#dbeafe"/>
@@ -51,7 +51,7 @@
   <g class="node">
     <rect x="330" y="300" width="220" height="80" rx="10" fill="#fde9c8"/>
     <text x="440" y="334" text-anchor="middle" class="title">AI tags each play</text>
-    <text x="440" y="356" text-anchor="middle">LeBron jumper, Q4</text>
+    <text x="440" y="356" text-anchor="middle">LeBron jumper in Q4</text>
   </g>
   <g class="decision">
     <polygon points="700,265 820,340 700,415 580,340" fill="#ede4fb"/>
@@ -60,7 +60,8 @@
   </g>
   <g class="node">
     <rect x="960" y="300" width="190" height="80" rx="10" fill="#d6f2e0"/>
-    <text x="1055" y="345" text-anchor="middle" class="title">Settle the bet</text>
+    <text x="1055" y="334" text-anchor="middle" class="title">Settle the bet</text>
+    <text x="1055" y="356" text-anchor="middle">winners paid that day</text>
   </g>
   <g class="node">
     <rect x="600" y="490" width="200" height="80" rx="10" fill="#fbdcdc"/>

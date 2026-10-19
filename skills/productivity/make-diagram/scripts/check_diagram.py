@@ -13,8 +13,9 @@ measures every <svg> that uses the drawing vocabulary in diagram_geometry.js.
 Prints each finding under the rule it breaks and exits 1 while any remain,
 0 when none do, and 2 when the file cannot be opened or no browser starts.
 
-The words file (default <stem>.words.txt beside the diagram, when it exists)
-records the owner's wording corrections, one per line:
+The words file (default <stem>.words.txt beside the diagram) is required: it
+records the cold read of every word on the drawing and the owner's wording
+corrections, one per line:
     import feed facts => copy official stats
     Project Falcon =>
 A phrase on the left may not appear in the diagram; an empty right side means
@@ -49,11 +50,17 @@ RULES = {
     "box": "A box holds a short title plus at most two short lines."
     " Show more mechanism as more nodes.",
     "rowlength": "Judgment: a row in a box stays short (32 characters or fewer).",
+    "list": "A box row holds one item. Two or more items are bullet rows, never a comma list.",
+    "twice": "A step is drawn once. Where lanes reach a step both take, they merge into one"
+    " shared flow; a step that differs by lane is a decision in it.",
+    "end": "An end box says what happens after it: whether and when it can be retried"
+    " or left, or what it hands on. A title alone leaves a gap.",
     "float": "Nothing floats: every node connects to the flow, every arrow"
     " starts and ends on a shape, and every loose text labels an arrow.",
     "decision": "A decision is a diamond with a labelled yes branch and a"
     " labelled no branch, and yes and no colours appear only on those branches.",
-    "direction": "Judgment: arrows read left to right and top to bottom; a loop goes back.",
+    "direction": "Judgment: arrows read left to right and top to bottom; a loop goes back."
+    " Arrows back to an earlier level or state mean a rulebook: put it in a table.",
     "crossing": "Judgment: arrows do not cross each other.",
     "through": "An arrow never runs through a box it does not connect.",
     "colour": "Arrow colour means one thing: yes green, no red, data blue, loop amber"
@@ -61,7 +68,8 @@ RULES = {
     "caption": "No caption or note under the diagram. If it needs one, change the diagram.",
     "contrast": "Text reads in both themes: contrast of at least 4.5:1 against what is"
     " behind it, and dark text on light fills.",
-    "words": "The owner's wording corrections hold: a replaced or dropped phrase stays out.",
+    "words": "Every word reads cold to a stranger, and the owner's corrections hold:"
+    " a replaced or dropped phrase stays out.",
     "accepted": "Each accepted judgment call names a current judgment finding and gives a reason.",
     "found": "The file holds a diagram drawn in the vocabulary: g.node and g.decision"
     " shapes joined by .arrow elements.",
@@ -225,6 +233,12 @@ def main():
                         findings.append(finding)
                     if scheme == "light" and words.is_file():
                         findings.extend(word_findings(result["texts"], read_words(words)))
+                    elif scheme == "light":
+                        findings.append({"rule": "words", "message": (
+                            f"{words.name} does not exist. Read every word on the drawing as"
+                            " someone outside the business who is not technical; replace each"
+                            " one they could not read, write each replacement there as"
+                            " `old => plain`, and create the file even when nothing changed")})
             finally:
                 browser.close()
     except RuntimeError as error:

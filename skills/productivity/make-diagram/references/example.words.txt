@@ -1,0 +1,3 @@
+# Cold read: the words a stranger could not read, and what replaced them.
+import feed facts => copy official stats
+operators => sportsbooks
