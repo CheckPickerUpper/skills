@@ -199,7 +199,7 @@ An issue whose only symptom is "the type permits nonsense" is a real issue. Say 
 
 **An issue is one cause with one fix.** Two reports are the same issue when one change to one owner fixes both, whatever file, repository, language, rule instance or agent produced them. A new sighting of a filed cause is evidence: add it to that issue's evidence and stop. Search for the cause (the rule, symbol, owner or command the evidence names) as well as the words, because a second reporter describes the same cause in its own vocabulary.
 
-**A cause whose fix lands in pieces is a parent issue with sub-issues.** When one cause needs several pull requests (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), the cause is the parent issue and each piece is a GitHub sub-issue closed by exactly one pull request. One issue, one pull request still holds: the pieces are the sub-issues, not extra pull requests on the parent. A new sighting still goes into the parent's evidence, never into a new issue.
+**A cause whose fix lands in pieces is a parent issue with sub-issues.** When one cause needs several separately landed changes (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), the cause is the parent issue and each piece is a GitHub sub-issue closed by the commit that finishes it, with `Closes #N` on that commit and `Part of #N` on any commit before it. The pieces are the sub-issues, not extra commits closing the parent. A new sighting still goes into the parent's evidence, never into a new issue.
 
 **Split into separate parent issues only for different causes.** Parts with different causes, different fixes, different owners, or a decision one part waits on are separate issues, each with its own sub-issues if its fix lands in pieces.
 
@@ -209,7 +209,7 @@ For a **decision issue**, keep the decision and the questions needed to make it 
 
 **Cut each issue vertically, not by layer.** One issue is a narrow but complete path through everything it touches — the shape, the code that reads it, the callers, the tests. An issue that is only the schema change, with the callers in a second issue, cannot be verified or landed on its own.
 
-**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep the cause as the parent issue and file each piece as a sub-issue closed by one pull request; if the parts have different causes, they are separate issues.
+**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep the cause as the parent issue and file each piece as a sub-issue closed by the commit that finishes it; if the parts have different causes, they are separate issues.
 
 **Apply the atomicity test before finalizing the split.** Can each issue land green on its own? If two slices only make sense together and cannot land separately, they are one issue. Splitting what must land atomically adds tracking overhead without reducing risk.
 
