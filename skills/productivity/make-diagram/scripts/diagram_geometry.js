@@ -13,6 +13,10 @@
   const MIN_FONT_PX = 15;
   const MAX_ROWS = 3;
   const MAX_ROW_CHARS = 32;
+  const BULLET_ROW = /^•\s/;
+  const SUBHEADING_ROW = /:$/;
+  const VAGUE_JOIN = /\band\b|&/i;
+  const EXAMPLE_ROW = /^e\.g\.\s/i;
   const TOUCH_PX = 10;
   const LABEL_REACH_PX = 28;
   const END_CLEARANCE_PX = 14;
@@ -270,9 +274,15 @@
       }
     }
 
-    // Box text.
+    // Box text. A titled checklist (subheadings and one bullet per item) may run longer.
+    const isChecklist = (rows) => {
+      const body = rows.slice(1);
+      return body.some((row) => BULLET_ROW.test(row))
+        && body.every((row, i) => BULLET_ROW.test(row)
+          || (SUBHEADING_ROW.test(row) && BULLET_ROW.test(body[i + 1] || "")));
+    };
     for (const shape of boxes) {
-      if (shape.rows.length > MAX_ROWS) {
+      if (shape.rows.length > MAX_ROWS && !isChecklist(shape.rows)) {
         say("box", `${shape.kind} ${shape.name} has ${shape.rows.length} rows of text`);
       }
       for (const row of shape.rows) {
@@ -287,6 +297,10 @@
       for (const row of shape.rows) {
         if (/,(?!\d)/.test(row.replace(/(\d),(\d)/g, "$1$2"))) {
           say("list", `${shape.kind} ${shape.name} lists items with commas: ${quote(row)}`);
+        }
+        // "jerseys and the court" names two things and specifies neither; a number is a specific.
+        if (VAGUE_JOIN.test(row) && !/\d/.test(row)) {
+          say("vague", `${shape.kind} ${shape.name} joins two things with "and": ${quote(row)}`);
         }
       }
     }
@@ -406,6 +420,11 @@
       }
       if (decision.shape && decision.shape.tagName !== "polygon") {
         say("decision", `decision ${decision.name} is drawn as a ${decision.shape.tagName}, not a diamond`);
+      }
+      // A check shows a real case, in its diamond or in the box its no branch reaches.
+      const failures = out.filter((a) => a.kinds.includes("no") && a.to).map((a) => a.to);
+      if (![decision, ...failures].some((s) => s.rows.some((row) => EXAMPLE_ROW.test(row)))) {
+        say("example", `decision ${decision.name} shows no real example of what fails it`);
       }
     }
     for (const arrow of arrows) {

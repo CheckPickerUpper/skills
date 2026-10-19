@@ -19,6 +19,12 @@ NO_LABEL = '<text class="label" x="712" y="458">no</text>'
 YES_LABEL = '<text class="label" x="889" y="328" text-anchor="middle">yes</text>'
 FIRST_DATA = '<path class="arrow data" d="M250 110 H328" marker-end="url(#head-data)"/>'
 LEGEND_START = '<g class="legend">'
+SETTLE_NODE = ('<g class="node">\n'
+               '    <rect x="960" y="300" width="190" height="80" rx="10" fill="#d6f2e0"/>\n'
+               '    <text x="1055" y="334" text-anchor="middle" class="title">Settle the bet</text>\n'
+               '    <text x="1055" y="356" text-anchor="middle">winners paid that day</text>\n'
+               '  </g>')
+REFUND_EXAMPLE = '\n    <text x="700" y="546" text-anchor="middle">e.g. no clip of the jumper</text>'
 CROSSING = ('arrow "Copy official stats" → "Settle the bet" crosses'
             ' the arrow "League box score" → "Settle the bet"')
 
@@ -79,6 +85,31 @@ class CheckDiagram(unittest.TestCase):
                      '<text x="150" y="358" text-anchor="middle">every camera angle</text>'
                      '<text x="150" y="376" text-anchor="middle">kept for the season</text>'),
             'node "Game video" has 4 rows of text')
+
+    def test_a_titled_checklist_box_passes(self):
+        result, _ = self.run_check(replaced(
+            SETTLE_NODE,
+            '<g class="node">\n'
+            '    <rect x="960" y="300" width="190" height="230" rx="10" fill="#d6f2e0"/>\n'
+            '    <text x="1055" y="334" text-anchor="middle" class="title">Settle the bet</text>\n'
+            '    <text x="975" y="358">Paid out:</text>\n'
+            '    <text x="985" y="380">• winners that day</text>\n'
+            '    <text x="985" y="402">• refunds by 6pm</text>\n'
+            '    <text x="975" y="426">Sent:</text>\n'
+            '    <text x="985" y="448">• a receipt per bet</text>\n'
+            '    <text x="985" y="470">• the clip as proof</text>\n'
+            '  </g>'))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_a_vague_and_row_is_refused(self):
+        self.assert_finding(
+            replaced(">winners paid that day<", ">jerseys and the court<"),
+            'node "Settle the bet" joins two things with "and": "jerseys and the court"')
+
+    def test_a_check_with_no_real_example_is_refused(self):
+        self.assert_finding(
+            replaced(REFUND_EXAMPLE, ""),
+            'decision "Proof clip found" shows no real example')
 
     def test_long_row_that_spills_is_refused(self):
         self.assert_finding(

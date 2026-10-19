@@ -65,7 +65,8 @@
   </g>
   <g class="node">
     <rect x="600" y="490" width="200" height="80" rx="10" fill="#fbdcdc"/>
-    <text x="700" y="535" text-anchor="middle" class="title">Refund the bet</text>
+    <text x="700" y="524" text-anchor="middle" class="title">Refund the bet</text>
+    <text x="700" y="546" text-anchor="middle">e.g. no clip of the jumper</text>
   </g>
   <g class="node">
     <rect x="330" y="490" width="220" height="80" rx="10" fill="#fde9c8"/>
