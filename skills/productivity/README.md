@@ -2,9 +2,9 @@
 
 General workflow tools.
 
+- **[audit-issues](./audit-issues/SKILL.md)** — Audit a GitHub tracker: a script finds open work hidden under closed issues (open children of closed parents, early closes, duplicates of nothing, decisions closed without their answer), then every open issue gets a checked verdict: done, duplicate, still real, or unsure with the check that settles it. Closes go through close-issues; scope goes to the owner.
 - **[check-protection](./check-protection/SKILL.md)** — Before an expensive or repeated check, name the wrong behaviour it catches and what cheaper evidence already covers. Keep required gates, reuse valid results, and audit every nested step. A script validates the recorded audit decisions.
-
-- **[close-issues](./close-issues/SKILL.md)** — Close GitHub issues only with proof: a script refuses a close while sub-issues or checklist lines are open, and records the proof, a duplicate's carried details or the owner's not-planned decision in the body. Sweeps find open work under closed parents, hidden by early closes, or waiting on a decision. Use whenever an issue is about to close, and to clean up a tracker.
+- **[close-issues](./close-issues/SKILL.md)** — Close GitHub issues only with proof: a script refuses a close while sub-issues or checklist lines are open, and records the proof, a duplicate's carried details or the owner's not-planned decision in the body. Use whenever an issue is about to close.
 - **[compose-goal](./compose-goal/SKILL.md)** — Compose or retrieve a gist-backed agent goal with a human outcome, live issue references, traceable implementation scope, and real behavior proof.
 - **[dependency-trace](./dependency-trace/SKILL.md)** — Derive a correctness dependency graph before implementation. Use when determining foundations, dependency order, or a lowest-to-highest flow for a feature.
 - **[make-diagram](./make-diagram/SKILL.md)** — Draw any diagram (system map, flowchart, pipeline, process map) a stranger can read: settle the domain and the owner's words first, show the mechanism as nodes, yes/no diamonds and one lane per source of truth, with semantic arrow colours and nothing floating. A script renders light and dark images and refuses overlaps, small text, crammed boxes, unlabelled branches, backward or crossing arrows and captions.
