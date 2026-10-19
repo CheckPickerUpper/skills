@@ -1,6 +1,6 @@
 ---
 name: make-diagram
-description: "Draw or revise any diagram for a reader: system map, flowchart, pipeline, process map, decision flow, architecture. Use whenever a diagram goes into an Artifact, doc, issue, PR or repository, and on every revision after the owner corrects one. Settles the domain and the plain words before drawing, puts rulebooks in tables, shows the mechanism as nodes, diamonds and lanes in a fixed SVG vocabulary, and ships a checker that renders light and dark images and refuses overlaps, small text, crammed boxes, comma lists, steps drawn twice, dead ends, floating nodes, unlabelled branches, backward or crossing arrows, wrong arrow colours and captions."
+description: "Draw or revise any diagram for a reader: system map, flowchart, pipeline, process map, decision flow, architecture. Use whenever a diagram goes into an Artifact, doc, issue, PR or repository, and on every revision after the owner corrects one. Settles the domain and the plain words before drawing, puts rulebooks in tables, shows the mechanism as nodes, diamonds and lanes in a fixed SVG vocabulary, and ships a checker that renders light and dark images and refuses overlaps, small text, crammed boxes, comma lists, vague \"and\" rows, checks with no real example, steps drawn twice, dead ends, floating nodes, unlabelled branches, backward or crossing arrows, wrong arrow colours and captions."
 short_description: "Draw diagrams a stranger can read, rendered and checked before delivery."
 allow_implicit_invocation: true
 ---
@@ -33,6 +33,9 @@ larger, and the figure carries no caption.
   page. Coined labels ("round", "keeper stat"), storage and tool names
   ("R2 games") and figures of speech ("each game entered twice") become what
   they mean: "our 27 games kept in full 4K", "two VAs score the same game".
+  The system's own nouns (markers, tracks, crops, queues, verified records,
+  rule checks) become the real thing a person sees: "the time Q2 starts",
+  "the clip of the jumper".
 - Record each replacement, yours from the cold read and every one the owner
   makes, in `<diagram>.words.txt` beside the diagram, one per line as
   `old phrase => plain phrase`, with an empty right side for a dropped name.
@@ -70,14 +73,27 @@ Write the nodes and edges as a list before placing any coordinate.
   wait on the source?
 - **Mechanism as nodes.** A box is a short title plus at most two short lines.
   A box that wants a paragraph is several steps; make each one a node.
+- **Specific, not vague; specific is not a paragraph.** When a step is a list
+  of concrete things a person does, the box is a titled checklist: the title,
+  short subheadings ending in ":", and one "• " bullet per concrete thing.
+  "VA marks the game" holds "Times:" • tip-off • each quarter's start and end
+  • game end, "Teams:" • both team names • which team is home • each team's
+  jersey colour • the referees' jersey colour, and "Court:" • which gym • 6
+  points on the court lines • where the scoreboard is. Never a catch-all such
+  as "jerseys and the court", which could mean a million things.
 - **One item per row.** Two or more items are bullet rows ("• tip-off",
-  "• periods"), never a comma list. More items than fit are more nodes.
+  "• game end"), never a comma list, and never two things joined by "and"
+  with no specifics.
 - **Concrete examples inside nodes.** "LeBron 2 pts in Q1 AND a turnaround
   jumper in Q4" shows what a field list ("player, stat, period") only names.
 - **Every check is a diamond** with a labelled yes branch and a labelled no
   branch, and the no branch leads somewhere real: a refund, a retry, a
   rejection. The question names the object of the check: "the clip or official
   stat that settles the bet, found before the review deadline?", not "proof?".
+  The diamond or its failure box shows a real case of what fails it, as a row
+  starting "e.g.": "Each time after the one before?" with "e.g. Q2 starts
+  before Q1 ends", not "Markers in order?" with "Back to the VA with the exact
+  reason".
 - **Lanes hold only what differs.** Official stats used as-is and AI-derived
   facts proven by rule checks are two lanes, with arrows showing exactly which
   part touches what. Where the lanes reach a step both do, they merge into one
@@ -92,8 +108,8 @@ Write the nodes and edges as a list before placing any coordinate.
 
 Done when every edge is written as "B waits on A because …", no node is
 without an edge, no check is without a labelled no branch, no step appears
-twice, no two sources of truth share a box, and no box is over three short
-rows.
+twice, no two sources of truth share a box, every check has its "e.g.", and
+no box is over three short rows unless it is a titled checklist.
 </what-to-do>
 
 ## 3. Draw in the vocabulary

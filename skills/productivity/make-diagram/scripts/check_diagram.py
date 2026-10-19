@@ -22,9 +22,10 @@ A phrase on the left may not appear in the diagram as whole words (any case;
 "round" does not catch "background"); an empty right side means
 the name is dropped. Lines starting with # are ignored.
 
-Most rules are hard: a finding is fixed in the drawing. Three are judgment
-calls with legitimate exceptions (a row over 32 characters, two arrows that
-cross, a non-loop arrow that points up or back). One of those can stand when
+Most rules are hard: a finding is fixed in the drawing. Four are judgment
+calls with legitimate exceptions (a row over 32 characters, a row joining two
+things with "and", two arrows that cross, a non-loop arrow that points up or
+back). One of those can stand when
 the drawing is clearer that way and the accepted file (default
 <stem>.accepted.txt) holds the finding as printed and the reason:
     arrow "A" → "B" crosses the arrow "C" → "D" | the two lanes must both reach "B"
@@ -49,14 +50,21 @@ RULES = {
     "size": "Text is 15px or larger where it is drawn.",
     "overlap": "Every label has its own space: no text overlaps another text,"
     " sits on an arrow, or spills out of its shape or the drawing.",
-    "box": "A box holds a short title plus at most two short lines."
-    " Show more mechanism as more nodes.",
+    "box": "A box holds a short title plus at most two short lines, or a titled checklist:"
+    " subheadings ending in ':' and one '• ' bullet per concrete thing. Show more mechanism"
+    " as more nodes.",
     "rowlength": "Judgment: a row in a box stays short (32 characters or fewer).",
     "list": "A box row holds one item. Two or more items are bullet rows, never a comma list.",
+    "vague": "Judgment: a row names one concrete thing. Two things joined by 'and' with no"
+    " specifics ('jerseys and the court') are bullets that each say exactly what: 'each"
+    " team's jersey colour', 'which gym'.",
     "twice": "A step is drawn once. Where lanes reach a step both take, they merge into one"
     " shared flow; a step that differs by lane is a decision in it.",
     "end": "An end box says what happens after it: whether and when it can be retried"
     " or left, or what it hands on. A title alone leaves a gap.",
+    "example": "Every check shows a real case of what fails it, as a row starting 'e.g.' in the"
+    " diamond or in the box its no branch reaches: 'Each time after the one before?' with"
+    " 'e.g. Q2 starts before Q1 ends'.",
     "float": "Nothing floats: every node connects to the flow, every arrow"
     " starts and ends on a shape, and every loose text labels an arrow.",
     "decision": "A decision is a diamond with a labelled yes branch and a"
@@ -78,7 +86,7 @@ RULES = {
 }
 
 
-JUDGMENT_RULES = {"rowlength", "crossing", "direction"}
+JUDGMENT_RULES = {"rowlength", "vague", "crossing", "direction"}
 ACCEPTED_SEPARATOR = " | "
 
 
