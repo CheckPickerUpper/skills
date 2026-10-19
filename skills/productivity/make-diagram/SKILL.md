@@ -1,6 +1,6 @@
 ---
 name: make-diagram
-description: "Draw or revise any diagram for a reader: system map, flowchart, pipeline, process map, decision flow, architecture. Use whenever a diagram goes into an Artifact, doc, issue, PR or repository, and on every revision after the owner corrects one. Settles the domain before drawing, shows the mechanism as nodes, diamonds and lanes in a fixed SVG vocabulary, and ships a checker that renders light and dark images and refuses overlaps, small text, crammed boxes, floating nodes, unlabelled branches, backward or crossing arrows, wrong arrow colours and captions."
+description: "Draw or revise any diagram for a reader: system map, flowchart, pipeline, process map, decision flow, architecture. Use whenever a diagram goes into an Artifact, doc, issue, PR or repository, and on every revision after the owner corrects one. Settles the domain and the plain words before drawing, puts rulebooks in tables, shows the mechanism as nodes, diamonds and lanes in a fixed SVG vocabulary, and ships a checker that renders light and dark images and refuses overlaps, small text, crammed boxes, comma lists, steps drawn twice, dead ends, floating nodes, unlabelled branches, backward or crossing arrows, wrong arrow colours and captions."
 short_description: "Draw diagrams a stranger can read, rendered and checked before delivery."
 allow_implicit_invocation: true
 ---
@@ -28,15 +28,34 @@ larger, and the figure carries no caption.
 - Write words a stranger understands, naming what the thing does: "copy
   official stats", "sportsbooks", "what settles it", in place of internal terms
   such as "import feed facts", "operators", "deciding source".
-- Record each wording correction the owner makes in `<diagram>.words.txt`
-  beside the diagram, one per line as `old phrase => plain phrase`, with an
-  empty right side for a dropped name. The checker refuses the old phrase from
-  then on.
+- Read every noun and label cold, before the first render, as someone outside
+  the business who is not technical. Each word is plain or defined on the
+  page. Coined labels ("round", "keeper stat"), storage and tool names
+  ("R2 games") and figures of speech ("each game entered twice") become what
+  they mean: "our 27 games kept in full 4K", "two VAs score the same game".
+- Record each replacement, yours from the cold read and every one the owner
+  makes, in `<diagram>.words.txt` beside the diagram, one per line as
+  `old phrase => plain phrase`, with an empty right side for a dropped name.
+  The checker refuses the old phrase from then on, and refuses a diagram with
+  no words file, so the cold read happens before the owner sees it.
+- Leave no gap a reader has to ask about. Every check states its exact
+  condition: a number, and what counts ("watched 90% of live play", not
+  "enough watched"). Every branch says what happens next. Every end says
+  whether it can be retried or left, and when ("can reapply after 3 months",
+  not "Not admitted"). A rule nobody has decided shows the default you
+  propose, marked "proposed"; vague words never stand in for it.
+- Choose the form before drawing. A diagram is for flow between actors and
+  steps. Levels, ranks and any states where each one has "move up when" and
+  "drop when" conditions are a rulebook: a table with the columns state, what
+  it means, when you move up and when you drop. A drawing of a rulebook needs
+  arrows back to earlier states, which is the sign to use the table.
 - For anything sold, the value is nodes: what it tells or gives the buyer, who
   pays, and why they pay. Name it concretely; a vague value undersells it.
 
 Done when every planned node has a source, the owner has answered every
-ambiguity, and the words file holds every correction made so far.
+ambiguity, every check, branch and end has its exact rule, rulebooks are
+tables, and the words file holds every replacement from the cold read and
+the owner.
 </what-to-do>
 
 ## 2. Plan the graph
@@ -44,26 +63,37 @@ ambiguity, and the words file holds every correction made so far.
 <what-to-do>
 Write the nodes and edges as a list before placing any coordinate.
 
+- **An arrow means "waits on".** Draw A → B only when B cannot start until A
+  is done. Outputs one step produces independently branch out from it side
+  by side; chaining them ("time per game" → "accuracy per stat" → "clips")
+  says each waits on the last. Ask of every edge: does the target really
+  wait on the source?
 - **Mechanism as nodes.** A box is a short title plus at most two short lines.
   A box that wants a paragraph is several steps; make each one a node.
+- **One item per row.** Two or more items are bullet rows ("• tip-off",
+  "• periods"), never a comma list. More items than fit are more nodes.
 - **Concrete examples inside nodes.** "LeBron 2 pts in Q1 AND a turnaround
   jumper in Q4" shows what a field list ("player, stat, period") only names.
 - **Every check is a diamond** with a labelled yes branch and a labelled no
   branch, and the no branch leads somewhere real: a refund, a retry, a
   rejection. The question names the object of the check: "the clip or official
   stat that settles the bet, found before the review deadline?", not "proof?".
-- **One lane per source of truth.** Official stats used as-is and AI-derived
+- **Lanes hold only what differs.** Official stats used as-is and AI-derived
   facts proven by rule checks are two lanes, with arrows showing exactly which
-  part touches what. Two flows that end in the same place still get two lanes;
-  the shared end sits outside both.
+  part touches what. Where the lanes reach a step both do, they merge into one
+  shared flow, and each shared step is drawn once below them. A step that
+  differs by lane is a decision in the shared flow ("Brodie game?"), not a
+  copy in each lane.
 - **Related inputs share one bubble**: all sources in one group, with one
   arrow out of it.
 - **Every node connects to where it comes from.** A downstream product gets an
   arrow from the checkpoint that enables it. An order or any other list joins
   the flow as nodes or stays off the drawing.
 
-Done when the list has no node without an edge, no check without a labelled no
-branch, no two sources of truth sharing a box, and no box over three short rows.
+Done when every edge is written as "B waits on A because …", no node is
+without an edge, no check is without a labelled no branch, no step appears
+twice, no two sources of truth share a box, and no box is over three short
+rows.
 </what-to-do>
 
 ## 3. Draw in the vocabulary
@@ -122,7 +152,9 @@ edge from step 2 is in it.
    32 characters, two arrows that cross, and a non-loop arrow that points up
    or back. Some layouts are clearer with one of these, such as two lanes
    that both have to reach the same end box. Leave it standing only when
-   moving it would make the drawing harder to read. Then add a line to
+   moving it would make the drawing harder to read. An arrow back to an
+   earlier level or state is never accepted: it is a rulebook, so make the
+   table from step 1. Then add a line to
    `<stem>.accepted.txt` reading `<finding as printed> | <why>`; the owner can
    read your reasons there. Every other finding gets fixed.
 2. Open both images and look at them. The checker measures geometry; your eyes
