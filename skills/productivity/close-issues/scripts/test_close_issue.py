@@ -5,7 +5,13 @@ Run with: python3 -m unittest test_close_issue
 
 import unittest
 
-from close_issue import open_pieces, ready_findings, unticked_lines, with_section
+from close_issue import (
+    open_pieces,
+    ready_findings,
+    uncarried_pieces,
+    unticked_lines,
+    with_section,
+)
 
 
 def issue(number=7, state="OPEN", reason=None, body="", labels=(), parent=None,
@@ -50,6 +56,17 @@ class Ready(unittest.TestCase):
     def test_decision_without_its_answer_cannot_close(self):
         self.assertEqual(kinds(ready_findings(issue(labels=["needs-decision"]))), ["no-decision"])
         self.assertEqual(ready_findings(issue(labels=["needs-decision"], body="## Decision\n\nYes.")), [])
+
+
+class Duplicate(unittest.TestCase):
+    def test_unticked_lines_the_survivor_carries_do_not_block(self):
+        survivor = issue(number=3, body="## Done when\n\n- [ ] migrate the table (was #7)\n")
+        self.assertEqual(uncarried_pieces(issue(body="- [ ] migrate the table"), survivor), [])
+
+    def test_lines_and_sub_issues_the_survivor_lacks_still_block(self):
+        found = uncarried_pieces(issue(body="- [ ] migrate the table", children=[(8, "OPEN")]),
+                                 issue(number=3, body="(was #7)"))
+        self.assertEqual(kinds(found), ["open-sub-issue", "unticked"])
 
 
 if __name__ == "__main__":
