@@ -1,6 +1,6 @@
 ---
 name: close-issues
-description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues and unticked lines, and records the proof, the duplicate's carried details or the owner's decision in the body."
+description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues and unticked lines, and records the proof, the duplicate's carried details, the out-of-date evidence or the owner's decision in the body."
 short_description: "Close issues only with proof."
 allow_implicit_invocation: true
 ---
@@ -32,6 +32,10 @@ issue back afterwards. Never close with a bare `gh issue close`.
    - **Duplicate.** Copy every detail the surviving issue lacks into its
      body, word for word, under a line ending `(was #N)`, then run
      `close_issue.py duplicate --repo R --issue N --of M`.
+   - **Out of date.** The code or release the issue describes has moved on
+     ("Release 0.1.166" after 0.1.170 shipped). That is evidence, not a scope
+     call, so it needs no owner:
+     `close_issue.py out-of-date --repo R --issue N --evidence "<the commit, release or code that moved on>"`.
    - **Not planned.** Dropping work is the owner's call, and a bug closed as
      won't fix is the owner's call too. Ask them, then quote their answer:
      `close_issue.py not-planned --repo R --issue N --owner-said "<their words>"`.

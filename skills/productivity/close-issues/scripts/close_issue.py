@@ -1,9 +1,11 @@
 """Close a GitHub issue only when nothing open hides under it, and record why.
 
-An issue closes for one of three reasons, each recorded in its body:
+An issue closes for one of four reasons, each recorded in its body:
 completed (the proof a person can check), a duplicate (after the survivor
-carries every detail under "(was #N)"), or not planned (the owner's decision,
-quoted). Open sub-issues and unticked checklist lines block every close.
+carries every detail under "(was #N)"), out of date (the evidence that the
+code or release it describes moved on), or not planned (the owner's decision,
+quoted). Open sub-issues and unticked checklist lines block every close; a
+duplicate's unticked lines may close once the survivor carries them.
 
     close_issue.py ready --repo OWNER/REPO --issue N
         Lists what stops N closing. Exits 1 while anything does.
@@ -11,7 +13,10 @@ quoted). Open sub-issues and unticked checklist lines block every close.
         Writes the proof under '## Proof' and closes N as completed. Also
         records proof on an issue a 'Closes #N' commit already closed.
     close_issue.py duplicate --repo OWNER/REPO --issue N --of M
-        Closes N as a duplicate of M once M is open and its body holds "(was #N)".
+        Closes N as a duplicate of M once M is open and its body holds "(was #N)"
+        and every unticked line of N.
+    close_issue.py out-of-date --repo OWNER/REPO --issue N --evidence TEXT
+        Writes the evidence under '## Out of date' and closes N as not planned.
     close_issue.py not-planned --repo OWNER/REPO --issue N --owner-said TEXT
         Writes the owner's decision under '## Not planned' and closes N.
 
@@ -46,7 +51,8 @@ ISSUE_FIELDS = """
   subIssues(first: 100) { nodes { number title url state } }
   duplicateOf { number url }
 """
-REASONS = {"completed": "COMPLETED", "duplicate": "DUPLICATE", "not-planned": "NOT_PLANNED"}
+REASONS = {"completed": "COMPLETED", "duplicate": "DUPLICATE", "out-of-date": "NOT_PLANNED",
+           "not-planned": "NOT_PLANNED"}
 
 
 def unticked_lines(body):
@@ -94,6 +100,18 @@ def open_pieces(issue):
             found.append(("open-sub-issue", f"{me} has open sub-issue #{child['number']} {child['title']}"))
     for text in unticked_lines(issue["body"]):
         found.append(("unticked", f"{me} has an unticked line: {text}"))
+    return found
+
+
+def uncarried_pieces(issue, survivor):
+    """Open pieces of a duplicate that its survivor does not carry: an unticked line
+    the survivor's body repeats travels with it; an open sub-issue never does."""
+    carried = survivor["body"] or ""
+    me = f"#{issue['number']}"
+    found = [("open-sub-issue", f"{me} has open sub-issue #{child['number']} {child['title']}")
+             for child in issue["subIssues"]["nodes"] if child["state"] == "OPEN"]
+    found += [("unticked", f"{me} has an unticked line #{survivor['number']} does not carry: {text}")
+              for text in unticked_lines(issue["body"]) if text not in carried]
     return found
 
 
@@ -206,9 +224,13 @@ def completed(args):
 
 def duplicate(args):
     issue = read_issue(args.repo, args.issue)
-    if refuse_open_pieces(issue):
-        return EXIT_FINDINGS
     survivor = read_issue(args.repo, args.of)
+    found = uncarried_pieces(issue, survivor)
+    if found:
+        print(RULE, file=sys.stderr)
+        for _, message in found:
+            print(f"  - {message}", file=sys.stderr)
+        return EXIT_FINDINGS
     if survivor["state"] != "OPEN":
         print(f"#{args.of} is closed; a duplicate points at the open issue that carries the work",
               file=sys.stderr)
@@ -220,6 +242,19 @@ def duplicate(args):
         return EXIT_FINDINGS
     gh("issue", "close", str(args.issue), "--repo", args.repo, "--duplicate-of", str(args.of))
     return read_back(args, "duplicate", None)
+
+
+def out_of_date(args):
+    issue = read_issue(args.repo, args.issue)
+    evidence = " ".join(args.evidence.split())
+    if not evidence:
+        print("out of date needs the evidence: the commit, release or code that moved on", file=sys.stderr)
+        return EXIT_FINDINGS
+    if refuse_open_pieces(issue):
+        return EXIT_FINDINGS
+    write_body(args, issue, "## Out of date", evidence)
+    gh("issue", "close", str(args.issue), "--repo", args.repo, "--reason", "not planned")
+    return read_back(args, "out-of-date", "## Out of date")
 
 
 def not_planned(args):
@@ -239,16 +274,17 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name)
-               for name in ("ready", "completed", "duplicate", "not-planned")}
+               for name in ("ready", "completed", "duplicate", "out-of-date", "not-planned")}
     for sub in parsers.values():
         sub.add_argument("--repo", required=True)
         sub.add_argument("--issue", type=int, required=True)
     parsers["completed"].add_argument("--proof", action="append", required=True)
     parsers["duplicate"].add_argument("--of", type=int, required=True)
+    parsers["out-of-date"].add_argument("--evidence", required=True)
     parsers["not-planned"].add_argument("--owner-said", required=True)
     args = parser.parse_args()
     handlers = {"ready": ready, "completed": completed, "duplicate": duplicate,
-                "not-planned": not_planned}
+                "out-of-date": out_of_date, "not-planned": not_planned}
     try:
         return handlers[args.command](args)
     except RuntimeError as error:
