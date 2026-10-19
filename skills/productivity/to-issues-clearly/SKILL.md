@@ -201,6 +201,10 @@ An issue whose only symptom is "the type permits nonsense" is a real issue. Say 
 
 **A cause whose fix lands in pieces is a parent issue with sub-issues.** When one cause needs several separately landed changes (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), the cause is the parent issue and each piece is a GitHub sub-issue closed by the commit that finishes it, with `Closes #N` on that commit and `Part of #N` on any commit before it. The pieces are the sub-issues, not extra commits closing the parent. A new sighting still goes into the parent's evidence, never into a new issue.
 
+**Ask for the fix, never a workaround.** When the fix an issue would ask for is raising a timeout, adding a retry, an exceptions list, running things one at a time or one copy per language, find the cause that makes it needed and ask for that fix instead, under the issue that owns it. Keep a workaround only when it really is the fix (a documented contract, say), and write `Not a workaround: <why>` in the body.
+
+**Keep a milestone to about 10 causes.** A milestone's top-level issues are its causes. A new top-level issue that would take one past 10 is most often a slice of a cause already there; file it under that cause, or add `More than 10 causes because: <why>` to the milestone's description.
+
 **Split into separate parent issues only for different causes.** Parts with different causes, different fixes, different owners, or a decision one part waits on are separate issues, each with its own sub-issues if its fix lands in pieces.
 
 **Count the acceptance criteria.** Four to six distinct outcomes is an issue. More than eight distinct outcomes is a system wearing an issue's clothes: each cluster of criteria with its own cause and fix is its own issue, and each cluster that is one cause landing in pieces becomes sub-issues of one parent.
@@ -392,6 +396,14 @@ gh api repos/OWNER/REPO/milestones -f title="..." -f description="..." --jq .num
 Add `-f due_on=YYYY-MM-DDT00:00:00Z` only when a due date was approved. Create a milestone only after the user approved it in step 5.
 
 Create issues in dependency order — anything that blocks something else goes first — so a child can reference a real number instead of a placeholder.
+
+Before each create, check the draft against the open tracker with the `audit-issues` skill's script:
+
+~~~sh
+python3 <audit-issues folder>/scripts/audit_issues.py draft --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md [--milestone "MILESTONE TITLE"] [--parent N]
+~~~
+
+It refuses while an open issue looks like the same cause, the draft asks for a workaround, or the draft would take its milestone past 10 causes. Act on each finding: add the sighting to that issue's body, file the draft as its sub-issue, or ask for the proper fix. Only when the finding does not apply, record why where it says (`Different cause from #N: <why>` or `Not a workaround: <why>` in the body, or the reason in the milestone description), and run it again. File the issue only once it exits 0, so the tracker never takes on what an audit would have to undo.
 
 ~~~sh
 gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL --milestone "MILESTONE TITLE"
