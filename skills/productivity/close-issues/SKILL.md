@@ -1,7 +1,7 @@
 ---
 name: close-issues
-description: "Close GitHub issues only with proof, and sweep a tracker for work hidden under closed issues. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, when someone says drop it or won't fix, and when asked to clean up, triage or sweep issues. Closes through a script that refuses open sub-issues and unticked lines, records the proof, the duplicate's carried details or the owner's decision in the body, and reports every verdict."
-short_description: "Close issues only with proof; sweep for hidden open work."
+description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues and unticked lines, and records the proof, the duplicate's carried details or the owner's decision in the body."
+short_description: "Close issues only with proof."
 allow_implicit_invocation: true
 ---
 
@@ -12,8 +12,6 @@ A close without proof, or with open work under it, hides that work from every
 view, and GitHub does nothing to stop it. Every close in this skill goes
 through `scripts/close_issue.py`, which refuses those closes and reads the
 issue back afterwards. Never close with a bare `gh issue close`.
-
-## Closing one issue
 
 <what-to-do>
 1. **Check it can close.** Run
@@ -44,27 +42,3 @@ issue back afterwards. Never close with a bare `gh issue close`.
 Done when the script printed "closed as <reason>" for the issue.
 </what-to-do>
 
-## Sweeping a tracker
-
-<what-to-do>
-1. Run `close_issue.py sweep --repo OWNER/REPO`. It finds work that went
-   invisible: open issues under closed parents, issues closed as completed
-   with open sub-issues or unticked lines, duplicates of nothing, decisions
-   closed without a `## Decision`, and decision issues waiting on the owner.
-   Fix each structural finding as it says and rerun until it exits 0.
-2. Give every open issue in scope one verdict:
-   - **Done:** you ran the check that proves it; close it as completed.
-   - **Duplicate:** of a named issue; close it as a duplicate.
-   - **Still real:** you reproduced it or read the code that still has it.
-   - **Unsure:** name the one exact check that would settle it.
-3. Never decide scope in a sweep. Dropping a feature, changing a priority or
-   answering a decision goes to the owner as a question, using the client's
-   question tool where it has one, with the facts behind each choice.
-4. Report to the owner: each issue closed, its reason and proof; each
-   duplicate and the issue it went into; each issue left open, with its
-   verdict; and the decisions waiting on them. Name every issue as a link
-   with its title.
-
-Done when the sweep exits 0, every open issue in scope has a verdict, and
-the owner has the report.
-</what-to-do>

@@ -5,8 +5,7 @@ Run with: python3 -m unittest test_close_issue
 
 import unittest
 
-from close_issue import (
-    open_pieces, ready_findings, sweep_findings, unticked_lines, with_section)
+from close_issue import open_pieces, ready_findings, unticked_lines, with_section
 
 
 def issue(number=7, state="OPEN", reason=None, body="", labels=(), parent=None,
@@ -51,28 +50,6 @@ class Ready(unittest.TestCase):
     def test_decision_without_its_answer_cannot_close(self):
         self.assertEqual(kinds(ready_findings(issue(labels=["needs-decision"]))), ["no-decision"])
         self.assertEqual(ready_findings(issue(labels=["needs-decision"], body="## Decision\n\nYes.")), [])
-
-
-class Sweep(unittest.TestCase):
-    def test_open_issue_under_closed_parent_is_found(self):
-        found = sweep_findings(issue(parent={"number": 3, "title": "", "url": "", "state": "CLOSED"}))
-        self.assertEqual(kinds(found), ["closed-parent"])
-
-    def test_completed_issue_hiding_open_work_is_found(self):
-        found = sweep_findings(issue(state="CLOSED", reason="COMPLETED", children=[(8, "OPEN")]))
-        self.assertEqual(kinds(found), ["hidden"])
-
-    def test_not_planned_issue_with_open_children_is_not_called_hidden(self):
-        self.assertEqual(sweep_findings(
-            issue(state="CLOSED", reason="NOT_PLANNED", body="- [ ] never")), [])
-
-    def test_duplicate_of_nothing_is_found(self):
-        self.assertEqual(kinds(sweep_findings(issue(state="CLOSED", reason="DUPLICATE"))), ["no-original"])
-        self.assertEqual(sweep_findings(
-            issue(state="CLOSED", reason="DUPLICATE", duplicate_of={"number": 2, "url": ""})), [])
-
-    def test_open_decision_waits_on_the_owner(self):
-        self.assertEqual(kinds(sweep_findings(issue(labels=["decision"]))), ["waiting"])
 
 
 if __name__ == "__main__":

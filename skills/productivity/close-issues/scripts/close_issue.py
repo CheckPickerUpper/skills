@@ -14,11 +14,6 @@ quoted). Open sub-issues and unticked checklist lines block every close.
         Closes N as a duplicate of M once M is open and its body holds "(was #N)".
     close_issue.py not-planned --repo OWNER/REPO --issue N --owner-said TEXT
         Writes the owner's decision under '## Not planned' and closes N.
-    close_issue.py sweep --repo OWNER/REPO
-        Lists open issues under closed parents, closed issues hiding open
-        sub-issues or unticked lines, duplicates with no original, decisions
-        closed with no '## Decision', and decisions waiting on the owner.
-        Exits 1 while any but the last remain.
 
 Every closing command reads the issue back and exits 1 unless it closed for
 the stated reason with its record in the body.
@@ -109,43 +104,13 @@ def ready_findings(issue):
     return found
 
 
-def sweep_findings(issue):
-    """Structural findings for one issue of a sweep, plus decisions waiting on the owner."""
-    me = f"#{issue['number']} {issue['title']}"
-    found = []
-    if issue["state"] == "OPEN":
-        parent = issue["parent"]
-        if parent and parent["state"] != "OPEN":
-            found.append(("closed-parent", f"{me} is open under closed parent #{parent['number']}"))
-        if is_decision(issue) and not has_section(issue["body"], "## Decision"):
-            found.append(("waiting", f"{me} waits on the owner's decision"))
-        return found
-    if issue["stateReason"] == "COMPLETED":
-        found += [("hidden", f"closed {message}") for _, message in open_pieces(issue)]
-    if issue["stateReason"] == "DUPLICATE" and not issue["duplicateOf"]:
-        found.append(("no-original", f"{me} closed as a duplicate of nothing"))
-    if is_decision(issue) and issue["stateReason"] == "COMPLETED" \
-            and not has_section(issue["body"], "## Decision"):
-        found.append(("no-decision", f"{me} closed as decided with no '## Decision' section"))
-    return found
-
-
-SWEEP_FIX = {
-    "closed-parent": "Move each under an open parent, or reopen the parent if its work is not done.",
-    "hidden": "Reopen each: it closed with work still open under it.",
-    "no-original": "Mark what each duplicates (gh issue close N --duplicate-of M), or reopen it.",
-    "no-decision": "Write each decision under '## Decision' in the body, or reopen it.",
-}
-WAITING = "Waiting on the owner (report these; a sweep never answers them):"
-
-
 # The owner's managed gh refuses a bare `gh issue close`; this marks the close as this script's.
 CLOSE_PASS = {"CLOSE_ISSUES_SCRIPT": "close_issue.py"}
 
 
 def gh(*args, stdin=None):
     result = subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True,
-                            env={**os.environ, **CLOSE_PASS})
+                            env={**os.environ, **CLOSE_PASS}, check=False)
     if result.returncode != 0:
         raise RuntimeError(f"gh {' '.join(args[:3])}: {result.stderr.strip()}")
     return result.stdout
@@ -167,28 +132,6 @@ def read_issue(repo, number):
     if issue is None:
         raise RuntimeError(f"{repo}#{number} is not an issue")
     return issue
-
-
-def all_issues(repo):
-    owner, name = repo.split("/")
-    query = f"""query($owner: String!, $name: String!, $after: String) {{
-      repository(owner: $owner, name: $name) {{
-        issues(first: 50, after: $after) {{
-          pageInfo {{ hasNextPage endCursor }}
-          nodes {{ {ISSUE_FIELDS} }}
-        }}
-      }}
-    }}"""
-    issues, after = [], None
-    while True:
-        variables = {"owner": owner, "name": name}
-        if after:
-            variables["after"] = after
-        page = graphql(query, **variables)["repository"]["issues"]
-        issues += page["nodes"]
-        if not page["pageInfo"]["hasNextPage"]:
-            return issues
-        after = page["pageInfo"]["endCursor"]
 
 
 def print_findings(found):
@@ -292,43 +235,20 @@ def not_planned(args):
     return read_back(args, "not-planned", "## Not planned")
 
 
-def sweep(args):
-    issues = all_issues(args.repo)
-    found = [f for issue in issues for f in sweep_findings(issue)]
-    print(RULE)
-    structural = [f for f in found if f[0] != "waiting"]
-    for kind, fix in SWEEP_FIX.items():
-        messages = [m for k, m in structural if k == kind]
-        if messages:
-            print(f"\n{fix}")
-            for message in messages:
-                print(f"  - {message}")
-    waiting = [m for k, m in found if k == "waiting"]
-    if waiting:
-        print(f"\n{WAITING}")
-        for message in waiting:
-            print(f"  - {message}")
-    if not structural:
-        print(f"\n{args.repo}: {len(issues)} issues read; no open work hides under a closed issue.")
-        return 0
-    return EXIT_FINDINGS
-
-
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name)
-               for name in ("ready", "completed", "duplicate", "not-planned", "sweep")}
-    for name, sub in parsers.items():
+               for name in ("ready", "completed", "duplicate", "not-planned")}
+    for sub in parsers.values():
         sub.add_argument("--repo", required=True)
-        if name != "sweep":
-            sub.add_argument("--issue", type=int, required=True)
+        sub.add_argument("--issue", type=int, required=True)
     parsers["completed"].add_argument("--proof", action="append", required=True)
     parsers["duplicate"].add_argument("--of", type=int, required=True)
     parsers["not-planned"].add_argument("--owner-said", required=True)
     args = parser.parse_args()
     handlers = {"ready": ready, "completed": completed, "duplicate": duplicate,
-                "not-planned": not_planned, "sweep": sweep}
+                "not-planned": not_planned}
     try:
         return handlers[args.command](args)
     except RuntimeError as error:
