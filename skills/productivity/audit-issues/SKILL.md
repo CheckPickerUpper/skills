@@ -3,6 +3,9 @@ name: audit-issues
 description: "Audit a GitHub issue tracker: group issues by the fix that would make them all disappear, rewrite workaround premises to the proper fix, close what is done, duplicated or out of date, and show the owner a short before-and-after page to approve before anything changes. Use when asked to audit, clean up, triage, groom, merge or sweep issues, or to say which open issues are still real. A script finds hidden open work, suggests likely slices of one cause and oversized milestones, checks the plan, and applies it only once approved; closes go through close-issues; scope decisions go to the owner."
 short_description: "Audit a tracker: one issue per cause, approved before applied."
 allow_implicit_invocation: true
+metadata:
+  when: "the issue list has gone messy"
+  situation: Filing or closing issues
 ---
 
 # Audit issues

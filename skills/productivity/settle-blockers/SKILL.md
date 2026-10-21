@@ -3,6 +3,9 @@ name: settle-blockers
 description: "Decide whether each blocked-by link or claimed blocker between GitHub issues is real, and record the verdict on the issue. Use before calling work blocked, waiting on another issue, or sequencing issues; when picking what can run in parallel; when reviewing or creating blocked-by edges; and when an agent reports 'blocked on #N'. A blocker is real only when the work cannot be done now or doing it now means redoing it; shared files, merge conflicts and relatedness never are. Sends cheap subagents to settle unclear links, then keeps each real link paired with its reason and removes the rest."
 short_description: "Settle which issue blockers are real, and record why."
 allow_implicit_invocation: true
+metadata:
+  when: "work seems blocked by another issue"
+  situation: Filing or closing issues
 ---
 
 # Settle blockers

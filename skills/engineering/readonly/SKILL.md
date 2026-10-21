@@ -2,6 +2,9 @@
 name: readonly
 description: "User-invoked modifier for evidence-first read-only investigation. Use when the user appends /readonly to a question or another skill request: answer by checking the codebase and available read-only sources, do not implement, do not open issues, do not mutate local or remote state, and do not guess with 'likely' or 'probably' when evidence can be gathered."
 disable-model-invocation: true
+metadata:
+  when: "you want an answer without any changes"
+  situation: Everything else
 ---
 
 # /readonly

@@ -5,6 +5,9 @@ user-invocable: true
 argument-hint: "<task description, or issue numbers like #111 #112>"
 short_description: "Compose or retrieve a verified agent goal."
 allow_implicit_invocation: true
+metadata:
+  when: "handing a job to another agent"
+  situation: Working with agents
 ---
 
 # Compose Goal

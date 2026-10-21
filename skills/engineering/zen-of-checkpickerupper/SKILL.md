@@ -3,6 +3,9 @@ name: zen-of-checkpickerupper
 description: "The Zen of CheckPickerUpper: twenty-one lines that judge designs, fixes, abstractions, types, structure, and questions, each expanded and traced to its source skill. Use when settling a design choice or an ambiguous question, choosing between options, judging whether a fix, abstraction, type, or layout is right, or when someone asks for the zen of checkpickerupper."
 short_description: "Twenty-one lines for judging designs, fixes, abstractions, types, and questions."
 allow_implicit_invocation: true
+metadata:
+  when: "choosing between two designs"
+  situation: Planning and design
 ---
 
 # The Zen of CheckPickerUpper

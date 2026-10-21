@@ -3,6 +3,9 @@ name: dependency-trace
 description: "Dependency trace: clarify scope, close the recursive capability graph, and derive the correctness order before implementation. Use when the user asks what a feature uses, what its dependencies use, dependency order, foundations, or a lowest-to-highest flow."
 short_description: "Clarify scope and derive the full dependency graph."
 allow_implicit_invocation: true
+metadata:
+  when: "working out what to build first"
+  situation: Planning and design
 ---
 
 # Dependency trace

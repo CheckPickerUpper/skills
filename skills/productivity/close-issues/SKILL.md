@@ -3,6 +3,9 @@ name: close-issues
 description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues and unticked lines, and records the proof, the duplicate's carried details, the out-of-date evidence or the owner's decision in the body."
 short_description: "Close issues only with proof."
 allow_implicit_invocation: true
+metadata:
+  when: "an issue is about to be closed"
+  situation: Filing or closing issues
 ---
 
 # Close issues
