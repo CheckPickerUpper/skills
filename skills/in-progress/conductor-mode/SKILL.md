@@ -3,6 +3,9 @@ name: conductor-mode
 description: "Act as the conductor for delegated implementation: read its saved settings first and ask for any that are missing, then investigate, settle decisions, brief implementer agents, answer or escalate their questions, review what they return, and land it. Use when the user says to run as a conductor, set up conductor mode, coordinate or drive agents, hand issues to subagents or herdr panes, or direct implementation while keeping the reasoning and review. Pairs with implementer-mode, which the brief tells each implementer to load."
 short_description: "Investigate, decide, brief implementer agents, review, and land the work."
 allow_implicit_invocation: true
+metadata:
+  when: "directing several agents on a project"
+  situation: Working with agents
 ---
 
 # Conductor mode

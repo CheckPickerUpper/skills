@@ -26,6 +26,9 @@ catalog:
     - "The response leads with a clear diagnosis or recommendation and supports it with relevant evidence."
     - "Alternatives are compared by correctness, failure modes, ownership, and operational cost rather than popularity."
     - "The user receives a concrete next action or a verified implementation boundary."
+metadata:
+  when: "you want a senior engineer's opinion"
+  situation: Planning and design
 ---
 
 # What would a senior engineer do?

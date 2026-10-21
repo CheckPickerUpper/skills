@@ -2,6 +2,8 @@
 name: test-failure-triage
 description: "Write and run focused tests without fixing implementation failures. Use when the user wants to know whether tests catch a defect and wants each result classified as an implementation bug, test-writing failure, harness failure, or pass, with the expected behavior stated."
 metadata:
+  when: "you want to know if tests catch a bug"
+  situation: Something is broken
   short-description: "Write tests, classify failures, and fix nothing"
 ---
 
