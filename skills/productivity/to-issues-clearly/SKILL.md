@@ -3,6 +3,9 @@ name: to-issues-clearly
 description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; makes each issue one cause with one fix, adding new sightings to the existing issue; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
 short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
 allow_implicit_invocation: true
+metadata:
+  when: "turning a plan into tracked tasks"
+  situation: Filing or closing issues
 ---
 
 # To issues clearly

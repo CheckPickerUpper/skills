@@ -1,6 +1,9 @@
 ---
 name: antimatter-codebase-structure-review
 description: "Pedantic structural audit of a commit, PR or branch, selected directory or module, or an entire codebase — hierarchy, nesting, naming, ownership, dependency boundaries, and growth readiness. Use when a change may distort repository shape, when a file or folder needs structural review, or when deciding whether to reorganize before expansion. Every finding must survive adversarial refutation and include evidence plus a concrete current→proposed change."
+metadata:
+  when: "a folder or module layout feels wrong"
+  situation: Reviewing a change
 ---
 
 # /antimatter-codebase-structure-review

@@ -2,6 +2,8 @@
 name: explain-diff
 description: "Explain a code change, diff, branch, commit, or PR as a rich, self-contained page: background, intuition with concrete examples, a walkthrough in execution order, what could break, and a quiz that cannot be gamed by picking the longest answer. Use when the user asks to explain, walk through, teach, or help them understand a change, diff, branch, or PR. Output is HTML by default, Markdown with --md (cheapest), and --chat moves the quiz into conversation as free-response questions."
 metadata:
+  when: "you want to understand a change"
+  situation: Reviewing a change
   short-description: "Explain a diff as a page with a fair quiz"
 ---
 

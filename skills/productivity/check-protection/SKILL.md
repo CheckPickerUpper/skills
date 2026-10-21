@@ -3,6 +3,9 @@ name: check-protection
 description: "Choose verification before a full run, a repeated check, a review of existing evidence, or a check-cost audit. Ask what each check protects that existing or cheaper evidence does not; keep required gates and remove duplication."
 short_description: "Choose checks by the protection they add."
 allow_implicit_invocation: true
+metadata:
+  when: "deciding which checks are worth running"
+  situation: Reviewing a change
 ---
 
 # Check protection

@@ -3,6 +3,9 @@ name: antimatter-code-quality-review
 description: "Deep code-quality and pre-merge review of a commit, PR, branch, or diff. Audit correctness, intent, naming, cohesion, types, boundaries, control flow, duplication, cost, allocation, and generalization. Check predictability: does a feature or fix create a second way to perform a capability the codebase already has? Compare existing implementations, reuse or extend sound patterns, and extract shared behavior without letting one feature own the abstraction or inventing flexibility. Every finding needs evidence, a concrete before-and-after, behavior preservation, and adversarial refutation."
 short_description: "Evidence-backed code review, including predictable patterns and reusable abstractions."
 allow_implicit_invocation: true
+metadata:
+  when: "checking a change before it lands"
+  situation: Reviewing a change
 ---
 
 # /antimatter-code-quality-review

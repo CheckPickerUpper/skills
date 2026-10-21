@@ -1,6 +1,9 @@
 ---
 name: pizza1
 description: "Justify by correctness, never by convention. Use when a design, fix, API, macro, library surface, hook message, or naming decision is defended by 'it's what the codebase does', 'the established pattern', 'the canonical lane does it', 'more ergonomic', 'less churn', 'already wired', 'smallest fix', 'compatibility', 'legacy path', or 'out of scope to change'. Prevalence and transition size are not evidence. Re-derive from correctness, name the bug the alternative causes, and be confident in the correct call even when the codebase already happens to do it."
+metadata:
+  when: "someone defends a design by habit"
+  situation: Planning and design
 ---
 
 # /pizza1

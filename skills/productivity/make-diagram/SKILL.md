@@ -3,6 +3,9 @@ name: make-diagram
 description: "Draw or revise any diagram for a reader: system map, flowchart, pipeline, process map, decision flow, architecture. Use whenever a diagram goes into an Artifact, doc, issue, PR or repository, and on every revision after the owner corrects one. Settles the domain and the plain words before drawing, puts rulebooks in tables, shows the mechanism as nodes, diamonds and lanes in a fixed SVG vocabulary, and ships a checker that renders light and dark images and refuses overlaps, small text, crammed boxes, comma lists, vague \"and\" rows, checks with no real example, steps drawn twice, dead ends, floating nodes, unlabelled branches, backward or crossing arrows, wrong arrow colours and captions."
 short_description: "Draw diagrams a stranger can read, rendered and checked before delivery."
 allow_implicit_invocation: true
+metadata:
+  when: "a picture would explain it better"
+  situation: Reports and pages
 ---
 
 # Make a diagram
