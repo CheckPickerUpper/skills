@@ -3,6 +3,9 @@ name: implementer-mode
 description: "Implement a job handed over by a conductor: work inside the brief's scope and settled decisions, commit and push your own verified work, ask the conductor only for decisions you cannot make, file collisions and release blockers, open the PR without merging, and report per acceptance criterion in the PR body. Use when a brief says to work under implementer-mode, when running as a subagent or herdr-driven agent on an assigned issue, or when receiving review fixes or a rebase request for a PR you opened."
 short_description: "Implement a conductor's brief, ask with options, report with proof."
 allow_implicit_invocation: true
+metadata:
+  when: "carrying out a job a conductor gave"
+  situation: Working with agents
 ---
 
 # Implementer mode

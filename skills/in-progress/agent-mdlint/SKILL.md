@@ -1,6 +1,9 @@
 ---
 name: agent-mdlint
 description: Review AGENTS.md changes for Markdown defects, duplicated or conflicting instructions, and unintended semantic drift. Use when editing or reviewing agent instruction files, especially large rewrites or diffs that remove existing rules.
+metadata:
+  when: "changing the agent instruction files"
+  situation: Reviewing a change
 ---
 
 # Agent MD Lint

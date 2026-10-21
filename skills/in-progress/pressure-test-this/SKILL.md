@@ -3,6 +3,9 @@ name: pressure-test-this
 description: "Adversarial stress-test of an architecture, technical proposal, API contract, state machine, or plan before implementation. Clamps the target into six orthogonal stress vises: state explosion, temporal/interruption breakdown, adversarial intent evasion, cascading failure attribution, asymmetric load, and multi-owner drift. Prohibits severity theater: every fracture must demonstrate a concrete breaking execution trace and survive an adversarial refutation pass or be destroyed. Outlaws verdict theater: outputs lead immediately with What to do and Brief reasoning, followed by a correct-by-construction before→after fix. Clean approval is an expected, first-class outcome."
 short_description: "Adversarial stress-test of technical designs, plans, and contracts."
 allow_implicit_invocation: true
+metadata:
+  when: "a plan needs stress testing before building"
+  situation: Planning and design
 ---
 
 # /pressure-test-this

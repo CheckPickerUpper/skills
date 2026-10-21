@@ -20,6 +20,9 @@ catalog:
     - "Every changed infrastructure behavior is mapped to an existing owner, a verified candidate, or a justified custom owner."
     - "Every replacement finding names the current code, preferred owner, coverage evidence, and required change."
     - "The report separates existing-owner findings from new-dependency options and justified custom work."
+metadata:
+  when: "custom code may duplicate a standard tool"
+  situation: Reviewing a change
 ---
 
 # Wheel reinvention audit

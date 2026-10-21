@@ -1,6 +1,9 @@
 ---
 name: correct-by-construction
 description: "Make classes of invalid states and evaded constraints unreachable by type composition first. Use for bugs, bad APIs, models, schemas, generated artifacts, and enforcement rules. Treat the target language's type system as the enforcer, accept its limits, and never substitute runtime checks, brands, casts, or workarounds for a type-level construction."
+metadata:
+  when: "a whole kind of bug should be impossible"
+  situation: Something is broken
 ---
 
 # /correct-by-construction

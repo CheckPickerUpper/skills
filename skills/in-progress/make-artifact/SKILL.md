@@ -4,6 +4,9 @@ description: "Make, revise, or republish a claude.ai Artifact of any kind: repor
 short_description: Make and revise Artifacts that do their reader's job.
 clients: [claude]
 allow_implicit_invocation: true
+metadata:
+  when: "turning findings into a shareable page"
+  situation: Reports and pages
 ---
 
 # Make an Artifact

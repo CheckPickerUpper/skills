@@ -1,6 +1,9 @@
 ---
 name: build-vs-buy
 description: "Before implementing a new capability, service, subsystem, or integration, choose its owner—reuse, adopt, buy, build, combine, or defer—when the decision spans internal code, platform adoption, managed services, or custom boundaries. Use library-fit for package-only coverage questions."
+metadata:
+  when: "deciding whether to build or buy"
+  situation: Planning and design
 ---
 
 # /build-vs-buy
