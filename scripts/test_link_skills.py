@@ -57,6 +57,18 @@ class LinkSkills(unittest.TestCase):
             self.assertEqual((dest / "foreign-missing").readlink(), root / "missing")
             self.assertTrue((dest / "real-directory").is_dir())
 
+            relocated = repo / "skills" / "reorganized" / renamed.name
+            relocated.parent.mkdir()
+            renamed.rename(relocated)
+
+            moved = link()
+
+            self.assertEqual(moved.returncode, 0, moved.stdout + moved.stderr)
+            self.assertEqual((dest / "renamed").resolve(), relocated)
+            self.assertEqual((dest / "foreign").readlink(), foreign)
+            self.assertEqual((dest / "foreign-missing").readlink(), root / "missing")
+            self.assertTrue((dest / "real-directory").is_dir())
+
 
 if __name__ == "__main__":
     unittest.main()
