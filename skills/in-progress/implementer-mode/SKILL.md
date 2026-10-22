@@ -1,6 +1,6 @@
 ---
 name: implementer-mode
-description: "Implement a job handed over by a conductor: work inside the brief's scope and settled decisions, commit and push your own verified work, ask the conductor only for decisions you cannot make, file collisions and release blockers, open the PR without merging, and report per acceptance criterion in the PR body. Use when a brief says to work under implementer-mode, when running as a subagent or herdr-driven agent on an assigned issue, or when receiving review fixes or a rebase request for a PR you opened."
+description: "Implement a conductor's settled job: build and prove it in the parent issue's worktree, push verified steps through the repository's permitted workflow, and report proof in the issue or permitted PR. Ask the conductor only for decisions you cannot make, file collisions and release blockers. Use when a brief says implementer-mode, when running as a subagent or herdr-driven agent on an assigned issue, or when receiving review fixes or a rebase request."
 short_description: "Implement a conductor's brief, ask with options, report with proof."
 allow_implicit_invocation: true
 metadata:
@@ -13,6 +13,14 @@ metadata:
 A conductor hands you a brief: a settled job with acceptance criteria. You
 build it, prove it, and report back. The conductor owns decisions, review, and
 merging. Its brief and decisions log are the authority on what to build.
+
+Apply the governing ownership and external-contribution rules first. In an
+owned repository, use the top-level parent's worktree for every sub-issue and
+helper, and push verified commits directly to the development or canonical
+branch. Different parents use different worktrees; implementation stays out
+of the main checkout. `parent-issue-worktree` owns those commands. PR steps
+below apply only where the governing rules permit that workflow, and never
+authorize publishing to an external repository.
 
 ## 1. Read before writing
 
@@ -51,7 +59,9 @@ the proof that will show it met.
 <what-to-do>
 Build, test, commit and push your own verified work without asking: commit
 each verified step at once, staging only your own exact paths. Work left
-uncommitted in a shared folder gets lost.
+unfinished stays uncommitted inside the parent issue's worktree. Other helpers
+on that parent may have edits there: preserve them and stage only your paths
+or hunks.
 
 Ask the conductor, through the channel the brief names, only for:
 
@@ -69,12 +79,6 @@ Send no status, acknowledgement, plan or receipt messages; the conductor reads
 your pushed commits and the board. Forward this rule to every subagent you
 start: they ask you, never the conductor.
 </what-to-do>
-
-<supporting-info>
-The owner set these rules on 2026-10-17 after status, plan and receipt
-messages from many groups filled the conductor's context, and work waiting on
-permission to commit was lost in a shared folder.
-</supporting-info>
 
 ## 4. Meet enforcement head on
 
@@ -105,7 +109,13 @@ cannot fix inside the brief goes in the report, or to the conductor when it is
 one of step 3's three questions. A review skill your client does not have is
 reported as unavailable, and the conductor runs it in its own review.
 
-Reach the brief's finish line: pushed, PR open with its closing line, checks
+In an owned repository, reach the brief's finish line with verified commits
+pushed to the development or canonical branch and proof recorded in the issue.
+Finishing a sub-issue keeps the parent's worktree for its remaining work.
+After the parent closes and the conductor's independent review accepts it,
+remove the clean landed worktree with `parent-issue-worktree`'s `finish`.
+
+In a permitted PR workflow, reach the brief's finish line: pushed, PR open with its closing line, checks
 passed on the pushed head SHA, mergeable. Merge only when the brief's finish
 line says you merge, and only after the conductor sends acceptance; otherwise
 the conductor merges.
@@ -114,9 +124,11 @@ Before reporting, run `herdr pane list` and close any pane you created that is
 still open. A pane that must stay open, such as a server the conductor will
 review against, goes in the report with its `pane_id` and why.
 
-Write the report into the PR body, not a message, in this shape:
+Write the report into the issue body for an owned repository, or the PR body
+for a permitted PR workflow, in this shape:
 
-1. PR URL, head SHA, check state on that SHA, mergeable state.
+1. Pushed commit URLs, head SHA and checks on that SHA; for a permitted PR
+   workflow, also the PR URL and mergeable state.
 2. Each acceptance criterion: **met**, with the proof; or **not met**, with the
    exact reason.
 3. Each new or changed test, and how it failed when the code it protects was
@@ -132,8 +144,8 @@ Write the report into the PR body, not a message, in this shape:
 ## 6. Follow-ups
 
 <what-to-do>
-Review fixes, gap closures, and rebases land on the same branch under the same
-working rules. Report per numbered item, done or not done with the exact
+Review fixes, gap closures, and rebases use the same parent's worktree and
+target branch under the same working rules. Report per numbered item, done or not done with the exact
 reason, plus the new head SHA. In a rebase, keep the behavior both sides
 wanted; for each conflict, report what each side wanted and what the merged
 code does.
