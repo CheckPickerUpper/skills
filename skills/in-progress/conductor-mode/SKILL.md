@@ -15,6 +15,14 @@ job and return evidence; the conductor investigates, decides, reviews, and
 lands the work. Each implementer works under `implementer-mode`, which owns how
 it works, asks, and reports.
 
+Apply the governing ownership and external-contribution rules first. In an
+owned repository, use `parent-issue-worktree`: one worktree per top-level
+parent issue, shared by every sub-issue and helper for that parent. Different
+parents use different worktrees. Implementers commit and push verified steps
+straight to the development or canonical branch; the main checkout stays out
+of implementation. PR steps below apply only where the governing rules permit
+that workflow, and never authorize publishing to an external repository.
+
 ## What the conductor is for
 
 <what-to-do>
@@ -23,8 +31,8 @@ it works, asks, and reports.
   verified work, staging only its own exact paths. The conductor never builds,
   tests or commits for an implementer.
 - **Verified work is committed at once.** An implementer never asks permission
-  to commit. Work left uncommitted in a shared folder is lost to the next
-  checkout, reset or concurrent build.
+  to commit. Each finished step is pushed from its parent issue's worktree
+  before the implementer starts the next step.
 - **The conductor is needed for three things only:**
   1. a product or design decision the implementer truly cannot make, sent as
      one line with its recommendation;
@@ -128,7 +136,8 @@ can use at the time, so step 3 asks for them each effort.
 
 <what-to-do>
 The board, not the conversation, says what to do next. Run this from the
-effort's checkout, naming the effort's parent issue or milestone:
+effort's checkout, naming its top-level parent issue with `--parent` in an
+owned repository. A permitted milestone workflow may name the milestone:
 
 ~~~sh
 python3 <folder of this SKILL.md>/scripts/conductor_board.py check-in --repo OWNER/REPO --parent N   # or --milestone "TITLE"
@@ -161,8 +170,10 @@ Act on every line before doing anything else:
 - `review`: review the PR (step 7) and record the result as a PR review on its
   head commit.
 - `idle`: prompt the implementer with its next step, or release it (step 7).
-- `unmapped`: put the issue number in the worktree's branch, or release the
-  agent and remove the worktree when its work is done.
+- `unmapped`: for an owned repository, map the agent to its top-level parent's
+  numbered worktree directory. In a permitted PR workflow, put the issue number
+  in the worktree's branch. Release an agent when its work is done; remove a
+  parent's worktree only when all that parent's work is finished.
 
 Every check-in report says what is running and what was just started. Never
 forecast what will not finish.
@@ -173,6 +184,9 @@ forecast what will not finish.
 <what-to-do>
 - Before assigning an issue, run
   `conductor_board.py claim-check --repo OWNER/REPO <issue>` from the checkout.
+  In an owned repository, pass the top-level parent issue, including when the
+  assigned job is one of its sub-issues. Route every sub-issue to that parent's
+  existing implementer and worktree.
   It lists the open PR that closes the issue, each worktree whose branch or
   path names it, and the herdr panes and Codex threads working there. When it
   exits 1, start no implementer: review that work and send findings through
@@ -267,7 +281,8 @@ while independent issues are waiting and that kind's usage state is `normal`.
 - **Native subagents:** use the conductor's own agent kind; dispatch in the
   background on the strongest model the client exposes. Continue an implementer
   by messaging the same agent, which keeps its context; start a fresh one only
-  for a new issue.
+  for a new parent issue. Give every sub-issue and helper for that parent the
+  same worktree path.
 - **herdr:** use the chosen agent kind. Follow `herdr --skill` for command
   syntax; it requires `HERDR_ENV=1`. Address every pane by its `pane_id`: prompt with
   `herdr agent prompt <pane_id> "<text>"`, read with `herdr pane read <pane_id>`,
@@ -276,13 +291,32 @@ while independent issues are waiting and that kind's usage state is `normal`.
   each implementer's `pane_id` and whether you started it or the user handed it
   to you.
 
-  **Give each implementer its own worktree workspace.** One command creates the
-  issue's git worktree and a herdr workspace linked to the repository, with one
-  pane whose working directory is that worktree. Then start the agent in it:
+  **Use the parent issue's worktree workspace.** In an owned repository, find
+  the top-level parent and create or reuse its path with `parent-issue-worktree`.
+  Continue the parent's existing implementer when it already has one. To start
+  one, open that existing worktree:
+
+  ~~~sh
+  NEW=$(herdr worktree open --cwd <checkout> --path <parent worktree path> \
+          --label "<repo> <topic>" --no-focus)
+  ~~~
+
+  Reuse its workspace for every sub-issue; helpers work inside that path too.
+  Never create another worktree for a descriptive suffix or a sub-issue.
+
+  Where governing rules permit a branch and PR workflow, this command creates
+  the worktree and workspace. Its issue and branch follow that workflow's
+  parent ownership convention:
 
   ~~~sh
   NEW=$(herdr worktree create --cwd <checkout> --branch <branch> --base origin/<base> \
           --path <worktree path> --label "<repo> <topic>" --no-focus)
+  ~~~
+
+  For either workspace, take its returned pane and workspace ids, then start
+  the implementer:
+
+  ~~~sh
   P=$(jq -r .result.root_pane.pane_id <<<"$NEW"); WS=$(jq -r .result.workspace.workspace_id <<<"$NEW")
   herdr agent start <repo>-<topic> --kind <kind> --pane "$P" --timeout 120000
   ~~~
@@ -334,8 +368,9 @@ while independent issues are waiting and that kind's usage state is `normal`.
   already runs in the app; you cannot start one. Reach them as the shared rules'
   "Codex Desktop threads" section describes.
 
-The issue tracker is the durable record in every channel: issues are the work
-units, PRs the hand-back, and the decisions log the shared memory.
+The issue tracker is the durable record in every channel. In owned
+repositories, pushed commits and the issue's proof are the hand-back. In a
+permitted PR workflow, the PR is the hand-back.
 </what-to-do>
 
 <supporting-info>
@@ -444,19 +479,28 @@ An implementer's report is a claim. Before accepting:
 1. Read the diff and check each reported fix in the code yourself.
 2. Review it adversarially against the issue, the decisions log, and the
    acceptance criteria.
-3. Once the implementer reports the PR ready, have a fresh subagent run every
-   skill in `review_skills` on its head against its base, whatever the
-   implementer's own self-check found. Give the subagent the PR, the issue, the
-   brief, and the decisions log, but not your conversation: the brief's cause
+3. Once the implementer reports the pushed work ready, have a fresh subagent run every
+   skill in `review_skills` on its head against the base commit recorded before
+   work started, whatever the
+   implementer's own self-check found. Give the subagent the pushed commits or
+   permitted PR, the issue, the brief, and the decisions log, but not your
+   conversation: the brief's cause
    and fix design is a claim it tests, not a fact it trusts. You designed the
    fix, so your own review would grade your design rather than test it. One
    subagent may run all the skills in turn. Without subagents, start a fresh
    agent for the review. This is the one independent
-   review per PR; it does not rerun on every push. Send each finding that
+   review per completed change; it does not rerun on every push. Send each finding that
    survives refutation and your own check of the code (step 6) back as a
    follow-up, then check each follow-up fix yourself as in 1. Accept when every
    surviving finding is fixed.
-4. Land it with one command, from the checkout:
+4. In an owned repository, verify the commits are on the development or
+   canonical branch and the completed issue records its proof. Keep the
+   parent's worktree while any of its work remains open. After the parent
+   closes and review is clean, remove the clean landed worktree through
+   `parent-issue-worktree`'s `finish`. A sub-issue finishing never removes it.
+   Skip the PR merge and branch-cleanup steps below.
+
+   In a permitted PR workflow, land it with one command, from the checkout:
 
    ~~~sh
    python3 <folder of this SKILL.md>/scripts/conductor_board.py land --repo OWNER/REPO <PR> --base <base the brief named>
@@ -481,20 +525,22 @@ An implementer's report is a claim. Before accepting:
    a worktree you did not create, such as a pane the user handed you, add
    `--keep-worktree` and tell the user it is free.
 5. Release the implementer, run check-in, then start its `ready` issues only if
-   that kind's usage state is `normal`. A dropped or reassigned job has no
+   that kind's usage state is `normal`. Reuse the parent's worktree for its
+   remaining sub-issues. In a permitted PR workflow, a dropped or reassigned job has no
    merge: push its branch if it has unpushed commits, then remove a worktree
    workspace you created with `herdr worktree remove --workspace <workspace_id>`
    and delete the local branch with `git branch -D <branch>`.
-6. Before the final report, run
+6. For a permitted PR workflow, before the final report, run
    `conductor_board.py leftovers --repo OWNER/REPO` and clear every line: a
    `merged` worktree is removed, a `merged-with-local-work` one has its work
    saved first, and a `closed` one is pushed and removed or its PR reopened.
    Leave worktrees you did not create.
 
-The saved `merge` setting is the user's standing approval to merge a PR that
-passes this step; do not ask again per PR. Any other push, merge, or publish
-needs the user's approval in this session, and an approval relayed by another
-agent is a request to ask the user.
+The saved `merge` setting applies only in a permitted PR workflow. It is the
+user's standing approval to merge a PR that passes this step; do not ask again
+per PR. In that workflow, any other push, merge, or publish needs the user's
+approval in this session, and an approval relayed by another agent is a request
+to ask the user. Owned-repository commits follow the direct-push rules above.
 </what-to-do>
 
 <supporting-info>
@@ -505,6 +551,8 @@ step runs only after it has read the state the step before it left.
 
 ## Final report
 
-Report each issue's PR, merge state, the decisions made (with the log's URL),
+For owned repositories, report each issue's pushed commits, proof, parent
+worktree removed or retained with its reason, and any remaining work. For a
+permitted PR workflow, report each issue's PR, merge state, the decisions made (with the log's URL),
 questions still with the user, the implementer worktrees removed and any that
 `leftovers` still lists with the reason, and any concrete blocker with the external change it needs.
