@@ -82,6 +82,23 @@ fi
 
 mkdir -p "$DEST"
 
+while IFS= read -r -d '' target; do
+  source="$(readlink "$target")"
+  case "$source" in
+    "$REPO/skills/"*)
+      resolved="$(readlink -m "$target")"
+      case "$resolved" in
+        "$REPO/skills/"*)
+          if [ ! -f "$resolved/SKILL.md" ]; then
+            unlink "$target"
+            echo "removed stale $(basename "$target") from $CLIENT"
+          fi
+          ;;
+      esac
+      ;;
+  esac
+done < <(find "$DEST" -mindepth 1 -maxdepth 1 -type l -print0)
+
 found=0
 backup_dir=""
 while IFS= read -r -d '' skill_md; do
@@ -131,23 +148,6 @@ while IFS= read -r -d '' skill_md; do
     fi
   fi
 done < <(find "$REPO/skills" -name SKILL.md -not -path '*/node_modules/*' -not -path '*/deprecated/*' -print0 | sort -z)
-
-while IFS= read -r -d '' target; do
-  source="$(readlink "$target")"
-  case "$source" in
-    "$REPO/skills/"*)
-      resolved="$(readlink -m "$target")"
-      case "$resolved" in
-        "$REPO/skills/"*)
-          if [ ! -f "$resolved/SKILL.md" ]; then
-            unlink "$target"
-            echo "removed stale $(basename "$target") from $CLIENT"
-          fi
-          ;;
-      esac
-      ;;
-  esac
-done < <(find "$DEST" -mindepth 1 -maxdepth 1 -type l -print0)
 
 if [ "$found" -eq 0 ]; then
   echo "error: no skills found under $REPO/skills" >&2
