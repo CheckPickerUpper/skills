@@ -92,8 +92,8 @@ class Draft(unittest.TestCase):
     def setUp(self):
         self.issues = [issue(1, title="Sync drops rows", body="error: row 12 rejected by the server")]
 
-    def draft(self, title="Import drops rows", body="", milestone="v1"):
-        return {"title": title, "body": body, "milestone": milestone}
+    def draft(self, title="Import drops rows", body="", milestone="v1", parent=None):
+        return {"title": title, "body": body, "milestone": milestone, "parent": parent}
 
     def test_a_draft_sharing_a_cause_with_an_open_issue_is_stopped(self):
         found = draft_findings(self.draft(body="error: row 40 rejected by the server"), self.issues, "")
@@ -103,6 +103,12 @@ class Draft(unittest.TestCase):
     def test_a_recorded_different_cause_lets_it_through(self):
         body = "error: row 40 rejected by the server\n\nDifferent cause from #1: the import has its own writer."
         self.assertEqual(draft_findings(self.draft(body=body), self.issues, ""), [])
+
+    def test_a_sub_issue_may_share_its_declared_parents_cause_but_no_other_issues(self):
+        issues = [*self.issues, issue(2, title="Export drops rows", body="error: row 7 rejected by the server")]
+        found = draft_findings(self.draft(body="error: row 40 rejected by the server", parent=1), issues, "")
+        self.assertEqual(kinds(found), ["same-cause"])
+        self.assertIn("#2 Export drops rows", found[0][1])
 
     def test_a_workaround_draft_is_stopped_until_its_premise_is_settled(self):
         self.assertEqual(kinds(draft_findings(self.draft(title="Retry the import"), [], "")), ["workaround"])

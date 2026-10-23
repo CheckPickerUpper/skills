@@ -270,17 +270,19 @@ def workaround_hints(issues):
 
 
 def draft_findings(draft, issues, milestone_description):
-    """What stops a draft being filed: an open issue it shares a cause with, a workaround
-    premise, or a milestone it takes over MAX_CAUSES. Each clears by fixing the draft or
-    by its recorded reason: the DIFFERENT_CAUSE or NOT_A_WORKAROUND line in the body, or
-    the OVER_LIMIT_REASON line in the milestone description."""
+    """What stops a draft being filed: an open issue other than its declared parent that it
+    shares a cause with, a workaround premise, or a milestone it takes over MAX_CAUSES. Each
+    clears by fixing the draft or by its recorded reason: the DIFFERENT_CAUSE or
+    NOT_A_WORKAROUND line in the body, or the OVER_LIMIT_REASON line in the milestone
+    description."""
     body = draft["body"] or ""
     opened = [i for i in issues if i["state"] == "OPEN"]
     candidate = {"number": 0, "title": draft["title"], "body": body}
     titles = {i["number"]: i["title"] for i in opened}
     found = []
     for (first, number), total in sorted(pair_weights(carriers_of([candidate, *opened])).items()):
-        if first == 0 and total >= 2 and DIFFERENT_CAUSE.format(number=number) not in body:
+        if (first == 0 and total >= 2 and number != draft.get("parent")
+                and DIFFERENT_CAUSE.format(number=number) not in body):
             found.append(("same-cause", (
                 f"#{number} {titles[number]} looks like the same cause: add this sighting to its body,"
                 f" file this as its sub-issue, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
