@@ -77,8 +77,8 @@ beside this one.
    was written, then creates new causes, moves slices under their causes,
    copies folded details in, and closes through close-issues, deepest issues
    first. A failed run is safe to rerun; it resumes.
-8. **Report to whoever asked**, in their channel: the owner's chat, or the
-   conductor's or peer session's pane when an agent asked, never only printed
+8. **Report to whoever asked**, in their channel: the user, or the
+   conducting agent when an agent asked, never only printed
    where nobody is looking. Lead with outcomes as counts before and after
    ("312 open issues are now 41 causes in 4 milestones; 120 closed with
    proof"), then the decisions waiting on the owner. Name every issue as a
