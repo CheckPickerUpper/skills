@@ -122,7 +122,7 @@ def ready_findings(issue):
     return found
 
 
-# The owner's managed gh refuses a bare `gh issue close`; this marks the close as this script's.
+# Plain gh ignores this; a gh wrapper that refuses hand-typed closes reads it to let this script's closes through.
 CLOSE_PASS = {"CLOSE_ISSUES_SCRIPT": "close_issue.py"}
 
 
