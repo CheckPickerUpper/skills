@@ -37,5 +37,5 @@ Finish when every audited command has a decision, every retained check adds name
 </what-to-do>
 
 <supporting-info>
-The source examples are the [waste log](https://github.com/CheckPickerUpper/dotfiles/issues/1400). It records repeated full suites on an unchanged head, broad mutation runs, duplicate profiles, mock fallbacks mistaken for real-service proofs, and waiting without a dependency. Those examples motivate the question; their historical fixes are not universal commands or current policy.
+The source examples are repeated full suites on an unchanged head, broad mutation runs, duplicate profiles, mock fallbacks mistaken for real-service proofs, and waiting without a dependency. Those examples motivate the question; their historical fixes are not universal commands or current policy.
 </supporting-info>
