@@ -145,6 +145,8 @@ workflow. It consumes the changesets into `CHANGELOG.md`, bumps the version in
 `package.json` and `.claude-plugin/plugin.json`, commits
 `chore: version skills vX.Y.Z` to `main`, and publishes the
 [GitHub Release](https://github.com/CheckPickerUpper/skills/releases) `vX.Y.Z`
-with that version's changelog as its notes. A push with no pending changesets,
+with notes written by `scripts/release_notes.py`: a plain summary (each new
+skill with when to use it, from its catalog row, then retired and
+improved skills), followed by that version's changelog under Nitty-gritty. A push with no pending changesets,
 including the workflow's own version commit, releases nothing. Pull `main`
 after a release. `npm run release` starts the same workflow by hand.
