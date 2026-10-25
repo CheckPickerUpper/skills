@@ -1,10 +1,14 @@
 name: Release
 
-# Started by `npm run release`. Consumes the pending changesets into
-# CHANGELOG.md, commits the version straight to main, then publishes the
-# GitHub Release for that version with its CHANGELOG section as the notes.
+# Runs on every push to main. When the push leaves pending changesets, it
+# consumes them into CHANGELOG.md, commits the version straight to main, then
+# publishes the GitHub Release for that version with its CHANGELOG section as
+# the notes. A push with no pending changesets, including this workflow's own
+# version commit, releases nothing.
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency: release
@@ -24,28 +28,35 @@ jobs:
           # changeset version reads git history to find the commit behind each changeset.
           fetch-depth: 0
 
+      - name: Find pending changesets
+        id: pending
+        run: |
+          if find .changeset -maxdepth 1 -name '*.md' ! -name README.md | grep -q .; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No pending changesets on main; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Setup Node.js
+        if: steps.pending.outputs.release == 'true'
         uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: steps.pending.outputs.release == 'true'
         run: npm ci
 
-      - name: Require pending changesets
-        run: |
-          if ! find .changeset -maxdepth 1 -name '*.md' ! -name README.md | grep -q .; then
-            echo "::error::No pending changesets on main. Add one with \`npx changeset\` and push it before releasing."
-            exit 1
-          fi
-
       - name: Version
+        if: steps.pending.outputs.release == 'true'
         run: npm run version
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit version
+        if: steps.pending.outputs.release == 'true'
         id: version
         run: |
           version="$(node -p "require('./package.json').version")"
@@ -57,6 +68,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Publish GitHub Release
+        if: steps.pending.outputs.release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ steps.version.outputs.version }}

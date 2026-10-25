@@ -112,10 +112,13 @@ Claude or is universal.
 
 ## Publishing
 
-Publish skills, catalog entries, and plugin registrations directly to `main`
-from a task worktree after validation. Routine releases do not use GitHub issues
-or pull requests. If GitHub rejects a direct push, report the exact restriction
-instead of routing the change through an issue or pull request.
+Every push to `main` releases, so a push to `main` needs the maintainer's
+explicit go-ahead for that change; an agent asks before each push and never
+pushes on its own judgment. With that go-ahead, publish skills, catalog
+entries, and plugin registrations directly to `main` from a task worktree after
+validation. Routine releases do not use GitHub issues or pull requests. If
+GitHub rejects a direct push, report the exact restriction instead of routing
+the change through an issue or pull request.
 
 Every pushed change to a published skill, catalog entry, or plugin
 registration carries a changeset: run `npx changeset`, choose the bump
@@ -137,17 +140,11 @@ Write one changeset per change, in the shape of the existing entries in
 
 ## Releases
 
-Pending changesets on `main` become a release when you run:
-
-```bash
-npm ci
-npm run release
-```
-
-This starts the Release workflow, waits for it, and prints the release page.
-The workflow consumes the changesets into `CHANGELOG.md`, bumps the version in
+Every push to `main` that leaves pending changesets is released by the Release
+workflow. It consumes the changesets into `CHANGELOG.md`, bumps the version in
 `package.json` and `.claude-plugin/plugin.json`, commits
 `chore: version skills vX.Y.Z` to `main`, and publishes the
 [GitHub Release](https://github.com/CheckPickerUpper/skills/releases) `vX.Y.Z`
-with that version's changelog as its notes. Pull `main` afterwards. With no
-pending changesets, the workflow fails without changing anything.
+with that version's changelog as its notes. A push with no pending changesets,
+including the workflow's own version commit, releases nothing. Pull `main`
+after a release. `npm run release` starts the same workflow by hand.
