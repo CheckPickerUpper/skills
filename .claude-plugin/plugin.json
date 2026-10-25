@@ -2,7 +2,6 @@
   "name": "checkpickerupper-skills",
   "version": "1.0.0",
   "skills": [
-    "./skills/productivity/check-protection",
     "./skills/engineering/antimatter-code-quality-review",
     "./skills/engineering/antimatter-codebase-structure-review",
     "./skills/engineering/explain-diff",
