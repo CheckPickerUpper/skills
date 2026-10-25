@@ -32,32 +32,32 @@ Every skill also loads on its own when its situation comes up, except `readonly`
 
 Skills for code, architecture, APIs, and design decisions, with an emphasis on correctness and simplicity.
 
-| Skill | The problem it fixes | Example |
+| Skill | Use it when | Example |
 |---|---|---|
-| [antimatter-code-quality-review](./skills/engineering/antimatter-code-quality-review/SKILL.md) | Reviews pad the list with style nitpicks and inflated severities, and miss a change that adds a second way to do something the code already does. Every finding here must survive an attempt to disprove it and come with a before-and-after. | `/antimatter-code-quality-review the staged changes` |
-| [antimatter-codebase-structure-review](./skills/engineering/antimatter-codebase-structure-review/SKILL.md) | Folders and modules drift into a shape nobody chose, and it is only noticed once a reorganization is expensive. | `/antimatter-codebase-structure-review src/billing` |
-| [explain-diff](./skills/engineering/explain-diff/SKILL.md) | You are reviewing or have merged a change you do not really understand. It writes a page with a walkthrough in execution order, what could break and a quiz. Based on [Geoffrey Litt's explain-diff gist](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524). | `/explain-diff HEAD~3..HEAD` |
-| [facts-as-data](./skills/engineering/facts-as-data/SKILL.md) | The same list of names is copied across files, so a case missing from one copy breaks one check silently. It moves the list into one table with a check that fails on a missing case. | `/facts-as-data sweep src/rules` |
-| [pizza1](./skills/engineering/pizza1/SKILL.md) | An agent defends a choice with "it's what the codebase does" or "smallest fix" instead of whether it is correct. | `/pizza1 why keep status as a string?` |
-| [readonly](./skills/engineering/readonly/SKILL.md) | You ask a question and the agent starts changing code, or answers with "probably". It answers from evidence and changes nothing. | `why does login retry twice? /readonly` |
-| [test-hygiene](./skills/engineering/test-hygiene/SKILL.md) | Tests pass when nothing was checked, or check what another test already checks. It breaks each rule on purpose to see which tests fail. | `/test-hygiene review the tests in this diff` |
-| [zen-of-checkpickerupper](./skills/engineering/zen-of-checkpickerupper/SKILL.md) | Two designs both look fine and the choice comes down to taste. Twenty-one short principles settle it. | `/zen-of-checkpickerupper store the total or compute it?` |
+| [antimatter-code-quality-review](./skills/engineering/antimatter-code-quality-review/SKILL.md) | Before you merge a change, to get a review that reports only real problems, each with proof and a before-and-after. | `/antimatter-code-quality-review the staged changes` |
+| [antimatter-codebase-structure-review](./skills/engineering/antimatter-codebase-structure-review/SKILL.md) | Before reorganizing folders or modules, or when a change might put code in the wrong place. | `/antimatter-codebase-structure-review src/billing` |
+| [explain-diff](./skills/engineering/explain-diff/SKILL.md) | You need to understand a change, branch or PR you did not write. It writes a page with a walkthrough, what could break and a quiz. Based on [Geoffrey Litt's explain-diff gist](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524). | `/explain-diff HEAD~3..HEAD` |
+| [facts-as-data](./skills/engineering/facts-as-data/SKILL.md) | The same list of names (file types, commands, error codes) is copied in several places in your code, and adding one means finding every copy. | `/facts-as-data sweep src/rules` |
+| [pizza1](./skills/engineering/pizza1/SKILL.md) | An agent defends a choice with "it's what the codebase does" or "smallest fix", and you want the correct answer instead. | `/pizza1 why keep status as a string?` |
+| [readonly](./skills/engineering/readonly/SKILL.md) | You want an answer about your code, backed by evidence, without the agent changing anything. | `why does login retry twice? /readonly` |
+| [test-hygiene](./skills/engineering/test-hygiene/SKILL.md) | You are writing or reviewing tests and want each one to fail when its rule breaks, with no test repeating another. | `/test-hygiene review the tests in this diff` |
+| [zen-of-checkpickerupper](./skills/engineering/zen-of-checkpickerupper/SKILL.md) | You are choosing between two designs that both seem fine. | `/zen-of-checkpickerupper store the total or compute it?` |
 
 ### Productivity
 
 General workflow tools.
 
-| Skill | The problem it fixes | Example |
+| Skill | Use it when | Example |
 |---|---|---|
-| [audit-issues](./skills/productivity/audit-issues/SKILL.md) | The tracker has hundreds of issues, many duplicated or already done, and nobody knows which are still real. You approve a before-and-after page before anything changes. | `/audit-issues OWNER/REPO` |
-| [check-protection](./skills/productivity/check-protection/SKILL.md) | Agents rerun full suites and checks whose result is already known, and the time goes nowhere. | `/check-protection which checks does this commit need?` |
-| [close-issues](./skills/productivity/close-issues/SKILL.md) | Agents close issues that are not done, and later nobody can tell why one closed. A script refuses the close until the proof is written into the issue. | `/close-issues #142 is finished` |
-| [compose-goal](./skills/productivity/compose-goal/SKILL.md) | Handing work to another agent loses the outcome, the issue links and how to prove it works. | `/compose-goal hand #142 to another agent` |
-| [dependency-trace](./skills/productivity/dependency-trace/SKILL.md) | You build a feature in the wrong order because nobody mapped what it needs to exist first. | `/dependency-trace what does checkout depend on?` |
-| [issues-to-outcomes](./skills/productivity/issues-to-outcomes/SKILL.md) | Status reports are lists of issue titles that mean nothing to the person reading them. | `/issues-to-outcomes what landed this week` |
-| [make-diagram](./skills/productivity/make-diagram/SKILL.md) | Agent-drawn diagrams overlap, use jargon and leave out how the thing actually works. A script renders the drawing and refuses those defects. | `/make-diagram how a payment goes from cart to receipt` |
-| [settle-blockers](./skills/productivity/settle-blockers/SKILL.md) | Issues get marked blocked over a shared file or a merge conflict, so work waits for no reason. | `/settle-blockers OWNER/REPO#88` |
-| [to-issues-clearly](./skills/productivity/to-issues-clearly/SKILL.md) | Agent-filed issues have vague titles you must open to understand, and no clear point at which they are done. | `/to-issues-clearly turn this plan into issues` |
+| [audit-issues](./skills/productivity/audit-issues/SKILL.md) | Your GitHub repository has so many open issues that you cannot tell which are duplicates, already done, or still need work. | `/audit-issues OWNER/REPO` |
+| [check-protection](./skills/productivity/check-protection/SKILL.md) | Before rerunning a full test suite or an expensive check, to find out whether its result is already known. | `/check-protection which checks does this commit need?` |
+| [close-issues](./skills/productivity/close-issues/SKILL.md) | An agent is about to close a GitHub issue. It refuses until every sub-issue and checklist item is done, and writes the proof into the issue. | `/close-issues #142 is finished` |
+| [compose-goal](./skills/productivity/compose-goal/SKILL.md) | You are handing a task to another agent and want it to get the outcome, the issue links and how to prove it works. | `/compose-goal hand #142 to another agent` |
+| [dependency-trace](./skills/productivity/dependency-trace/SKILL.md) | Before building a feature, to work out what has to exist first and in what order. | `/dependency-trace what does checkout depend on?` |
+| [issues-to-outcomes](./skills/productivity/issues-to-outcomes/SKILL.md) | You are writing a status update or end-of-day summary and want it to say what changed for the reader, not list issue titles. | `/issues-to-outcomes what landed this week` |
+| [make-diagram](./skills/productivity/make-diagram/SKILL.md) | You need a diagram (flowchart, system map, pipeline) that someone new can read. | `/make-diagram how a payment goes from cart to receipt` |
+| [settle-blockers](./skills/productivity/settle-blockers/SKILL.md) | An issue is marked as blocked by another issue and you want to know whether it really has to wait. | `/settle-blockers OWNER/REPO#88` |
+| [to-issues-clearly](./skills/productivity/to-issues-clearly/SKILL.md) | You are turning a plan, bug report or audit into GitHub issues and want titles you can understand without opening them. | `/to-issues-clearly turn this plan into issues` |
 
 ### Misc
 
