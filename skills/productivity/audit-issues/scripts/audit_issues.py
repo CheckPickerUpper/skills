@@ -21,12 +21,18 @@
         whose files changed since the owner saw its page. Every close runs
         through close-issues' close_issue.py. Safe to rerun after a failure.
 
+Every command reads issues through a local copy kept in
+$XDG_CACHE_HOME/checkpickerupper/audit-issues/ (default ~/.cache), refreshed with only the
+issues updated since the last run; a changed issue count or an unreadable copy downloads
+every issue again and says why on stderr.
+
 The plan format is in references/plan-format.md beside this skill.
 """
 
 import argparse
 import hashlib
 import json
+import os
 import re
 import subprocess
 import sys
@@ -54,7 +60,7 @@ CHECKLIST = re.compile(r"^\s*[-*+] \[[ xX]\] (.+)", re.MULTILINE)
 HEADING = re.compile(r"^#{1,6} ")
 DECISION_LABEL = re.compile(r"decision", re.IGNORECASE)
 ISSUE_FIELDS = """
-  id number title url state stateReason body
+  id number title url state stateReason body updatedAt
   labels(first: 30) { nodes { name } }
   milestone { title }
   parent { number title url state }
@@ -520,11 +526,25 @@ def graphql(query, **variables):
     return json.loads(gh(*args))["data"]
 
 
-def all_issues(repo):
+# Each repository's issues are kept on disk and refreshed with only the issues updated since
+# the last sync, so a run costs one count query and the changed issues, not the whole tracker.
+MIRROR_VERSION = 1
+MIRROR_FIELDS = hashlib.sha256(ISSUE_FIELDS.encode()).hexdigest()[:12]
+
+
+def mirror_path(repo):
     owner, name = repo.split("/")
-    query = f"""query($owner: String!, $name: String!, $after: String) {{
+    cache = os.environ.get("XDG_CACHE_HOME") or str(Path.home() / ".cache")
+    return Path(cache) / "checkpickerupper" / "audit-issues" / f"{owner}__{name}.json"
+
+
+def issue_pages(repo, since=None):
+    """Every issue, or with since only those updated at or after it (oldest first)."""
+    owner, name = repo.split("/")
+    filtered = ", filterBy: {since: $since}, orderBy: {field: UPDATED_AT, direction: ASC}" if since else ""
+    query = f"""query($owner: String!, $name: String!, $after: String{', $since: DateTime!' if since else ''}) {{
       repository(owner: $owner, name: $name) {{
-        issues(first: 50, after: $after) {{
+        issues(first: 50, after: $after{filtered}) {{
           pageInfo {{ hasNextPage endCursor }}
           nodes {{ {ISSUE_FIELDS} }}
         }}
@@ -532,7 +552,7 @@ def all_issues(repo):
     }}"""
     issues, after = [], None
     while True:
-        variables = {"owner": owner, "name": name}
+        variables = {"owner": owner, "name": name, **({"since": since} if since else {})}
         if after:
             variables["after"] = after
         page_ = graphql(query, **variables)["repository"]["issues"]
@@ -540,6 +560,85 @@ def all_issues(repo):
         if not page_["pageInfo"]["hasNextPage"]:
             return issues
         after = page_["pageInfo"]["endCursor"]
+
+
+def issue_count(repo):
+    owner, name = repo.split("/")
+    query = """query($owner: String!, $name: String!) {
+      repository(owner: $owner, name: $name) { issues { totalCount } }
+    }"""
+    return graphql(query, owner=owner, name=name)["repository"]["issues"]["totalCount"]
+
+
+def read_mirror(path):
+    """The saved mirror, or None with the reason a full download is needed printed on stderr."""
+    try:
+        loaded = json.loads(path.read_text())
+    except FileNotFoundError:
+        print(f"no local copy of the issues at {path}; downloading every issue", file=sys.stderr)
+        return None
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        print(f"{path} is unreadable ({error}); downloading every issue again", file=sys.stderr)
+        return None
+    match loaded:
+        case {"version": 1, "fields": str(fields), "synced_at": str() | None,
+              "issues": dict()} if fields == MIRROR_FIELDS:
+            return loaded
+        case {"version": 1, "fields": str(fields)}:
+            print(f"{path} was saved with issue fields {fields}, this script reads {MIRROR_FIELDS};"
+                  " downloading every issue again", file=sys.stderr)
+        case _:
+            print(f"{path} is unreadable (not a version {MIRROR_VERSION} issue mirror);"
+                  " downloading every issue again", file=sys.stderr)
+    return None
+
+
+def write_mirror(path, by_number, synced_at):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    partial = path.with_suffix(".partial")
+    partial.write_text(json.dumps({"version": MIRROR_VERSION, "fields": MIRROR_FIELDS,
+                                   "synced_at": synced_at, "issues": by_number}))
+    partial.replace(path)
+
+
+def refresh_links(by_number):
+    """A sub-issue or parent changing state updates its own updatedAt, not the issues that list
+    it, so each listed same-repository issue takes its state and title from its own record."""
+    by_url = {issue["url"]: issue for issue in by_number.values()}
+    for issue in by_number.values():
+        for link in [issue["parent"], *issue["subIssues"]["nodes"]]:
+            if link and link["url"] in by_url:
+                link["state"] = by_url[link["url"]]["state"]
+                link["title"] = by_url[link["url"]]["title"]
+
+
+def latest_update(issues, previous):
+    return max((i["updatedAt"] for i in issues), default=previous)
+
+
+def synced_issues(repo):
+    """Every issue in repo, open and closed, read through the local mirror."""
+    path = mirror_path(repo)
+    mirror = read_mirror(path)
+    by_number, synced_at = None, None
+    if mirror is not None and mirror["synced_at"] is not None:
+        by_number = mirror["issues"]
+        changed = issue_pages(repo, since=mirror["synced_at"])
+        by_number.update({str(i["number"]): i for i in changed})
+        synced_at = latest_update(changed, mirror["synced_at"])
+        total = issue_count(repo)
+        if total != len(by_number):
+            print(f"{repo} has {total} issues but the local copy at {path} has {len(by_number)}"
+                  " (issues were deleted or transferred); downloading every issue again",
+                  file=sys.stderr)
+            by_number = None
+    if by_number is None:
+        issues = issue_pages(repo)
+        by_number = {str(i["number"]): i for i in issues}
+        synced_at = latest_update(issues, None)
+    refresh_links(by_number)
+    write_mirror(path, by_number, synced_at)
+    return [by_number[key] for key in sorted(by_number, key=int)]
 
 
 def read_issue(repo, number):
@@ -650,7 +749,7 @@ def load_plan(plan_path, verdict_paths):
 
 
 def scan(args):
-    issues = all_issues(args.repo)
+    issues = synced_issues(args.repo)
     found = [f for issue in issues for f in findings(issue)]
     print(RULE)
     for kind, fix in FIXES.items():
@@ -695,7 +794,7 @@ def scan(args):
 
 
 def index(args):
-    scope = in_scope({"milestone": args.milestone}, all_issues(args.repo))
+    scope = in_scope({"milestone": args.milestone}, synced_issues(args.repo))
     rows = [f"#{i['number']}\t{milestone_of(i)}\t"
             f"{'under #' + str(open_parent(i)) if open_parent(i) else 'top'}\t"
             f"{','.join(label['name'] for label in i['labels']['nodes'])}\t{i['title']}"
@@ -715,7 +814,7 @@ def draft(args):
         milestone_description = matching[0]["description"] or ""
     candidate = {"title": args.title, "body": args.body_file.read_text(),
                  "milestone": args.milestone, "parent": args.parent}
-    found = draft_findings(candidate, all_issues(args.repo), milestone_description)
+    found = draft_findings(candidate, synced_issues(args.repo), milestone_description)
     if not found:
         print(f"{args.title!r} is clear to file: no open issue shares its cause, its premise is not"
               " a workaround, and its milestone stays within its causes.")
@@ -728,7 +827,7 @@ def draft(args):
 
 def plan_command(args):
     plan, code = load_plan(args.plan, args.verdicts)
-    issues = all_issues(args.repo)
+    issues = synced_issues(args.repo)
     found = plan_findings(plan, issues)
     if found:
         print(f"{args.plan}: {len(found)} finding(s); fix the plan and run this again:")
@@ -751,7 +850,7 @@ def apply(args):
     state_path = args.plan.with_suffix(".applied.json")
     resuming = state_path.is_file()
     created = json.loads(state_path.read_text())["created"] if resuming else {}
-    issues = all_issues(args.repo)
+    issues = synced_issues(args.repo)
     found = [] if resuming else plan_findings(plan, issues)
     if found:
         print("the tracker no longer matches the plan; run plan again:", file=sys.stderr)

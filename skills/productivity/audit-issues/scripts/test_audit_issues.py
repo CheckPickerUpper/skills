@@ -3,7 +3,13 @@
 Run with: python3 -m unittest test_audit_issues
 """
 
+import json
+import os
+import subprocess
+import sys
+import tempfile
 import unittest
+from pathlib import Path
 
 from audit_issues import (
     approval_code,
@@ -211,6 +217,145 @@ class Plan(unittest.TestCase):
 
     def test_the_approval_code_changes_with_the_plan(self):
         self.assertNotEqual(approval_code([b"{}"]), approval_code([b"{ }"]))
+
+
+SCRIPT = Path(__file__).resolve().with_name("audit_issues.py")
+
+# A stand-in for `gh api graphql`: it answers from tracker.json beside it, the way GitHub
+# would (a since-filter keeps issues updated at or after that time, oldest first), and
+# appends the kind of each query it answered to calls.log.
+STAND_IN_GH = """#!{python}
+import json, sys
+from pathlib import Path
+here = Path(__file__).resolve().parent
+args = sys.argv[1:]
+values = dict(a.split("=", 1) for flag, a in zip(args, args[1:]) if flag in ("-f", "-F"))
+query = values["query"]
+if "totalCount" in query and "nodes" not in query:
+    kind = "count"
+elif "filterBy" in query:
+    kind = "since"
+else:
+    kind = "full"
+with open(here / "calls.log", "a") as log:
+    log.write(kind + "\\n")
+issues = json.loads((here / "tracker.json").read_text())
+if kind == "count":
+    print(json.dumps({{"data": {{"repository": {{"issues": {{"totalCount": len(issues)}}}}}}}}))
+    sys.exit(0)
+if kind == "since":
+    issues = sorted((i for i in issues if i["updatedAt"] >= values["since"]), key=lambda i: i["updatedAt"])
+start = int(values.get("after", "0"))
+nodes = issues[start:start + 50]
+more = start + 50 < len(issues)
+print(json.dumps({{"data": {{"repository": {{"issues": {{
+    "pageInfo": {{"hasNextPage": more, "endCursor": str(start + 50)}}, "nodes": nodes}}}}}}}}))
+"""
+
+
+def tracked(number, updated, **fields):
+    return {**issue(number, **fields), "updatedAt": updated}
+
+
+class Mirror(unittest.TestCase):
+    """Every command reads the tracker through a local copy that only fetches what changed."""
+
+    def setUp(self):
+        self.folder = Path(tempfile.mkdtemp(prefix="audit-issues-test-"))
+        self.bin = self.folder / "bin"
+        self.bin.mkdir()
+        stand_in = self.bin / "gh"
+        stand_in.write_text(STAND_IN_GH.format(python=sys.executable))
+        stand_in.chmod(0o755)
+        self.cache = self.folder / "cache"
+        self.mirror = self.cache / "checkpickerupper" / "audit-issues" / "example__app.json"
+        self.draft_body = self.folder / "draft.md"
+        self.draft_body.write_text("error: row 40 rejected by the server")
+
+    def tearDown(self):
+        for path in sorted(self.folder.rglob("*"), reverse=True):
+            path.rmdir() if path.is_dir() else path.unlink()
+        self.folder.rmdir()
+
+    def tracker(self, *issues):
+        (self.bin / "tracker.json").write_text(json.dumps(list(issues)))
+
+    def run_script(self, *args):
+        (self.bin / "calls.log").unlink(missing_ok=True)
+        env = {**os.environ, "PATH": f"{self.bin}{os.pathsep}{os.environ['PATH']}",
+               "XDG_CACHE_HOME": str(self.cache)}
+        result = subprocess.run([sys.executable, str(SCRIPT), *args, "--repo", "example/app"],
+                                capture_output=True, text=True, env=env, check=False)
+        log = self.bin / "calls.log"
+        calls = log.read_text().split() if log.is_file() else []
+        return result, calls
+
+    def draft(self):
+        return self.run_script("draft", "--title", "Import drops rows", "--body-file", str(self.draft_body))
+
+    def test_a_second_run_fetches_only_what_changed(self):
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z"), tracked(2, "2026-01-02T00:00:00Z"))
+        first, first_calls = self.draft()
+        self.assertEqual(first.returncode, 0, first.stderr)
+        self.assertIn("full", first_calls)
+        second, second_calls = self.draft()
+        self.assertEqual(second.returncode, 0, second.stderr)
+        self.assertNotIn("full", second_calls)
+        self.assertEqual(sorted(set(second_calls)), ["count", "since"])
+
+    def test_an_issue_edited_between_runs_is_read_as_edited(self):
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z", title="Sync drops rows", body="unrelated"),
+                     tracked(2, "2026-01-02T00:00:00Z"))
+        first, _ = self.draft()
+        self.assertEqual(first.returncode, 0, first.stdout)
+        self.tracker(tracked(1, "2026-01-03T00:00:00Z", title="Sync drops rows",
+                             body="error: row 12 rejected by the server"),
+                     tracked(2, "2026-01-02T00:00:00Z"))
+        second, calls = self.draft()
+        self.assertNotIn("full", calls)
+        self.assertEqual(second.returncode, 1, second.stdout + second.stderr)
+        self.assertIn("#1 Sync drops rows looks like the same cause", second.stdout)
+
+    def test_a_deleted_issue_forces_a_full_resync(self):
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z"),
+                     tracked(2, "2026-01-02T00:00:00Z", title="Export drops rows",
+                             body="error: row 7 rejected by the server"))
+        first, _ = self.draft()
+        self.assertEqual(first.returncode, 1, first.stdout)
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z"))
+        second, calls = self.draft()
+        self.assertIn("full", calls)
+        self.assertIn("1 issues", second.stderr)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+
+    def test_a_closed_sub_issue_updates_its_parents_view_of_it(self):
+        # Closing #2 changes #2's updatedAt, not its parent's, so the parent's copy of its
+        # sub-issue list is refreshed from the mirror's own record of #2.
+        parent = {"number": 1, "title": "Issue 1", "url": "https://example.test/1", "state": "CLOSED"}
+        closed_parent = {**tracked(1, "2026-01-01T00:00:00Z", state="CLOSED", reason="COMPLETED"),
+                         "url": "https://example.test/1"}
+        closed_parent["subIssues"]["nodes"] = [
+            {"number": 2, "title": "Issue 2", "url": "https://example.test/2", "state": "OPEN"}]
+        child = {**tracked(2, "2026-01-01T00:00:00Z", parent=parent), "url": "https://example.test/2"}
+        self.tracker(closed_parent, child)
+        first, _ = self.run_script("scan")
+        self.assertEqual(first.returncode, 1, first.stdout)
+        self.tracker(closed_parent, {**child, "state": "CLOSED", "stateReason": "COMPLETED",
+                                     "updatedAt": "2026-01-05T00:00:00Z"})
+        second, calls = self.run_script("scan")
+        self.assertNotIn("full", calls)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+
+    def test_a_corrupt_mirror_is_reported_and_rebuilt(self):
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z"))
+        self.mirror.parent.mkdir(parents=True)
+        self.mirror.write_text("{not json")
+        result, calls = self.draft()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn(str(self.mirror), result.stderr)
+        self.assertIn("Expecting property name", result.stderr)
+        self.assertIn("full", calls)
+        self.assertEqual(list(json.loads(self.mirror.read_text())["issues"]), ["1"])
 
 
 if __name__ == "__main__":
