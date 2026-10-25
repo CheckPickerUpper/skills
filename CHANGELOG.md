@@ -1,5 +1,13 @@
 # checkpickerupper-skills
 
+## 2.0.1
+
+### Patch Changes
+
+- [`c470154`](https://github.com/CheckPickerUpper/skills/commit/c47015419606d59e9957077b53bebb7f44de03ee) audit-issues keeps a local copy of the repository's issues and fetches only what changed since the last run, so filing a set of issues no longer downloads the whole tracker each time.
+
+- [`a3dfe0c`](https://github.com/CheckPickerUpper/skills/commit/a3dfe0caca14c65f6db1eb62f817ede8565dda39) audit-issues: `audit_issues.py draft` also catches a duplicate written in plain words. It refuses a draft whose title shares rare words with an open issue's title (worth as much as two words no other open title has), lists the three closest titles to read before filing, and its passing message now says exactly what it checked.
+
 ## 2.0.0
 
 ### Major Changes
