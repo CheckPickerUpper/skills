@@ -19,6 +19,7 @@ from audit_issues import (
     leads,
     milestone_sizes,
     operations,
+    subject_leads,
     page,
     plan_findings,
     unticked_lines,
@@ -115,6 +116,28 @@ class Draft(unittest.TestCase):
         found = draft_findings(self.draft(body="error: row 40 rejected by the server", parent=1), issues, "")
         self.assertEqual(kinds(found), ["same-cause"])
         self.assertIn("#2 Export drops rows", found[0][1])
+
+    def plain_issues(self):
+        return [issue(1, title="A chakra dash resolves movement and fighter contact outcomes",
+                      body="The archived design describes a resource-gated high-speed attack."),
+                issue(2, title="Hold C to charge chakra"), issue(3, title="Stop a fighter's chakra regaining"),
+                issue(4, title="Show the shop prices"), issue(5, title="Save the outfit"),
+                issue(6, title="Record each guess the player's machine made")]
+
+    def test_a_plain_words_draft_sharing_a_rare_title_phrase_is_stopped(self):
+        found = draft_findings(self.draft(title="Chakra dash on a double-tap of W"), self.plain_issues(), "")
+        self.assertEqual(kinds(found), ["same-subject"])
+        self.assertIn("#1 A chakra dash", found[0][1])
+
+    def test_one_shared_title_word_is_a_lead_not_a_refusal(self):
+        draft = self.draft(title="Open the shop cooldown")
+        self.assertEqual(draft_findings(draft, self.plain_issues(), ""), [])
+        self.assertEqual([n for _, n, _ in subject_leads(draft, self.plain_issues())], [4])
+
+    def test_a_recorded_different_cause_clears_a_subject_match(self):
+        body = "Different cause from #1: this is the input binding, not the dash itself."
+        draft = self.draft(title="Chakra dash on a double-tap of W", body=body)
+        self.assertEqual(draft_findings(draft, self.plain_issues(), ""), [])
 
     def test_a_workaround_draft_is_stopped_until_its_premise_is_settled(self):
         self.assertEqual(kinds(draft_findings(self.draft(title="Retry the import"), [], "")), ["workaround"])
@@ -304,17 +327,17 @@ class Mirror(unittest.TestCase):
         self.assertEqual(sorted(set(second_calls)), ["count", "since"])
 
     def test_an_issue_edited_between_runs_is_read_as_edited(self):
-        self.tracker(tracked(1, "2026-01-01T00:00:00Z", title="Sync drops rows", body="unrelated"),
+        self.tracker(tracked(1, "2026-01-01T00:00:00Z", title="Sync stalls on large files", body="unrelated"),
                      tracked(2, "2026-01-02T00:00:00Z"))
         first, _ = self.draft()
         self.assertEqual(first.returncode, 0, first.stdout)
-        self.tracker(tracked(1, "2026-01-03T00:00:00Z", title="Sync drops rows",
+        self.tracker(tracked(1, "2026-01-03T00:00:00Z", title="Sync stalls on large files",
                              body="error: row 12 rejected by the server"),
                      tracked(2, "2026-01-02T00:00:00Z"))
         second, calls = self.draft()
         self.assertNotIn("full", calls)
         self.assertEqual(second.returncode, 1, second.stdout + second.stderr)
-        self.assertIn("#1 Sync drops rows looks like the same cause", second.stdout)
+        self.assertIn("#1 Sync stalls on large files looks like the same cause", second.stdout)
 
     def test_a_deleted_issue_forces_a_full_resync(self):
         self.tracker(tracked(1, "2026-01-01T00:00:00Z"),

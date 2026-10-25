@@ -406,7 +406,7 @@ Before each create, check the draft against the open tracker with the `audit-iss
 python3 <audit-issues folder>/scripts/audit_issues.py draft --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md [--milestone "MILESTONE TITLE"] [--parent N]
 ~~~
 
-It refuses while an open issue looks like the same cause, the draft asks for a workaround, or the draft would take its milestone past 10 causes. Act on each finding: add the sighting to that issue's body, file the draft as its sub-issue, or ask for the proper fix. Only when the finding does not apply, record why where it says (`Different cause from #N: <why>` or `Not a workaround: <why>` in the body, or the reason in the milestone description), and run it again. File the issue only once it exits 0, so the tracker never takes on what an audit would have to undo.
+It refuses while an open issue looks like the same cause (shared file paths, code names or error text) or the same subject (rare words its title shares with the draft's title), the draft asks for a workaround, or the draft would take its milestone past 10 causes. Act on each finding: add the sighting to that issue's body, file the draft as its sub-issue, or ask for the proper fix. Only when the finding does not apply, record why where it says (`Different cause from #N: <why>` or `Not a workaround: <why>` in the body, or the reason in the milestone description), and run it again. Read the closest titles it lists after its verdict before filing; they do not block. File the issue only once it exits 0, so the tracker never takes on what an audit would have to undo.
 
 ~~~sh
 gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL --milestone "MILESTONE TITLE"

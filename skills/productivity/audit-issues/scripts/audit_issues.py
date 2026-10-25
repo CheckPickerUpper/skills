@@ -32,6 +32,7 @@ The plan format is in references/plan-format.md beside this skill.
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import subprocess
@@ -275,9 +276,55 @@ def workaround_hints(issues):
     return hints
 
 
+# A plain-language issue carries no file path, code name or error text, so two reports of
+# one feature can share nothing the signals above see. Their titles still share its name.
+SUBJECT_STOP = set("""
+a an the and or of to in on at for with by from as is are be been being it its this that these
+those into onto over under via per each every any all no not only own their his her our your my
+we you they do does did done can could should would will may might must so than then when while
+which who what where why how up down out off again new old make makes made let lets get gets use
+uses used show shows keep keeps add adds one two against
+""".split())
+
+
+def subject_terms(title):
+    """The title's words and adjacent word pairs, without connecting words."""
+    words = [w for w in re.findall(r"[a-z][a-z0-9']+", title.lower()) if w not in SUBJECT_STOP and len(w) > 2]
+    return set(words) | {f"{a} {b}" for a, b in zip(words, words[1:])}
+
+
+def subject_scores(draft, opened):
+    """(score, number, shared terms) for each open issue whose title shares a rare term with
+    the draft's title. A term counts ln(open issues / titles carrying it), and only when at
+    most MAX_SHARED titles carry it, so a common word or phrase counts nothing."""
+    titles = {i["number"]: subject_terms(i["title"]) for i in opened}
+    carriers = Counter(term for terms in titles.values() for term in terms)
+    total = max(len(opened), 2)
+    wanted = subject_terms(draft["title"])
+    scored = []
+    for number, terms in titles.items():
+        shared = sorted((t for t in wanted & terms if carriers[t] <= MAX_SHARED), key=lambda t: carriers[t])
+        if shared and number != draft.get("parent"):
+            scored.append((round(sum(math.log(total / carriers[t]) for t in shared), 1), number, shared))
+    return sorted(scored, key=lambda row: (-row[0], row[1]))
+
+
+def subject_threshold(opened):
+    """As much as two title words that no other open title carries."""
+    return 2 * math.log(max(len(opened), 2))
+
+
+def subject_leads(draft, issues, limit=3):
+    """The closest titles below the refusal threshold, for the filer to read before filing."""
+    opened = [i for i in issues if i["state"] == "OPEN"]
+    threshold = subject_threshold(opened)
+    return [row for row in subject_scores(draft, opened) if row[0] < threshold][:limit]
+
+
 def draft_findings(draft, issues, milestone_description):
     """What stops a draft being filed: an open issue other than its declared parent that it
-    shares a cause with, a workaround premise, or a milestone it takes over MAX_CAUSES. Each
+    shares a cause with (file paths, code names, error text) or a subject with (rare title
+    words), a workaround premise, or a milestone it takes over MAX_CAUSES. Each
     clears by fixing the draft or by its recorded reason: the DIFFERENT_CAUSE or
     NOT_A_WORKAROUND line in the body, or the OVER_LIMIT_REASON line in the milestone
     description."""
@@ -292,6 +339,14 @@ def draft_findings(draft, issues, milestone_description):
             found.append(("same-cause", (
                 f"#{number} {titles[number]} looks like the same cause: add this sighting to its body,"
                 f" file this as its sub-issue, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
+                " in the draft")))
+    flagged = {int(re.search(r"#(\d+)", message).group(1)) for _, message in found}
+    threshold = subject_threshold(opened)
+    for score, number, shared in subject_scores(draft, opened):
+        if score >= threshold and number not in flagged and DIFFERENT_CAUSE.format(number=number) not in body:
+            found.append(("same-subject", (
+                f"#{number} {titles[number]} has the same subject ({', '.join(shared)}): add this to its"
+                f" body, file this as its sub-issue, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
                 " in the draft")))
     hints = workaround_hints([candidate])
     if hints and NOT_A_WORKAROUND not in body:
@@ -814,15 +869,23 @@ def draft(args):
         milestone_description = matching[0]["description"] or ""
     candidate = {"title": args.title, "body": args.body_file.read_text(),
                  "milestone": args.milestone, "parent": args.parent}
-    found = draft_findings(candidate, synced_issues(args.repo), milestone_description)
-    if not found:
-        print(f"{args.title!r} is clear to file: no open issue shares its cause, its premise is not"
-              " a workaround, and its milestone stays within its causes.")
-        return 0
-    print(f"{args.title!r} is not ready to file:")
-    for _, message in found:
-        print(f"  - {message}")
-    return EXIT_FINDINGS
+    issues = synced_issues(args.repo)
+    found = draft_findings(candidate, issues, milestone_description)
+    leads_ = subject_leads(candidate, issues)
+    titles = {i["number"]: i["title"] for i in issues}
+    if found:
+        print(f"{args.title!r} is not ready to file:")
+        for _, message in found:
+            print(f"  - {message}")
+    else:
+        print(f"{args.title!r} passed the checks: no open issue shares its file paths, code names,"
+              " error text or rare title words, its premise is not a workaround, and its milestone"
+              " stays within its causes.")
+    if leads_:
+        print("Closest titles by subject; read each before filing:")
+        for score, number, shared in leads_:
+            print(f"  - #{number} {titles[number]} ({', '.join(shared)})")
+    return EXIT_FINDINGS if found else 0
 
 
 def plan_command(args):
