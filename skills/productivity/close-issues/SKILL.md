@@ -1,6 +1,6 @@
 ---
 name: close-issues
-description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues and unticked lines, and records the proof, the duplicate's carried details, the out-of-date evidence or the owner's decision in the body."
+description: "Close GitHub issues only with proof. Use every time an issue is about to close or has just closed: before `gh issue close`, before pushing a commit with `Closes #N`, when work looks done, when marking a duplicate, and when someone says drop it or won't fix. Closes through a script that refuses open sub-issues, unticked lines and a bug whose reproduction was never rerun or still fails, and records the proof, the duplicate's carried details, the out-of-date evidence or the owner's decision in the body."
 short_description: "Close issues only with proof."
 allow_implicit_invocation: true
 metadata:
@@ -26,6 +26,14 @@ issue back afterwards. Never close with a bare `gh issue close`.
      "Done when" line: the passing test, the commit that shipped it, a walk
      through the product. The issue's text describes the past; only the check
      says it is done now.
+     When the issue has a reproduction ("Steps to reproduce", "Reproduction"),
+     rerun those exact steps on the fixed code and record what happened:
+     `close_issue.py reran --repo R --issue N --ran "<the reproduction's command>" --saw "<what it did>" --result fixed`.
+     Tests passing is not this rerun, and the script refuses a rerun that runs
+     none of the reproduction's commands. If the tests pass but the
+     reproduction still fails, the tests miss the bug: record it with
+     `--result still-fails`, leave the issue open, and keep working.
+     `ready` and `completed` refuse until a rerun shows it fixed.
      `close_issue.py completed --repo R --issue N --proof "<commit url>" --proof "<test and its result>"`
      writes the proof under `## Proof` and closes it. A commit with
      `Closes #N` closes the issue when it is pushed: run `ready` before that

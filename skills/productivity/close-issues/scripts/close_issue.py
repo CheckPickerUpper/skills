@@ -5,10 +5,16 @@ completed (the proof a person can check), a duplicate (after the survivor
 carries every detail under "(was #N)"), out of date (the evidence that the
 code or release it describes moved on), or not planned (the owner's decision,
 quoted). Open sub-issues and unticked checklist lines block every close; a
-duplicate's unticked lines may close once the survivor carries them.
+duplicate's unticked lines may close once the survivor carries them. An issue
+whose body has a reproduction section closes as completed only after a rerun of
+that reproduction is recorded and shows it fixed: passing tests are not a rerun.
 
     close_issue.py ready --repo OWNER/REPO --issue N
         Lists what stops N closing. Exits 1 while anything does.
+    close_issue.py reran --repo OWNER/REPO --issue N --ran TEXT --saw TEXT --result fixed|still-fails
+        Writes the rerun of N's reproduction under '## Reproduction rerun'. Refuses
+        a rerun that runs none of the reproduction's commands. Exits 1 while the
+        reproduction still fails.
     close_issue.py completed --repo OWNER/REPO --issue N --proof TEXT [--proof TEXT ...]
         Writes the proof under '## Proof' and closes N as completed. Also
         records proof on an issue a 'Closes #N' commit already closed.
@@ -38,12 +44,23 @@ RULE = (
     "An issue closes as completed with proof, as a duplicate once the survivor"
     " holds its details, or as not planned on the owner's word. Nothing closes"
     " while it has open sub-issues or unticked checklist lines: finish them, move"
-    " them under an open parent, or close each with its own reason first."
+    " them under an open parent, or close each with its own reason first. An issue"
+    " with a reproduction closes as completed only once a recorded rerun of that"
+    " reproduction shows it fixed; tests that pass are not that rerun."
 )
 HEADING = re.compile(r"^#{1,6} ")
-FENCE = re.compile(r"^\s*(```|~~~)")
+FENCE = re.compile(r"^\s*(```|~~~)\s*(?P<lang>\S*)")
 UNTICKED = re.compile(r"^\s*[-*+] \[ \] (?P<text>.+)")
 DECISION_LABEL = re.compile(r"decision", re.IGNORECASE)
+REPRO_HEADING = re.compile(
+    r"^#{1,6}\s+(steps to reproduce|how to reproduce|to reproduce|reproduce|reproduction( steps)?"
+    r"|repro( steps)?)\s*:?\s*$", re.IGNORECASE)
+RERUN_HEADING = "## Reproduction rerun"
+RERUN_FIELD = re.compile(r"^\s*[-*+]?\s*(?P<name>Ran|Saw|Result):\s*(?P<value>.*)$")
+INLINE_CODE = re.compile(r"`([^`\n]+)`")
+SHELL_LANGS = {"sh", "bash", "zsh", "fish", "shell", "console", "shell-session", "powershell", "ps1",
+               "pwsh", "cmd", "bat"}
+RESULTS = {"fixed": "fixed", "still-fails": "still fails"}
 ISSUE_FIELDS = """
   number title url state stateReason body
   labels(first: 30) { nodes { name } }
@@ -115,11 +132,92 @@ def uncarried_pieces(issue, survivor):
     return found
 
 
+def section(body, matches):
+    """The heading and lines of the first section whose heading matches, ignoring
+    heading-like lines inside code fences; (None, []) when there is none."""
+    heading, lines, fenced = None, [], False
+    for line in (body or "").splitlines():
+        if FENCE.match(line):
+            fenced = not fenced
+        elif not fenced and HEADING.match(line):
+            if heading:
+                break
+            if matches(line.strip()):
+                heading = line.strip()
+                continue
+        if heading:
+            lines.append(line)
+    return heading, lines
+
+
+def reproduction(body):
+    return section(body, lambda line: bool(REPRO_HEADING.match(line)))
+
+
+def reproduction_commands(lines):
+    """What the reproduction runs: its inline code, the lines of its shell blocks,
+    and any '$ ' line in its other blocks."""
+    found, fence_lang = [], None
+    for line in lines:
+        fence = FENCE.match(line)
+        if fence:
+            fence_lang = None if fence_lang is not None else fence["lang"].lower()
+            continue
+        text = line.strip()
+        if fence_lang is None:
+            found += [code.strip() for code in INLINE_CODE.findall(line) if code.strip()]
+        elif text.startswith("$ "):
+            found.append(text[2:].strip())
+        elif fence_lang in SHELL_LANGS and text and not text.startswith("#"):
+            found.append(text)
+    return list(dict.fromkeys(" ".join(c.split()) for c in found if c.strip()))
+
+
+def runs_reproduction(ran, commands):
+    """Whether the rerun names one of the reproduction's commands; a reproduction
+    written only in prose has none to name, so any rerun of it counts."""
+    ran = " ".join(ran.split())
+    return not commands or any(command in ran for command in commands)
+
+
+def recorded_rerun(body):
+    """The Ran, Saw and Result fields under '## Reproduction rerun', or None."""
+    heading, lines = section(body, lambda line: line.lower() == RERUN_HEADING.lower())
+    if not heading:
+        return None
+    fields = {}
+    for line in lines:
+        match = RERUN_FIELD.match(line)
+        if match:
+            fields[match["name"].lower()] = match["value"].strip()
+    return fields
+
+
+def rerun_findings(issue):
+    me = f"#{issue['number']}"
+    heading, lines = reproduction(issue["body"])
+    if not heading:
+        return []
+    rerun = recorded_rerun(issue["body"])
+    if rerun is None:
+        return [("no-rerun", f"{me} has a reproduction under '{heading}' and no recorded rerun of it."
+                 " Rerun that reproduction on the fixed code and record it with 'close_issue.py reran';"
+                 " tests that pass are not a rerun")]
+    commands = reproduction_commands(lines)
+    if not runs_reproduction(rerun.get("ran", ""), commands):
+        return [("rerun-unrelated", f"{me}'s recorded rerun ran '{rerun.get('ran', '')}', which is none of"
+                 f" its reproduction's commands: {', '.join(commands)}")]
+    if rerun.get("result", "").lower() != RESULTS["fixed"]:
+        return [("repro-still-fails", f"{me}'s reproduction still fails on its last rerun"
+                 f" ({rerun.get('saw', '')}); the bug is not fixed, whatever the tests say")]
+    return []
+
+
 def ready_findings(issue):
     found = open_pieces(issue)
     if is_decision(issue) and not has_section(issue["body"], "## Decision"):
         found.append(("no-decision", f"#{issue['number']} is a decision issue with no '## Decision' section"))
-    return found
+    return found + rerun_findings(issue)
 
 
 # Plain gh ignores this; a gh wrapper that refuses hand-typed closes reads it to let this script's closes through.
@@ -222,6 +320,36 @@ def completed(args):
     return read_back(args, "completed", "## Proof")
 
 
+def reran(args):
+    issue = read_issue(args.repo, args.issue)
+    ran, saw = " ".join(args.ran.split()), " ".join(args.saw.split())
+    heading, lines = reproduction(issue["body"])
+    if not heading:
+        print(f"#{args.issue} has no reproduction section; record its proof with 'completed --proof'",
+              file=sys.stderr)
+        return EXIT_FINDINGS
+    if not ran or not saw:
+        print("a rerun records what you ran and what you saw it do", file=sys.stderr)
+        return EXIT_FINDINGS
+    commands = reproduction_commands(lines)
+    if not runs_reproduction(ran, commands):
+        print(f"'{ran}' is not #{args.issue}'s reproduction. Rerun what '{heading}' runs, one of:"
+              f" {', '.join(commands)}. A test that passes elsewhere does not show this bug is gone.",
+              file=sys.stderr)
+        return EXIT_FINDINGS
+    write_body(args, issue, RERUN_HEADING,
+               f"- Ran: {ran}\n- Saw: {saw}\n- Result: {RESULTS[args.result]}")
+    if recorded_rerun(read_issue(args.repo, args.issue)["body"]) is None:
+        print(f"read back #{args.issue}: its body has no '{RERUN_HEADING}' section", file=sys.stderr)
+        return EXIT_FINDINGS
+    if args.result != "fixed":
+        print(f"Recorded on #{args.issue}: its reproduction still fails. It stays open until a rerun shows it"
+              " fixed, even with every test passing.")
+        return EXIT_FINDINGS
+    print(f"Recorded on #{args.issue}: its reproduction no longer fails.")
+    return 0
+
+
 def duplicate(args):
     issue = read_issue(args.repo, args.issue)
     survivor = read_issue(args.repo, args.of)
@@ -274,16 +402,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name)
-               for name in ("ready", "completed", "duplicate", "out-of-date", "not-planned")}
+               for name in ("ready", "reran", "completed", "duplicate", "out-of-date", "not-planned")}
     for sub in parsers.values():
         sub.add_argument("--repo", required=True)
         sub.add_argument("--issue", type=int, required=True)
+    parsers["reran"].add_argument("--ran", required=True)
+    parsers["reran"].add_argument("--saw", required=True)
+    parsers["reran"].add_argument("--result", choices=sorted(RESULTS), required=True)
     parsers["completed"].add_argument("--proof", action="append", required=True)
     parsers["duplicate"].add_argument("--of", type=int, required=True)
     parsers["out-of-date"].add_argument("--evidence", required=True)
     parsers["not-planned"].add_argument("--owner-said", required=True)
     args = parser.parse_args()
-    handlers = {"ready": ready, "completed": completed, "duplicate": duplicate,
+    handlers = {"ready": ready, "reran": reran, "completed": completed, "duplicate": duplicate,
                 "out-of-date": out_of_date, "not-planned": not_planned}
     try:
         return handlers[args.command](args)
