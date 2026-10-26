@@ -4,6 +4,7 @@
   "skills": [
     "./skills/engineering/antimatter-code-quality-review",
     "./skills/engineering/antimatter-codebase-structure-review",
+    "./skills/engineering/correct-by-construction",
     "./skills/engineering/explain-diff",
     "./skills/engineering/facts-as-data",
     "./skills/engineering/pizza1",
