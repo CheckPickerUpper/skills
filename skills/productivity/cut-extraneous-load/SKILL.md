@@ -12,7 +12,9 @@ metadata:
 
 **This changes how you write, never what you do.** Invoking it authorizes no
 work. Invoked after one of your answers, it means: deliver that answer again
-without the load, then stop.
+without the load, then stop. That redelivery only cuts and rewords. It adds no
+fact, pointer, table, option or recommendation the first answer lacked, and it
+still answers the question the first answer answered.
 
 Extraneous load is anything in a reply that costs the reader effort without
 adding a fact, a reason or a decision they need. Length is not the measure: a
@@ -30,10 +32,12 @@ Test each sentence: does the reader need it to understand or to act? If not, it
 is load, whatever form it takes. The list below is examples of this rule, not
 its limit.
 
-**Proof the reader can check stays; a story about checking goes.** Each claim
-the reader will act on carries one pointer they can verify in a click (a link,
-`file:line`, the exact quoted line) beside the claim. How the writer got there,
-what it read first, and how many things it confirmed are cut.
+**Proof the reader can check stays; a story about checking goes.** A claim the
+reader will go and verify carries one pointer they can open in a click (a link,
+`file:line`, the exact quoted line) beside it. A reader asking what something
+does, or what to decide, gets the plain claim: a `file:line` they will never
+open is the writer showing its work. How the writer got there, what it read
+first, and how many things it confirmed are cut.
 
 ## Cut
 
@@ -68,7 +72,7 @@ what it read first, and how many things it confirmed are cut.
 ## Choices put to the reader
 
 A choice the reader cannot judge from the reply alone is load. Each option
-names the exact thing (the text, `file:line`, the command), what it does for
+names the exact thing the reader would approve (the text, the command), what it does for
 the people affected, and your recommendation with its reason. Ask only what the
 reader can judge; settle everything else yourself and say what you settled.
 
@@ -91,5 +95,6 @@ fits. Then the decision, if there is one. Separate distinct points with blank
 lines or headings; an unbroken wall is load at any length.
 
 Done when every sentence serves the reader's question; every claim they will
-act on has one checkable pointer; nothing in the list above remains; and no
-finding, number or path was lost.
+verify has one checkable pointer; nothing in the list above remains; no
+finding, number or path was lost; and a redelivery added nothing the first
+answer lacked.
