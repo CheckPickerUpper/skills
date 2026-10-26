@@ -14,6 +14,7 @@
     "./skills/productivity/audit-issues",
     "./skills/productivity/close-issues",
     "./skills/productivity/compose-goal",
+    "./skills/productivity/cut-extraneous-load",
     "./skills/productivity/dependency-trace",
     "./skills/productivity/make-diagram",
     "./skills/productivity/settle-blockers",

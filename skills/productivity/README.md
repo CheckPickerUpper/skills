@@ -7,6 +7,7 @@ General workflow tools.
 | [audit-issues](./audit-issues/SKILL.md) | Your GitHub repository has so many open issues that you cannot tell which are duplicates, already done, or still need work. | `/audit-issues OWNER/REPO` |
 | [close-issues](./close-issues/SKILL.md) | An agent is about to close a GitHub issue. It refuses until every sub-issue and checklist item is done, and writes the proof into the issue. | `/close-issues #142 is finished` |
 | [compose-goal](./compose-goal/SKILL.md) | You are handing a task to another agent and want it to get the outcome, the issue links and how to prove it works. | `/compose-goal hand #142 to another agent` |
+| [cut-extraneous-load](./cut-extraneous-load/SKILL.md) | Your agent's replies are padded, repeat themselves or need translating, and you want only what you need to know. | `/cut-extraneous-load say that again without the filler` |
 | [dependency-trace](./dependency-trace/SKILL.md) | Before building a feature, to work out what has to exist first and in what order. | `/dependency-trace what does checkout depend on?` |
 | [issues-to-outcomes](./issues-to-outcomes/SKILL.md) | You are writing a status update or end-of-day summary and want it to say what changed for the reader, not list issue titles. | `/issues-to-outcomes what landed this week` |
 | [make-diagram](./make-diagram/SKILL.md) | You need a diagram (flowchart, system map, pipeline) that someone new can read. | `/make-diagram how a payment goes from cart to receipt` |
