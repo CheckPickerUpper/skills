@@ -1,5 +1,21 @@
 # checkpickerupper-skills
 
+## 2.1.0
+
+### Minor Changes
+
+- [`ab284be`](https://github.com/CheckPickerUpper/skills/commit/ab284be083bd9d62636d7f7840a449a31001d2b4) Ship **`correct-by-construction`** in the **Engineering** bucket, so it installs with `npx skills` and loads from the Claude Code plugin.
+
+  `correct-by-construction` (model-invoked) makes a whole class of invalid states impossible to write, starting from the type system: it traces the writer of the bad state, strips the incident's names to find the class, moves the rule to the earliest owner that can refuse it, deletes every bypass, and proves the former bad shape fails the type checker. `zen-of-checkpickerupper` already cited it as a source.
+
+- [`7e5906e`](https://github.com/CheckPickerUpper/skills/commit/7e5906e9ebcc4ffa2d4fe18cee59ef71195ee299) Ship **`cut-extraneous-load`** in the **Productivity** bucket, so it installs with `npx skills` and loads from the Claude Code plugin.
+
+  `cut-extraneous-load` (model-invoked) changes how an agent writes, never what it does: every sentence serves the reader's question, never the writer's need to show its work. It cuts restated questions, narration, repeated points, phrases that need translating, hedges in place of a lookup and bare numbers, keeps every reason and one checkable pointer per claim, and never cuts a finding to look short.
+
+### Patch Changes
+
+- [`5aeb593`](https://github.com/CheckPickerUpper/skills/commit/5aeb5937d3303d123ec8ce34c0f8b165c5eb6e7e) close-issues: an issue with a reproduction section no longer closes as completed on passing tests alone. `close_issue.py reran` records a rerun of that reproduction under `## Reproduction rerun` and refuses a rerun that runs none of the reproduction's commands. `ready` and `completed` refuse until a recorded rerun shows the bug fixed, so an issue whose tests pass while its reproduction still fails stays open. Suggested by u/MiserableFlatworm337.
+
 ## 2.0.1
 
 ### Patch Changes

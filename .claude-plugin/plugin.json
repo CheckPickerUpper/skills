@@ -1,6 +1,6 @@
 {
   "name": "checkpickerupper-skills",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "skills": [
     "./skills/engineering/antimatter-code-quality-review",
     "./skills/engineering/antimatter-codebase-structure-review",
