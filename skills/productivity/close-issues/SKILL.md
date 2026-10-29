@@ -54,6 +54,9 @@ issue back afterwards. Never close with a bare `gh issue close`.
 3. **A decision issue** closes as completed once its answer is written under
    `## Decision` in the body; `ready` refuses it until then.
 
+GitHub never closes a milestone itself: when a close leaves its milestone with
+no open issue, the script closes the milestone too.
+
 Done when the script printed "closed as <reason>" for the issue.
 </what-to-do>
 

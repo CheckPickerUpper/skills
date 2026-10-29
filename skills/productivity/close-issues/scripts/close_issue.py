@@ -67,6 +67,7 @@ ISSUE_FIELDS = """
   parent { number title url state }
   subIssues(first: 100) { nodes { number title url state } }
   duplicateOf { number url }
+  milestone { number title state issues(states: OPEN) { totalCount } }
 """
 REASONS = {"completed": "COMPLETED", "duplicate": "DUPLICATE", "out-of-date": "NOT_PLANNED",
            "not-planned": "NOT_PLANNED"}
@@ -286,7 +287,24 @@ def read_back(args, reason, heading):
         print(f"read back #{args.issue}: " + "; ".join(problems), file=sys.stderr)
         return EXIT_FINDINGS
     print(f"#{args.issue} closed as {reason}.")
+    close_finished_milestone(args, issue)
     return 0
+
+
+def finished_milestone(issue):
+    """The number of the issue's milestone when it is still open with no open issue left."""
+    milestone = issue.get("milestone")
+    if milestone and milestone["state"] == "OPEN" and milestone["issues"]["totalCount"] == 0:
+        return milestone["number"]
+    return None
+
+
+def close_finished_milestone(args, issue):
+    """GitHub never closes a milestone itself, so the close that finishes one closes it."""
+    number = finished_milestone(issue)
+    if number is not None:
+        gh("api", "-X", "PATCH", f"repos/{args.repo}/milestones/{number}", "-f", "state=closed")
+        print(f"Milestone '{issue['milestone']['title']}' has no open issue left; closed it.")
 
 
 def refuse_open_pieces(issue):

@@ -6,6 +6,7 @@ Run with: python3 -m unittest test_close_issue
 import unittest
 
 from close_issue import (
+    finished_milestone,
     open_pieces,
     ready_findings,
     reproduction,
@@ -121,3 +122,21 @@ class Duplicate(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def milestoned(state="OPEN", open_issues=0):
+    return {**issue(state="CLOSED", reason="COMPLETED"),
+            "milestone": {"number": 2, "title": "Builds overflow", "state": state,
+                          "issues": {"totalCount": open_issues}}}
+
+
+class Milestone(unittest.TestCase):
+    def test_closing_the_last_open_issue_finishes_its_milestone(self):
+        self.assertEqual(finished_milestone(milestoned()), 2)
+
+    def test_a_milestone_with_open_issues_stays_open(self):
+        self.assertIsNone(finished_milestone(milestoned(open_issues=1)))
+
+    def test_a_closed_milestone_or_no_milestone_needs_nothing(self):
+        self.assertIsNone(finished_milestone(milestoned(state="CLOSED")))
+        self.assertIsNone(finished_milestone({**issue(), "milestone": None}))
