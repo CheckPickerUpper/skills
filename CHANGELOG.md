@@ -1,5 +1,11 @@
 # checkpickerupper-skills
 
+## 2.1.1
+
+### Patch Changes
+
+- [`b0c2ee6`](https://github.com/CheckPickerUpper/skills/commit/b0c2ee65b76dfbf85b4aac9d2abefb1362d2e674) close-issues: a close that leaves its milestone with no open issue now closes the milestone too. GitHub never closes a milestone by itself, so a milestone whose every issue was done stayed open and kept showing as 100% wherever open milestones are listed. `close_issue.py` reads the issue's milestone after every close (completed, duplicate, out-of-date or not planned) and closes it when nothing in it is still open.
+
 ## 2.1.0
 
 ### Minor Changes
