@@ -1,5 +1,15 @@
 # checkpickerupper-skills
 
+## 2.2.0
+
+### Minor Changes
+
+- [`e0c3025`](https://github.com/CheckPickerUpper/skills/commit/e0c302584ee36a29e6630f238128e0c5901f38fa) anti-ai-slop-writing: a new skill that loads whenever an agent writes or edits prose for people, such as web copy, articles, documents, emails and release notes. It bans the signs of AI writing, including puffed-up significance, promotional tone, "not X but Y", overused AI words, em dashes, chatbot talk, unfilled placeholders and "In conclusion" endings, and adds a hard ban on lists of three. Each sign comes with what to write instead.
+
+### Patch Changes
+
+- [`754a51a`](https://github.com/CheckPickerUpper/skills/commit/754a51a9daef0e0aae371313b74e1263401f6ab9) cut-extraneous-load: asked to redo an answer, it now only cuts and rewords, never adding facts, code references, tables, options or recommendations the first answer lacked. It also stops putting `file:line` references beside claims the reader will never open, such as answers about what something does.
+
 ## 2.1.1
 
 ### Patch Changes
