@@ -50,6 +50,7 @@ General workflow tools.
 
 | Skill | Use it when | Example |
 |---|---|---|
+| [anti-ai-slop-writing](./skills/productivity/anti-ai-slop-writing/SKILL.md) | You are having an agent write a web page, article, email or document, and you don't want it to read like a chatbot wrote it. It also bans lists of three. | `/anti-ai-slop-writing write the About page for our bakery` |
 | [audit-issues](./skills/productivity/audit-issues/SKILL.md) | Your GitHub repository has so many open issues that you cannot tell which are duplicates, already done, or still need work. | `/audit-issues OWNER/REPO` |
 | [close-issues](./skills/productivity/close-issues/SKILL.md) | An agent is about to close a GitHub issue. It refuses until every sub-issue and checklist item is done, and writes the proof into the issue. | `/close-issues #142 is finished` |
 | [compose-goal](./skills/productivity/compose-goal/SKILL.md) | You are handing a task to another agent and want it to get the outcome, the issue links and how to prove it works. | `/compose-goal hand #142 to another agent` |
