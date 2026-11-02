@@ -38,6 +38,11 @@ issue back afterwards. Never close with a bare `gh issue close`.
      writes the proof under `## Proof` and closes it. A commit with
      `Closes #N` closes the issue when it is pushed: run `ready` before that
      commit, and `completed` with the commit as proof right after the push.
+     A "Done when" line that can only pass once the commit exists, such as an
+     exact-commit gate or a push, goes the other way round: the commit says
+     `Part of #N`, the line is ticked after the real pass, then `ready` and
+     `completed` close the issue with that commit as proof. Never add an empty
+     commit to carry `Closes #N`.
      A commit that does only part of the work says `Part of #N` and ticks
      its checklist line.
    - **Duplicate.** Copy every detail the surviving issue lacks into its
