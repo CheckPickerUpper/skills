@@ -1,7 +1,7 @@
 ---
 name: ruthless-bottleneck-destroyer
-description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long or where the time goes, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Proves the first two by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, writes the shape into the repository's agent rules with a check that refuses it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
-short_description: "Every check catches its break, is the only one that does, runs only when its inputs change, and costs only what its claim needs."
+description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long or where the time goes, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must have something to catch, catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Deletes checks with nothing to catch, proves catching and uniqueness by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, writes the shape into the repository's agent rules with a check that refuses it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
+short_description: "Every check has something to catch, catches its break, is the only one that does, runs only when its inputs change, and costs only what its claim needs."
 allow_implicit_invocation: true
 metadata:
   when: "writing or judging a test, something is slow, the user sets a time limit, before running a check, or when accounting for time"
@@ -10,19 +10,22 @@ metadata:
 
 # Ruthless bottleneck destroyer
 
-A check earns what it costs. Every test, hook, gate and CI job has four
+A check earns what it costs. Every test, hook, gate and CI job has five
 properties, each with its own proof:
 
 | Property | Bad state | Proof |
 | --- | --- | --- |
+| **It has something to catch** | a check of code nothing uses; a check repeating what a tool in the gate already refuses; a check standing in for a type, import, schema or generator that would make the bad state impossible to write | a search of every place a user could live finds one; the break gets past every tool; a stated reason the owner upstream cannot refuse it |
 | **It catches its break** | a test that passes whether or not the behaviour happened | break the rule on purpose; the test fails |
 | **It is the only one that does** | two tests, or two stages, prove the same thing | the same break: exactly one test fails |
 | **It runs only when its inputs change** | reruns on unchanged code, coarse cache keys, a second checkout rebuilding | an unchanged rerun does zero work; one changed input redoes only its own unit |
 | **It costs only what its claim needs** | setup rebuilt per test, sleeps, process spawns, hardware thrown at repeats | the per-test time limit the runner enforces, and a check that refuses each slow shape |
 
-A check missing the first says "checked" when nothing was, which is worse than
-no check. A check missing any other is time paid for nothing. The job ends when
-every check has all four, the cause of each failure is fixed so it cannot
+A check with nothing to catch is deleted, along with any dead code it guards;
+when the rule can move upstream, move it there and delete the check. A check
+that does not catch its break says "checked" when nothing was, which is worse
+than no check. A check missing any other property is time paid for nothing.
+The job ends when every check has all five, the cause of each failure is fixed so it cannot
 return, and the result reaches every checkout. Until then there is nothing to
 report.
 
@@ -382,6 +385,11 @@ Wrong:
   before the linter started.)
 - Deleted the gate's unit-test step because CI runs the same tests. (No break
   proof; CI ran a different test selection that missed the rule.)
+- Kept `check_queries.py` because it catches broken SQL and no other check
+  does. (Nothing opens that SQL; the check and the SQL both go.)
+- Kept `check_route_ids.py` because it catches a renamed id. (The page and
+  the test could import the id, so a rename fails the build; the check has
+  nothing to catch.)
 - No command ran twice on identical code, and the new push gate runs only one
   test run, so it is the fix. (Judged per command, not per test, and the gate
   named the fix unaudited: it ran all 299 tests on every push, 10 minutes for
