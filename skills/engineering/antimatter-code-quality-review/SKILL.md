@@ -1,6 +1,6 @@
 ---
 name: antimatter-code-quality-review
-description: "Deep code-quality and pre-merge review of a commit, PR, branch, or diff. Audit correctness, intent, naming, cohesion, types, boundaries, control flow, duplication, cost, allocation, and generalization. Check predictability: does a feature or fix create a second way to perform a capability the codebase already has? Compare existing implementations, reuse or extend sound patterns, and extract shared behavior without letting one feature own the abstraction or inventing flexibility. Every finding needs evidence, a concrete before-and-after, behavior preservation, and adversarial refutation."
+description: "Deep code-quality and pre-merge review of a commit, PR, branch, or diff. Audit correctness, intent, naming, cohesion, types, boundaries, control flow, duplication, cost, allocation, generalization, and the tests and checks the change adds or edits. Check predictability: does a feature or fix create a second way to perform a capability the codebase already has? Compare existing implementations, reuse or extend sound patterns, and extract shared behavior without letting one feature own the abstraction or inventing flexibility. Every finding needs evidence, a concrete before-and-after, behavior preservation, and adversarial refutation."
 short_description: "Evidence-backed code review, including predictable patterns and reusable abstractions."
 allow_implicit_invocation: true
 metadata:
@@ -31,7 +31,7 @@ The report is short, ranked, and entirely load-bearing. A review incapable of re
 
 The review surface is the diff against a fixed point. If the user supplied a commit, branch, tag, PR, or range, use that. Otherwise infer the canonical base from the checked-out branch or remote default branch, state the fixed point, and continue. Search outside the diff for implementations of capabilities the change introduces or materially changes, and inspect relevant definitions and callers. Widen further only to establish a finding's blast radius. State the comparison paths and each widening; keep unrelated untouched code outside the review.
 
-Use the repository's available search, file-reading, and version-control tools. All procedures and references required by this skill are included here; no other skill, plugin, client-specific tool, or subagent is required. Review and propose changes; implementation requires separate authorization.
+Use the repository's available search, file-reading, and version-control tools. All procedures and references required by this skill are included here; no other skill, plugin, client-specific tool, or subagent is required. The one exception is the full procedure for proving and speeding up tests and checks, which `ruthless-bottleneck-destroyer` owns; the Tests and checks dimension below is its review summary. Review and propose changes; implementation requires separate authorization.
 
 ## Excluded
 
@@ -109,6 +109,7 @@ Survivors are ranked by blast radius and partitioned into *Blocks merge* and *Su
 - **Algorithmic cost** — whether the data structure fits the operation performed on it. A lookup by scanning, a loop nested over the same collection, a sort where one pass answers the question: each names a shape the data could have had instead.
 - **Allocation** — whether the change allocates on a path that repeats. A collection, closure, or copy built fresh per call is free once and expensive every frame.
 - **Generalization** — whether a reusable operation is confined to its first instance, written again under another name, or burdened with invented variation. Use `references/generalization-lens.md` whenever reviewing extraction, reuse, extension, or an abstraction's name or parameters.
+- **Tests and checks** — whether each test, hook, gate step or CI check the change adds or edits has something to catch, catches its break, is the only one that does, runs only when its inputs change, and costs only what its claim needs. Evidence: the rule the check is for, the break that should fail it, and the setup or repeat it pays for. After: the deletion, the move into a type, import or generator, or the fix in the shared helper or fixture, never test by test. When a survivor needs the break proof or a speed fix, run `ruthless-bottleneck-destroyer`.
 - **Correct-by-construction** — whether a type, boundary, or data-shape change renders the finding's entire class unrepresentable rather than caught. This is the highest-value finding when available.
 
 ## Smell prompts
@@ -124,6 +125,7 @@ Use these as search prompts only. They are never findings by themselves, and eac
 - **Intent fit:** missing requirement, scope creep, or a behavior that satisfies the letter of the request while violating its observable purpose.
 - **Algorithmic cost:** iteration nested over one collection, lookup by scan, repeated sorting, a value recomputed inside a loop that cannot change it.
 - **Allocation:** a collection, closure, or copy built per call; rebuilding a whole collection to append one element; a defensive copy of a value nobody mutates.
+- **Tests and checks:** setup rebuilt per test (a fresh database, server, build or child process per test); a sleep or fixed wait; a check of code nothing uses; a check standing in for a type, import or generator that would make the bad state impossible; one test proving what another already proves; a test that passes when the behavior never happened.
 - **Generalization:** a general operation named after one feature; the same behavior written under different names; a type parameter, strategy seam, or config field whose variation has no basis in the operation's requirements.
 
 ## Route a survivor to its lens
