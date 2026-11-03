@@ -42,7 +42,6 @@ Skills for code, architecture, APIs, and design decisions, with an emphasis on c
 | [pizza1](./skills/engineering/pizza1/SKILL.md) | An agent defends a choice with "it's what the codebase does" or "smallest fix", and you want the correct answer instead. | `/pizza1 why keep status as a string?` |
 | [readonly](./skills/engineering/readonly/SKILL.md) | You want an answer about your code, backed by evidence, without the agent changing anything. | `why does login retry twice? /readonly` |
 | [ruthless-bottleneck-destroyer](./skills/engineering/ruthless-bottleneck-destroyer/SKILL.md) | Your tests or CI take too long, or you are writing tests and want each one to catch its bug, with no test repeating another and none slower than it needs to be. It keeps going until every test is under the time limit you set. | `/ruthless-bottleneck-destroyer every test under 1 second` |
-| [test-hygiene](./skills/engineering/test-hygiene/SKILL.md) | You are writing or reviewing tests and want each one to fail when its rule breaks, with no test repeating another. | `/test-hygiene review the tests in this diff` |
 | [zen-of-checkpickerupper](./skills/engineering/zen-of-checkpickerupper/SKILL.md) | You are choosing between two designs that both seem fine. | `/zen-of-checkpickerupper store the total or compute it?` |
 
 ### Productivity
