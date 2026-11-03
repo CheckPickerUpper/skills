@@ -78,6 +78,10 @@ question, there is no question; implement the settled answer.
   domain; each caller declares its own value.
 - **If the answer would change what the system supports rather than what a
   caller declares, the question is wrong.**
+- A claim that nothing reads, writes or uses something covers every place a
+  consumer can live: this repository, any repository its docs name as the
+  owner, generated code and deployment configuration. Search all of them
+  before calling it dead or asking the user.
 </what-to-do>
 
 ## Protocol
@@ -313,6 +317,17 @@ than one when the bad state spans them. Do not hand the user a menu of these.
 - Add a guard, fallback, retry, lint, comment or doc and call it prevention
   while the old write path exists; keep the old lane beside the corrected one.
 - List patch-versus-root options when one option leaves the bad state writable.
+- Call a check, judge or mechanism real and stop there. A real need still
+  needs an owner for its code: before keeping custom code, check existing
+  code, the platform, a maintained library or a service, in that order.
+  Changed-file selection, time limits and generating migrations from a schema
+  are standard capabilities. Never say no library does it without the search
+  that shows it.
+- Give a verdict that rests on an unchecked "if". Check whether the owner
+  change is possible now, and state the result.
+- Rest a verdict on remembered upstream behavior. When one documentation tool
+  is unavailable, read the official site, and leave the outage out of the
+  answer.
 - Name a higher owner by intuition after being challenged, without the
   stripped sentence and a swap-test proof.
 - Call the nearest shared helper the owner when a higher source of truth owns

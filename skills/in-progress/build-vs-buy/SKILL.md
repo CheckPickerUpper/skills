@@ -51,9 +51,9 @@ search shows otherwise. A diff or plan that contains one triggers this skill.
 | Work | background jobs, queues, scheduling, leases, concurrency primitives |
 | Identity | authentication, sessions, tokens (JWT, JOSE), password hashing, cryptography |
 | Values | decimal money and currency, dates, times and time zones, locale formatting, units |
-| Storage | database drivers, query builders, migrations, caching, file paths, temporary files, atomic replace |
+| Storage | database drivers, query builders, migrations, generating migrations from a declared schema, caching, file paths, temporary files, atomic replace |
 | Interfaces | command-line parsing, routing, forms, state management, UI components, icons |
-| Tests | fake time and clocks, waiting for events, fixtures and test databases, browser automation and pooling, snapshot and golden files |
+| Tests | fake time and clocks, waiting for events, fixtures and test databases, browser automation and pooling, snapshot and golden files, selecting tests and checks by changed files, per-step time limits |
 | Operations | logging, tracing, metrics, error reporting, feature flags |
 | Code | collection algorithms, text and diff utilities, code analysis and generation |
 
@@ -200,6 +200,9 @@ code carries a solved capability that another owner should carry.
    meaning: it runs on the same inputs with the same rules. Check a linter,
    validator or parser with a probe input that breaks each rule on purpose,
    because some tools silently ignore a rule or option they do not know.
+   Also prove the replacement is the one that runs: the gate, hook or CI step
+   calls the new tool. A probe passing through a command nothing calls proves
+   nothing.
 </what-to-do>
 
 ## Answer
