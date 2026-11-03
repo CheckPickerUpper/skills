@@ -112,6 +112,9 @@ it) or `wait` (naming what it waits for and who owns that).
 - **Pay for a measurement twice.** Read the recorded times before rerunning
   anything to time it. Never rerun a suite to see whether it got faster when
   the per-test record can say.
+- **Answer "is it fast now" with a time measured before a change.** Read the
+  current record, or measure once when none exists since the change. Until
+  then the answer is "not measured since <change>", with no number beside it.
 - **Report red herrings.** Leave each of these out entirely, even as a
   footnote, a caveat or "what I haven't measured":
   - machine load: other jobs, queue waits, busy disk or CPU, memory limits;

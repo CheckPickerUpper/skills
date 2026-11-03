@@ -30,6 +30,13 @@ The result is one evidence-backed decision, not a catalog of options.
 - Install a dependency, buy a service, create an account or change production
   configuration without the user's authorization for that path.
 - Leave the decision only in the conversation.
+- Reject a candidate for a reason that holds only if the custom code stays
+  beside it. Judge every candidate as the replacement.
+- Rest a decision on an unverified fact. When one documentation tool is
+  unavailable, read the official site. A claim that nothing offers a
+  capability needs the search that shows it.
+- Offer an option that misses a hard requirement as a trade-off for the user
+  to accept. Report it as rejected, with the requirement it misses.
 
 ## Standard capabilities
 
@@ -82,7 +89,10 @@ search shows otherwise. A diff or plan that contains one triggers this skill.
    does instead, and whether that is a real constraint (a comment, an ADR, a
    dependency or a contract proves it) or a habit nobody decided. When they
    differ, say plainly that the current direction is the wrong shape and what
-   replacing it costs.
+   replacing it costs. When a candidate fails only because of a shape this
+   repository chose (tests importing built output instead of source, a custom
+   path layout), that shape is a finding: judge it against the standard
+   approach first. A shape nobody decided never disqualifies a candidate.
 
 4. **Close the candidate set,** searching by capability, not by the first
    tool's name, in this order:
@@ -92,6 +102,10 @@ search shows otherwise. A diff or plan that contains one triggers this skill.
    3. maintained packages or open-source components;
    4. managed services or vendors;
    5. custom code.
+
+   Name the unit each requirement works at (per file, per request, per row)
+   and search for owners that work at that unit. A tool whose smallest unit is
+   coarser than the need is not a candidate for that need.
 
    Check current primary sources (official documentation, repository, release
    history, licence, pricing, security notes, compatibility) when the decision
@@ -192,6 +206,10 @@ code carries a solved capability that another owner should carry.
 
 Lead with the decision in one sentence, then write it out in full sentences
 and short paragraphs, with a blank line between them.
+
+Every row and sentence changes the decision. Leave out what already works,
+who the work was sent to, other agents and their issues, and broken or
+rate-limited tools.
 
 **Before the code:** the outcome; what the repository already uses and what the
 standard approach is, and whether they differ; the decision and the chosen
