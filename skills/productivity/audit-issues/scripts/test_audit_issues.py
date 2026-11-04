@@ -193,11 +193,27 @@ class Plan(unittest.TestCase):
 
     def test_a_slice_needs_a_cause_that_stays_open(self):
         verdicts = {1: {"verdict": "done", "proof": ["c1"]},
-                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep rows"},
+                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep-rows: keep rows"},
                     3: {"verdict": "slice", "cause": "nowhere", "as": "sub-issue", "because": "parallel", "detail": "a second agent builds the editor"},
                     4: {"verdict": "out-of-date", "evidence": "0.2 replaced it"},
                     5: {"verdict": "still-real", "evidence": "read sync.py:40"}}
         self.assertEqual(kinds(plan_findings(plan_of(verdicts), self.issues)), ["cause", "cause"])
+
+    def test_a_folded_line_carries_a_line_id_unique_in_its_cause(self):
+        verdicts = {1: {"verdict": "cause", "reason": "sync"},
+                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "Keep rows"},
+                    3: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep-rows: keep rows"},
+                    4: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep-rows: and their order"},
+                    5: {"verdict": "still-real", "evidence": "e"}}
+        found = plan_findings(plan_of(verdicts), self.issues)
+        self.assertEqual(kinds(found), ["line-id", "line-id"])
+        self.assertIn("#2", found[0][1])
+        self.assertIn("#4", found[1][1])
+        self.issues[0] = issue(1, body="## Done when\n\n- [ ] keep-rows: keep rows\n")
+        verdicts[3]["line"] = "keep-rows: keep rows again"
+        del verdicts[2], verdicts[4]
+        verdicts.update({2: {"verdict": "still-real", "evidence": "e"}, 4: {"verdict": "still-real", "evidence": "e"}})
+        self.assertEqual(kinds(plan_findings(plan_of(verdicts), self.issues)), ["line-id"])
 
     def test_a_sub_issue_slice_names_why_it_is_not_a_checklist_line(self):
         verdicts = {1: {"verdict": "cause", "reason": "sync"},
@@ -215,7 +231,7 @@ class Plan(unittest.TestCase):
     def test_a_checkbox_slice_with_open_sub_issues_must_stay_a_sub_issue(self):
         self.issues[1] = issue(2, children=[(9, "OPEN")])
         verdicts = {1: {"verdict": "cause", "reason": "sync"},
-                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "x"},
+                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "x: x"},
                     3: {"verdict": "still-real", "evidence": "e"},
                     4: {"verdict": "still-real", "evidence": "e"},
                     5: {"verdict": "still-real", "evidence": "e"}}
@@ -230,7 +246,7 @@ class Plan(unittest.TestCase):
 
     def test_the_page_leads_with_counts_and_lists_each_cause_with_its_slices(self):
         verdicts = {1: {"verdict": "cause", "reason": "sync"},
-                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep rows"},
+                    2: {"verdict": "slice", "cause": 1, "as": "checkbox", "line": "keep-rows: keep rows"},
                     3: {"verdict": "slice", "cause": 1, "as": "sub-issue", "because": "parallel", "detail": "a second agent builds the editor"},
                     4: {"verdict": "duplicate", "of": 1},
                     5: {"verdict": "out-of-date", "evidence": "0.2 replaced it"}}
@@ -246,7 +262,7 @@ class Plan(unittest.TestCase):
                     2: {"verdict": "done", "proof": ["c2"]},
                     3: {"verdict": "cause", "reason": "r"},
                     4: {"verdict": "slice", "cause": 3, "as": "sub-issue", "because": "parallel", "detail": "a second agent builds the editor"},
-                    5: {"verdict": "slice", "cause": "new", "as": "checkbox", "line": "x"}}
+                    5: {"verdict": "slice", "cause": "new", "as": "checkbox", "line": "x: x"}}
         plan = plan_of(verdicts, new_causes={"new": {"title": "T", "body": "B", "milestone": "v1"}})
         ops = [(op[0], op[1]) for op in operations(plan, self.issues)]
         self.assertEqual(ops, [("create", "new"), ("sub-issue", 4), ("done", 2),

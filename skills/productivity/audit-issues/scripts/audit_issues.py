@@ -106,6 +106,8 @@ STAYING_TOP = {"cause", "still-real", "unsure"}
 SLICE_FORMS = ("checkbox", "sub-issue")
 # The only reasons a slice of a cause stays its own sub-issue; every other slice is a
 # checklist line of the cause. Already being a sub-issue is not a reason.
+# A folded line is "<id>: <text>", the checklist line shape close-issues proves by its id.
+FOLDED_LINE = re.compile(r"^(?P<id>[a-z0-9][a-z0-9-]*):\s+\S")
 SUB_ISSUE_REASONS = {
     "parallel": "a different person or agent works it at the same time as the rest",
     "other-owner": "someone other than the cause's owner owns it",
@@ -401,6 +403,12 @@ def plan_findings(plan, issues):
 
     for number in sorted(scope - verdicts.keys()):
         found.append(("missing", f"#{number} {by_number[number]['title']} has no verdict"))
+    line_ids = set()
+
+    def existing_ids(cause):
+        body = by_number[cause]["body"] if cause in by_number else ""
+        return {m["id"] for m in re.finditer(r"^\s*[-*+] \[[ xX]\] (?P<id>[a-z0-9][a-z0-9-]*):", body or "", re.M)}
+
     for number, verdict in sorted(verdicts.items()):
         me = f"#{number}"
         if number not in scope:
@@ -427,6 +435,16 @@ def plan_findings(plan, issues):
                     found.append(("duplicate", f"{me} duplicates #{verdict['of']}, which does not stay open"))
         if kind == "slice" and verdict["as"] not in SLICE_FORMS:
             found.append(("kind", f"{me} is a slice as {verdict['as']!r}; use checkbox or sub-issue"))
+        if kind == "slice" and verdict["as"] == "checkbox":
+            folded = FOLDED_LINE.match(verdict["line"])
+            if not folded:
+                found.append(("line-id", f"{me} folds in as {verdict['line']!r}, which has no line id; write"
+                              " '<id>: <text>' so a commit can prove it with 'Part of #N: <id>'"))
+            elif (verdict["cause"], folded["id"]) in line_ids or folded["id"] in existing_ids(verdict["cause"]):
+                found.append(("line-id", f"{me} folds in as '{folded['id']}', an id another line of"
+                              f" {verdict['cause']!r} already has"))
+            else:
+                line_ids.add((verdict["cause"], folded["id"]))
         if kind == "slice" and verdict["as"] == "sub-issue" and verdict["because"] not in SUB_ISSUE_REASONS:
             found.append(("sub-issue", f"{me} stays a sub-issue because {verdict['because']!r}, which is not a"
                           " reason; make it a checklist line of its cause, or give one of: "
