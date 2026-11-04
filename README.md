@@ -74,11 +74,11 @@ Tools kept around but rarely used. None yet.
 ./scripts/link-skills.sh --client codex
 ./scripts/link-skills.sh --client gemini
 ./scripts/link-skills.sh --client pi
-uv run scripts/run_tests.py
+uv run --with pytest==8.4.2 --with playwright==1.58.0 pytest
 ```
 
-`run_tests.py` runs every test in one process and fails any test, or the whole
-run, over the limits in `scripts/test-bar.json`.
+The root `conftest.py` fails any test, or the whole run, over the limits in
+`pytest.ini`.
 
 ## Client targeting
 
