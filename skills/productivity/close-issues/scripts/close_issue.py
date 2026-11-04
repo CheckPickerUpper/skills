@@ -49,7 +49,7 @@ import re
 import subprocess
 import sys
 
-from checklist_proof import Evidence, checklist, section_lines, closed_issues, line_findings, removed_findings, with_derived_ticks
+from checklist_proof import FENCE, HEADING, Evidence, checklist, section_lines, closed_issues, line_findings, removed_findings, with_derived_ticks
 
 EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
@@ -65,9 +65,6 @@ RULE = (
     " with a reproduction closes as completed only once a recorded rerun of that"
     " reproduction shows it fixed; tests that pass are not that rerun."
 )
-HEADING = re.compile(r"^#{1,6} ")
-FENCE = re.compile(r"^\s*(```|~~~)\s*(?P<lang>\S*)")
-UNTICKED = re.compile(r"^\s*[-*+] \[ \] (?P<text>.+)")
 DECISION_LABEL = re.compile(r"decision", re.IGNORECASE)
 REPRO_HEADING = re.compile(
     r"^#{1,6}\s+(steps to reproduce|how to reproduce|to reproduce|reproduce|reproduction( steps)?"
@@ -79,7 +76,7 @@ SHELL_LANGS = {"sh", "bash", "zsh", "fish", "shell", "console", "shell-session",
                "pwsh", "cmd", "bat"}
 RESULTS = {"fixed": "fixed", "still-fails": "still fails"}
 ISSUE_FIELDS = """
-  number title url state stateReason body
+  id number title url state stateReason body
   labels(first: 30) { nodes { name } }
   parent { number title url state }
   subIssues(first: 100) { nodes { number title url state } }
@@ -92,15 +89,7 @@ REASONS = {"completed": "COMPLETED", "duplicate": "DUPLICATE", "out-of-date": "N
 
 def unticked_lines(body):
     """The text of each '- [ ]' line outside code fences."""
-    found, fenced = [], False
-    for line in (body or "").splitlines():
-        if FENCE.match(line):
-            fenced = not fenced
-            continue
-        match = None if fenced else UNTICKED.match(line)
-        if match:
-            found.append(match["text"].strip())
-    return found
+    return [line.text for line in checklist(body) if not line.ticked]
 
 
 def has_section(body, heading):

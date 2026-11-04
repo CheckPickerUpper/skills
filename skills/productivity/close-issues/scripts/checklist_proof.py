@@ -20,7 +20,7 @@ import difflib
 import re
 from dataclasses import dataclass
 
-FENCE = re.compile(r"^\s*(```|~~~)")
+FENCE = re.compile(r"^\s*(```|~~~)\s*(?P<lang>\S*)")
 HEADING = re.compile(r"^#{1,6} ")
 BOX = re.compile(r"^\s*[-*+] \[(?P<mark>[ xX])\] (?P<text>.+)$")
 ID = r"[a-z0-9][a-z0-9-]*"

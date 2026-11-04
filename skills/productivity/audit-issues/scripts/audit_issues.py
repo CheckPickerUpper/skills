@@ -52,7 +52,8 @@ CLOSE_ISSUES = Path(__file__).resolve().parents[2] / "close-issues" / "scripts"
 sys.path.insert(0, str(CLOSE_ISSUES))
 try:
     import close_issue
-    from checklist_proof import ID, LINE_ID, carries, change_record, changes, checklist, moved_line, unproved_lines, without_lines
+    from close_issue import has_section, is_decision, unticked_lines
+    from checklist_proof import HEADING, ID, LINE_ID, carries, change_record, changes, checklist, moved_line, unproved_lines, without_lines
 except ModuleNotFoundError as error:
     raise SystemExit(f"audit_issues.py reads checklists and closes through the close-issues skill,"
                      f" expected at {CLOSE_ISSUES}: {error}") from error
@@ -72,11 +73,6 @@ RULE = (
     " is open, a duplicate names its original, a decision closes with its answer in the"
     " body, and an open issue sits under an open parent."
 )
-FENCE = re.compile(r"^\s*(```|~~~)")
-UNTICKED = re.compile(r"^\s*[-*+] \[ \] (?P<text>.+)")
-CHECKLIST = re.compile(r"^\s*[-*+] \[[ xX]\] (.+)", re.MULTILINE)
-HEADING = re.compile(r"^#{1,6} ")
-DECISION_LABEL = re.compile(r"decision", re.IGNORECASE)
 ISSUE_FIELDS = """
   id number title url state stateReason body updatedAt
   labels(first: 30) { nodes { name } }
@@ -137,21 +133,8 @@ SUB_ISSUE_REASONS = {
 
 # Reading issue bodies.
 
-def unticked_lines(body):
-    """The text of each '- [ ]' line outside code fences."""
-    found, fenced = [], False
-    for line in (body or "").splitlines():
-        if FENCE.match(line):
-            fenced = not fenced
-            continue
-        match = None if fenced else UNTICKED.match(line)
-        if match:
-            found.append(match["text"].strip())
-    return found
 
 
-def has_section(body, heading):
-    return any(line.strip().lower() == heading.lower() for line in (body or "").splitlines())
 
 
 def with_lines_in_section(body, heading, new_lines):
@@ -171,8 +154,6 @@ def with_lines_in_section(body, heading, new_lines):
     return "\n".join([*lines, "", heading, "", *new_lines]).lstrip("\n") + "\n"
 
 
-def is_decision(issue):
-    return any(DECISION_LABEL.search(label["name"]) for label in issue["labels"]["nodes"])
 
 
 def milestone_of(issue):
@@ -298,7 +279,7 @@ def milestone_sizes(issues):
 def workaround_hints(issues):
     hints = []
     for issue in issues:
-        asked = [issue["title"], *CHECKLIST.findall(issue["body"] or "")]
+        asked = [issue["title"], *(line.text for line in checklist(issue["body"]))]
         match = WORKAROUND.search("\n".join(asked))
         if match:
             hints.append((issue["number"], match.group(0)))
@@ -699,18 +680,8 @@ def approval_code(contents):
 
 # GitHub.
 
-def gh(*args, stdin=None):
-    result = subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True, check=False)
-    if result.returncode != 0:
-        raise RuntimeError(f"gh {' '.join(args[:3])}: {result.stderr.strip()}")
-    return result.stdout
 
 
-def graphql(query, **variables):
-    args = ["api", "graphql", "-f", f"query={query}"]
-    for name, value in variables.items():
-        args += ["-F" if isinstance(value, int) else "-f", f"{name}={value}"]
-    return json.loads(gh(*args))["data"]
 
 
 # Each repository's issues are kept on disk and refreshed with only the issues updated since
@@ -742,7 +713,7 @@ def issue_pages(repo, since=None):
         variables = {"owner": owner, "name": name, **({"since": since} if since else {})}
         if after:
             variables["after"] = after
-        page_ = graphql(query, **variables)["repository"]["issues"]
+        page_ = close_issue.graphql(query, **variables)["repository"]["issues"]
         issues += page_["nodes"]
         if not page_["pageInfo"]["hasNextPage"]:
             return issues
@@ -754,7 +725,7 @@ def issue_count(repo):
     query = """query($owner: String!, $name: String!) {
       repository(owner: $owner, name: $name) { issues { totalCount } }
     }"""
-    return graphql(query, owner=owner, name=name)["repository"]["issues"]["totalCount"]
+    return close_issue.graphql(query, owner=owner, name=name)["repository"]["issues"]["totalCount"]
 
 
 def read_mirror(path):
@@ -835,15 +806,6 @@ def synced_issues(repo):
     return [by_number[key] for key in sorted(by_number, key=int)]
 
 
-def read_issue(repo, number):
-    owner, name = repo.split("/")
-    query = f"""query($owner: String!, $name: String!, $number: Int!) {{
-      repository(owner: $owner, name: $name) {{ issue(number: $number) {{ {ISSUE_FIELDS} }} }}
-    }}"""
-    issue = graphql(query, owner=owner, name=name, number=number)["repository"]["issue"]
-    if issue is None:
-        raise RuntimeError(f"{repo}#{number} is not an issue")
-    return issue
 
 
 def run_close(repo, command, number, *options):
@@ -856,16 +818,16 @@ def run_close(repo, command, number, *options):
 
 def edit_body(repo, issue, body):
     if body != (issue["body"] or ""):
-        gh("issue", "edit", str(issue["number"]), "--repo", repo, "--body-file", "-", stdin=body)
+        close_issue.gh("issue", "edit", str(issue["number"]), "--repo", repo, "--body-file", "-", stdin=body)
 
 
 def carry_into(repo, number, target, checkbox=None):
     """Copy an issue's details into the target's body under '(was #N)' lines."""
-    survivor = read_issue(repo, target)
+    survivor = close_issue.read_issue(repo, target)
     marker = f"(was #{number})"
     if marker in (survivor["body"] or ""):
         return
-    issue = read_issue(repo, number)
+    issue = close_issue.read_issue(repo, number)
     body = survivor["body"] or ""
     if checkbox:
         body = with_lines_in_section(body, "## Done when", [f"- [ ] {checkbox} {marker}"])
@@ -878,13 +840,13 @@ def settle_lines(repo, number, fates, cause):
     """Carry out each open line's fate: add a moved line to its target's '## Done when', then
     record every move and drop under '## Checklist changes' and take the lines out of the body.
     A rerun skips what an earlier run already did."""
-    issue = read_issue(repo, number)
+    issue = close_issue.read_issue(repo, number)
     present = {line.key: line for line in checklist(issue["body"])}
     ordered = [key for key in present if key in fates] + sorted(key for key in fates if key not in present)
     for key in ordered:
         fate = fates[key]
         if "moved" in fate and key in present:
-            target = read_issue(repo, cause(fate["moved"]))
+            target = close_issue.read_issue(repo, cause(fate["moved"]))
             if not carries(target["body"], present[key], number):
                 line_id = fate.get("id") or present[key].line_id
                 edit_body(repo, target, with_lines_in_section(
@@ -898,13 +860,13 @@ def settle_lines(repo, number, fates, cause):
 
 
 def hang_under(repo, number, parent):
-    issue = read_issue(repo, number)
+    issue = close_issue.read_issue(repo, number)
     if issue["parent"] and issue["parent"]["number"] == parent:
         return
-    graphql("""mutation($parent: ID!, $child: ID!) {
+    close_issue.graphql("""mutation($parent: ID!, $child: ID!) {
       addSubIssue(input: {issueId: $parent, subIssueId: $child, replaceParent: true}) { issue { number } }
-    }""", parent=read_issue(repo, parent)["id"], child=issue["id"])
-    moved = read_issue(repo, number)["parent"]
+    }""", parent=close_issue.read_issue(repo, parent)["id"], child=issue["id"])
+    moved = close_issue.read_issue(repo, number)["parent"]
     if not moved or moved["number"] != parent:
         raise RuntimeError(f"read back #{number}: it is not under #{parent}")
 
@@ -922,27 +884,27 @@ def apply_operation(repo, op, created):
             args = ["issue", "create", "--repo", repo, "--title", data["title"], "--body-file", "-"]
             if data.get("milestone"):
                 args += ["--milestone", data["milestone"]]
-            created[ref] = int(gh(*args, stdin=data.get("body", "")).strip().rsplit("/", 1)[-1])
+            created[ref] = int(close_issue.gh(*args, stdin=data.get("body", "")).strip().rsplit("/", 1)[-1])
         case "sub-issue":
             hang_under(repo, ref, cause(data["cause"]))
         case "premise":
-            issue = read_issue(repo, ref)
+            issue = close_issue.read_issue(repo, ref)
             if issue["title"] != data["title"]:
-                gh("issue", "edit", str(ref), "--repo", repo, "--title", data["title"])
+                close_issue.gh("issue", "edit", str(ref), "--repo", repo, "--title", data["title"])
             edit_body(repo, issue, with_lines_in_section(
                 issue["body"], "## Proper fix", [] if data["fix"] in (issue["body"] or "") else [data["fix"]]))
             hang_under(repo, ref, cause(data["under"]))
         case "fold" | "duplicate":
             target = cause(data["cause"] if kind == "fold" else data["of"])
             carry_into(repo, ref, target, checkbox=data.get("line") if kind == "fold" else None)
-            if read_issue(repo, ref)["stateReason"] != "DUPLICATE":
+            if close_issue.read_issue(repo, ref)["stateReason"] != "DUPLICATE":
                 run_close(repo, "duplicate", ref, "--of", str(target))
         case "done":
             settle_lines(repo, ref, data.get("lines", {}), cause)
             run_close(repo, "completed", ref, *[arg for p in data["proof"] for arg in ("--proof", p)])
         case "out-of-date":
             settle_lines(repo, ref, data.get("lines", {}), cause)
-            if read_issue(repo, ref)["state"] == "OPEN":
+            if close_issue.read_issue(repo, ref)["state"] == "OPEN":
                 run_close(repo, "out-of-date", ref, "--evidence", data["evidence"])
 
 
@@ -1019,7 +981,7 @@ def index(args):
 def draft(args):
     milestone_description = ""
     if args.milestone:
-        found = json.loads(gh("api", f"repos/{args.repo}/milestones?state=all&per_page=100"))
+        found = json.loads(close_issue.gh("api", f"repos/{args.repo}/milestones?state=all&per_page=100"))
         matching = [m for m in found if m["title"] == args.milestone]
         if not matching:
             raise RuntimeError(f"{args.repo} has no milestone titled {args.milestone!r}")

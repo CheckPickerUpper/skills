@@ -417,7 +417,7 @@ class Mirror(unittest.TestCase):
     def run_script(self, *args):
         self.github.calls = []
         out, err = io.StringIO(), io.StringIO()
-        with mock.patch.object(audit_issues, "gh", self.github), \
+        with mock.patch.object(audit_issues.close_issue, "gh", self.github), \
                 mock.patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache)}), \
                 contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
             code = audit_issues.main([*args, "--repo", "example/app"])
@@ -542,8 +542,7 @@ class ApplyLineFates(unittest.TestCase):
 
     def run_script(self, *args):
         out, err = io.StringIO(), io.StringIO()
-        with mock.patch.object(audit_issues, "gh", self.github), \
-                mock.patch.object(audit_issues.close_issue, "gh", self.github), \
+        with mock.patch.object(audit_issues.close_issue, "gh", self.github), \
                 mock.patch.object(audit_issues.close_issue, "landed_commits", lambda args, number: []), \
                 mock.patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.folder / "cache")}), \
                 contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
