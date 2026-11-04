@@ -39,11 +39,18 @@ RULE = (
     " variation has no real form."
 )
 
-SOURCE_SUFFIXES = {
-    ".c", ".cc", ".cjs", ".cpp", ".cs", ".dart", ".ex", ".exs", ".go", ".h", ".hpp", ".hs",
-    ".java", ".js", ".jsx", ".kt", ".lua", ".luau", ".mjs", ".odin", ".php", ".py", ".rb", ".rs",
-    ".scala", ".sh", ".swift", ".ts", ".tsx",
+# Every text file is read as code, in any language, except these kinds that hold no logic.
+# A file whose name ends in one of them is skipped, and so is any file with a NUL byte.
+NOT_CODE = {
+    "prose": (".md", ".markdown", ".mdx", ".rst", ".txt", ".adoc", ".org", ".tex"),
+    "data": (".json", ".jsonl", ".ndjson", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".xml",
+             ".csv", ".tsv", ".env", ".properties", ".plist"),
+    "lockfile": (".lock", ".sum", "-lock.yaml", "-lock.json"),
+    "minified or generated": (".min.js", ".min.css", ".map", ".snap"),
+    "media": (".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".pdf", ".mp3", ".mp4",
+              ".wav", ".woff", ".woff2", ".ttf", ".otf"),
 }
+BINARY_PROBE_BYTES = 8192
 TEST_PATH = re.compile(
     r"(^|/)(tests?|spec|fixtures?|__tests__)/|(^|/)test_[^/]*$|_test\.[^/]*$|\.(test|spec)\.[^/]*$")
 STRING = r'"(?:[^"\\\n]|\\.)*"|\'(?:[^\'\\\n]|\\.)*\''
@@ -129,13 +136,23 @@ def source_files(paths, include_tests):
         else:
             matched = [str(f) for f in ([Path(root)] if Path(root).is_file() else Path(root).rglob("*"))
                        if f.is_file()]
-        readable = [f for f in matched if Path(f).suffix in SOURCE_SUFFIXES]
+        readable = [f for f in matched if not_code_kind(f) is None]
         chosen = [f for f in readable if include_tests or not TEST_PATH.search(f)]
         if chosen:
             files += chosen
         else:
             unread[root] = matched_instead(matched, readable)
     return sorted(set(files)), unread
+
+
+def not_code_kind(path):
+    """The NOT_CODE kind a file belongs to, "binary" when it holds a NUL byte, or None for code."""
+    name = Path(path).name.lower()
+    for kind, endings in NOT_CODE.items():
+        if name.endswith(endings):
+            return kind
+    with open(path, "rb") as probe:
+        return "binary" if b"\0" in probe.read(BINARY_PROBE_BYTES) else None
 
 
 def matched_instead(matched, readable):
@@ -146,8 +163,8 @@ def matched_instead(matched, readable):
     noun = "file" if len(matched) == 1 else "files"
     if readable:
         return f"{len(matched)} {noun}, none read (test files: {len(readable)}; pass --include-tests)"
-    types = Counter(Path(f).suffix or "(no extension)" for f in matched)
-    return f"{len(matched)} {noun}, none read (" + ", ".join(f"{t}: {n}" for t, n in sorted(types.items())) + ")"
+    kinds = Counter(f"{not_code_kind(f)} {Path(f).suffix or '(no extension)'}" for f in matched)
+    return f"{len(matched)} {noun}, none read (" + ", ".join(f"{k}: {n}" for k, n in sorted(kinds.items())) + ")"
 
 
 def added_lines(rev, path):
@@ -219,8 +236,9 @@ def main(argv=None):
             for root, instead in unread.items():
                 print(f"{root}: {instead}", file=sys.stderr)
             print(f"unreadable: {len(unread)} of {len(args.paths)} paths gave no source file to read;"
-                  f" a census of code it did not read proves nothing. Source types: "
-                  + " ".join(sorted(SOURCE_SUFFIXES)), file=sys.stderr)
+                  " a census of code it did not read proves nothing. Not read as code: "
+                  + "; ".join(f"{kind} ({' '.join(endings)})" for kind, endings in NOT_CODE.items())
+                  + "; binary (a NUL byte)", file=sys.stderr)
             return EXIT_UNREADABLE
         for path in files:
             file_leads = leads(path, Path(path).read_text(encoding="utf-8", errors="replace"))

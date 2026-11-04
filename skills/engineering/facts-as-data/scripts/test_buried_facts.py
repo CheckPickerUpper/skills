@@ -121,19 +121,27 @@ class Review(unittest.TestCase):
             os.chdir(cwd)
         return code, out.getvalue()
 
-    def test_odin_source_is_read(self):
-        Path(self.repo, "ratings.odin").write_text(
-            'PAUSES := []string{"sleep", "usleep", "nanosleep", "yield"}\n')
-        code, out = self.run_main("ratings.odin")
+    def test_every_language_is_read_and_only_docs_data_and_binaries_are_not(self):
+        names = '["sleep", "usleep", "nanosleep", "yield"]\n'
+        for code in ("rate.zig", "rate.wombat", "bin/rate"):
+            Path(self.repo, code).parent.mkdir(exist_ok=True)
+            Path(self.repo, code).write_text(names)
+        for skipped in ("README.md", "package-lock.json", "config.yaml", "ui.min.js"):
+            Path(self.repo, skipped).write_text(names)
+        Path(self.repo, "logo.bin").write_bytes(b"\x00" + names.encode())
+        code, out = self.run_main(".")
         self.assertEqual(code, 1)
-        self.assertIn("ratings.odin:1", out)
+        for read in ("rate.zig:1", "rate.wombat:1", "bin/rate:1"):
+            self.assertIn(read, out)
+        for skipped in ("README.md", "package-lock.json", "config.yaml", "ui.min.js", "logo.bin"):
+            self.assertNotIn(skipped, out)
 
     def test_a_path_with_no_readable_source_is_unreadable_not_clean(self):
         Path(self.repo, "notes").mkdir()
         Path(self.repo, "notes", "plan.txt").write_text('["a1", "b2", "c3", "d4"]\n')
         code, out = self.run_main("notes", "missing")
         self.assertEqual(code, 2)
-        self.assertIn("notes: 1 file, none read (.txt: 1)", out)
+        self.assertIn("notes: 1 file, none read (prose .txt: 1)", out)
         self.assertIn("missing: matches no file", out)
         self.assertNotIn("No unsettled leads", out)
 
