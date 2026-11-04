@@ -1,6 +1,6 @@
 ---
 name: ruthless-bottleneck-destroyer
-description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long or where the time goes, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must have something to catch, catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Deletes checks with nothing to catch, proves catching and uniqueness by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, writes the shape into the repository's agent rules with a check that refuses it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
+description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long or where the time goes, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must have something to catch, catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Deletes checks with nothing to catch, proves catching and uniqueness by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, makes the slow shape unwritable at its owner instead of adding a check for it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
 short_description: "Every check has something to catch, catches its break, is the only one that does, runs only when its inputs change, and costs only what its claim needs."
 allow_implicit_invocation: true
 metadata:
@@ -112,6 +112,12 @@ it) or `wait` (naming what it waits for and who owns that).
   none of it; the time comes back on a busier machine. They are allowed only
   after every remaining unit of work is accounted for and none repeats (step
   7), and never reported as the fix.
+- **Cut parallelism to make a repeat fit.** Fewer workers or a lower
+  concurrency limit spreads the same repeated setup over more time instead of
+  removing it; it is throwing hardware at it in reverse.
+- **Guard a slow shape with a slow check.** A script that walks the tree for
+  the shape after the fact is more cost; make the shape unwritable at its
+  owner (step 10).
 - **Pay for a measurement twice.** Read the recorded times before rerunning
   anything to time it. Never rerun a suite to see whether it got faster when
   the per-test record can say.
@@ -254,7 +260,11 @@ nothing about them.
    | A fixed sleep, or polling until a lock or lease clears | Wait for the event: the process exit, the written row, the listener accepting, the lock released |
    | A small program started for every lookup (version control, path resolution, file locks) on every step | Read those facts once per run, or in-process |
    | A new database connection, schema run or fsync per write | One prepared connection per thread, reused |
-   | Setup built again in every test: migrations replayed, a scratch repository with fixture commits, a dependency tree copied into each fixture, a whole store copied in and out | Build it once per file from a template keyed by its inputs, and give each test a cheap copy |
+   | Setup built again in every test: migrations replayed, a scratch repository with fixture commits, a dependency tree copied into each fixture, a whole store copied in and out | Build it once from a template keyed by its inputs, only when no template with that key exists, under a lock so concurrent runs build it once; give each test a cheap copy |
+   | A server or service (database, broker, browser, emulator) started per test file, per worker or per test | One per machine or run, started once by the runner's global setup; each file gets a copy inside it |
+   | A fresh copy per test where a rolled-back transaction would isolate it | A transaction per test, rolled back; a test whose claim needs committed data uses a separately named helper |
+   | Checks that fire only on commit (deferred constraints, commit hooks, triggers on commit), which a rolled-back test never reaches | The shared setup makes them fire right after each statement, so rollback tests still exercise them; the few tests that depend on commit timing keep their own copy |
+   | Copies or servers left behind by killed runs | Name each by its owner process; at startup, remove those whose process is gone |
    | A test that runs on a large input to prove something a tiny one shows | Test on the smallest real input that can show the behaviour |
    | A browser, runtime or emulator booted per test or per lookup | One per run, a fresh context per test |
    | A cache keyed on a whole folder, or on more files than the tool reads, so a docs edit reruns everything | Key per unit, on exactly the inputs the tool reads, plus the toolchain |
@@ -287,6 +297,21 @@ nothing about them.
      test goes through that store rather than around it. Prove it: an
      unchanged rerun does zero units, and one changed input redoes exactly its
      own unit. Only then may the remaining, justified units run in parallel.
+   - **Put each piece of setup at the widest scope its inputs allow,** and
+     give each test the cheapest isolation that still proves its claim:
+
+     | Scope | What lives there | Keyed by |
+     | --- | --- | --- |
+     | Machine | servers and services: a database, broker, browser, emulator, runtime | tool version and config |
+     | Run | prepared state: migrated schema, seeded data, built fixtures | the files that make it |
+     | File or worker | a cheap copy of the prepared state | its owner process |
+     | Test | isolation inside that copy, undone at the end | nothing |
+
+     Isolation, cheapest first: a transaction rolled back at the end; a copy
+     of a template (a template database, a copy-on-write file or folder, a
+     fresh browser context, a key prefix on a shared server); a fresh
+     instance, only for a test whose claim needs one, through a separately
+     named helper so the exception shows in the test.
    - **Put the fix inside a step agents already run** (the commit hook, the
      existing check command, the compile step), so nobody has to remember a
      new command. Prefer per-unit results keyed by contents, toolchain and the
@@ -313,12 +338,27 @@ nothing about them.
    because some tools silently ignore a rule name they do not know. A reused
    result is reused only when its inputs are unchanged **and** its last run
    passed; a failed or unknown result reruns. Delete only after searching
-   every config for the deleted name.
-10. **Make it impossible to come back.** Write each slow shape and its fix
-    into the repository's agent rules (`AGENTS.md` or its equivalent) in the
-    same commit as the fix, and add a check that refuses the shape where one
-    can (a lint against blocking spawns in tests, the per-test judge from step
-    1, a refusal of flags that discard the build cache).
+   every config for the deleted name. When setup moves to a wider scope,
+   break isolation on purpose: one test writes, and the next test or file
+   must not see it. If it does, the shared setup leaks and the fix is not
+   done.
+10. **Make it impossible to come back.** Make the slow shape unwritable at
+    its owner, so no check is needed to catch it:
+    - the shared helper or fixture is the only public way to get the
+      resource; the call that starts a server, opens a fresh database or
+      boots a browser is private to it, so a test cannot spell the slow
+      shape;
+    - the runner's configuration owns the scope (global setup starts the one
+      server; per-file setup hands out copies), so a test file has nothing
+      to configure;
+    - the cheap path is the default and the exception has its own named
+      helper, so choosing the expensive one shows in the test's code.
+
+    Only when the owner cannot make the shape unwritable, add a rule to a
+    linter or type checker the repository already runs on every change,
+    never a new script that walks the tree. Then write the shape and its
+    owner into the repository's agent rules (`AGENTS.md` or its equivalent)
+    in the same commit as the fix.
 11. **Make every checkout get it.** A speed-up that lands only on the
     development branch while other worktrees and branches keep the slow code
     is not done: every checkout gets it with no extra work from anyone.
