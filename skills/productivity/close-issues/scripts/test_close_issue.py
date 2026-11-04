@@ -233,6 +233,13 @@ class RemovedLines(unittest.TestCase):
         body = "- [ ] cleanse: Cleanse effects\n- [ ] Show the healed amount above the fighter\n"
         self.assertEqual(self.removed(body), [])
 
+    def test_a_line_that_gains_an_id_is_not_a_removal(self):
+        same = "- [ ] cleanse: Cleanse effects\n- [ ] number: Show the heal number above the fighter\n"
+        self.assertEqual(self.removed(same), [])
+        reworded = same.replace("heal number", "healed amount")
+        self.assertEqual(self.removed(reworded), [])
+        self.assertEqual(kinds(self.removed("- [ ] cleanse: Cleanse effects\n")), ["removed-unrecorded"])
+
     def test_a_line_removed_after_its_commit_landed_is_fine(self):
         body = "- [ ] Show the heal number above the fighter\n"
         self.assertEqual(self.removed(body, [("c0ffee1234", "Part of #1962: cleanse")]), [])

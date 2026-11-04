@@ -24,6 +24,7 @@ HEADING = re.compile(r"^#{1,6} ")
 BOX = re.compile(r"^\s*[-*+] \[(?P<mark>[ xX])\] (?P<text>.+)$")
 ID = r"[a-z0-9][a-z0-9-]*"
 LINE_ID = re.compile(rf"^(?P<id>{ID}):\s+\S")
+ID_PREFIX = re.compile(rf"^{ID}:\s+")
 LINE_SHA = re.compile(r"\((?P<sha>[0-9a-f]{7,40})\)\s*$")
 CHANGE = re.compile(r"^\s*[-*+] (?P<key>.+?): (?:moved to #(?P<to>\d+)|dropped[,:]?\s*(?P<why>.*))\s*$")
 PROOF_LINE = re.compile(rf"^\s*[-*+] (?P<id>{ID}):\s*(?P<evidence>.*https?://\S+.*)$")
@@ -42,6 +43,11 @@ class Line:
     @property
     def key(self):
         return self.line_id or self.text
+
+    @property
+    def wording(self):
+        """The text without its line id, so a line that gains an id keeps its wording."""
+        return ID_PREFIX.sub("", self.text, count=1) if self.line_id else self.text
 
 
 def checklist(body):
@@ -156,9 +162,10 @@ def changes(body):
 
 
 def reworded(line, current):
-    """Whether an id-less line that left the body lives on as a reworded current line."""
-    return any(difflib.SequenceMatcher(None, line.text, other.text).ratio() >= REWORD_SIMILARITY
-               for other in current if other.line_id is None)
+    """Whether an id-less line that left the body lives on as a current line, reworded or
+    given a line id."""
+    return any(difflib.SequenceMatcher(None, line.text, other.wording).ratio() >= REWORD_SIMILARITY
+               for other in current)
 
 
 def removed_findings(evidence, revisions, read_body):
