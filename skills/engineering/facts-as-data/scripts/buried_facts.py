@@ -18,6 +18,7 @@ import csv
 import re
 import subprocess
 import sys
+from collections import Counter
 from dataclasses import dataclass
 from enum import Enum, StrEnum
 from pathlib import Path
@@ -40,7 +41,7 @@ RULE = (
 
 SOURCE_SUFFIXES = {
     ".c", ".cc", ".cjs", ".cpp", ".cs", ".dart", ".ex", ".exs", ".go", ".h", ".hpp", ".hs",
-    ".java", ".js", ".jsx", ".kt", ".lua", ".luau", ".mjs", ".php", ".py", ".rb", ".rs",
+    ".java", ".js", ".jsx", ".kt", ".lua", ".luau", ".mjs", ".odin", ".php", ".py", ".rb", ".rs",
     ".scala", ".sh", ".swift", ".ts", ".tsx",
 }
 TEST_PATH = re.compile(
@@ -117,15 +118,36 @@ def leads(path, text):
 
 
 def source_files(paths, include_tests):
-    listed = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "--", *paths],
-                            capture_output=True, text=True)
-    if listed.returncode == 0:
-        files = listed.stdout.splitlines()
-    else:
-        files = [str(p) for root in paths for p in
-                 ([Path(root)] if Path(root).is_file() else Path(root).rglob("*"))]
-    return sorted(f for f in files if Path(f).suffix in SOURCE_SUFFIXES and Path(f).is_file()
-                  and (include_tests or not TEST_PATH.search(f)))
+    """(files to read, unread) where unread names each path that gave no file to read:
+    path -> what it matched instead, so a census never passes on code it did not open."""
+    files, unread = [], {}
+    for root in paths:
+        listed = subprocess.run(["git", "ls-files", "-co", "--exclude-standard", "--", root],
+                                capture_output=True, text=True)
+        if listed.returncode == 0:
+            matched = [f for f in listed.stdout.splitlines() if Path(f).is_file()]
+        else:
+            matched = [str(f) for f in ([Path(root)] if Path(root).is_file() else Path(root).rglob("*"))
+                       if f.is_file()]
+        readable = [f for f in matched if Path(f).suffix in SOURCE_SUFFIXES]
+        chosen = [f for f in readable if include_tests or not TEST_PATH.search(f)]
+        if chosen:
+            files += chosen
+        else:
+            unread[root] = matched_instead(matched, readable)
+    return sorted(set(files)), unread
+
+
+def matched_instead(matched, readable):
+    """What a path matched when none of it is read: no file, test files only, or files
+    whose type is not source."""
+    if not matched:
+        return "matches no file"
+    noun = "file" if len(matched) == 1 else "files"
+    if readable:
+        return f"{len(matched)} {noun}, none read (test files: {len(readable)}; pass --include-tests)"
+    types = Counter(Path(f).suffix or "(no extension)" for f in matched)
+    return f"{len(matched)} {noun}, none read (" + ", ".join(f"{t}: {n}" for t, n in sorted(types.items())) + ")"
 
 
 def added_lines(rev, path):
@@ -192,7 +214,15 @@ def main(argv=None):
     try:
         rows = read_record(args.record) if args.record else []
         found = []
-        for path in source_files(args.paths, args.include_tests):
+        files, unread = source_files(args.paths, args.include_tests)
+        if unread:
+            for root, instead in unread.items():
+                print(f"{root}: {instead}", file=sys.stderr)
+            print(f"unreadable: {len(unread)} of {len(args.paths)} paths gave no source file to read;"
+                  f" a census of code it did not read proves nothing. Source types: "
+                  + " ".join(sorted(SOURCE_SUFFIXES)), file=sys.stderr)
+            return EXIT_UNREADABLE
+        for path in files:
             file_leads = leads(path, Path(path).read_text(encoding="utf-8", errors="replace"))
             if args.since:
                 added = added_lines(args.since, path)

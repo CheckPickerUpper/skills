@@ -115,11 +115,33 @@ class Review(unittest.TestCase):
         cwd = os.getcwd()
         os.chdir(self.repo)
         try:
-            with contextlib.redirect_stdout(out):
+            with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
                 code = main(list(args))
         finally:
             os.chdir(cwd)
         return code, out.getvalue()
+
+    def test_odin_source_is_read(self):
+        Path(self.repo, "ratings.odin").write_text(
+            'PAUSES := []string{"sleep", "usleep", "nanosleep", "yield"}\n')
+        code, out = self.run_main("ratings.odin")
+        self.assertEqual(code, 1)
+        self.assertIn("ratings.odin:1", out)
+
+    def test_a_path_with_no_readable_source_is_unreadable_not_clean(self):
+        Path(self.repo, "notes").mkdir()
+        Path(self.repo, "notes", "plan.txt").write_text('["a1", "b2", "c3", "d4"]\n')
+        code, out = self.run_main("notes", "missing")
+        self.assertEqual(code, 2)
+        self.assertIn("notes: 1 file, none read (.txt: 1)", out)
+        self.assertIn("missing: matches no file", out)
+        self.assertNotIn("No unsettled leads", out)
+
+    def test_a_path_holding_only_tests_names_the_flag(self):
+        Path(self.repo, "test_rule.py").write_text('X = ["a1", "b2", "c3", "d4"]\n')
+        code, out = self.run_main("test_rule.py")
+        self.assertEqual(code, 2)
+        self.assertIn("test_rule.py: 1 file, none read (test files: 1; pass --include-tests)", out)
 
     def test_only_added_lines_are_reviewed(self):
         self.assertEqual(self.run_main("--since", "HEAD", "rule.py")[0], 0)
