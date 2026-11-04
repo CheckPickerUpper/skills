@@ -202,12 +202,12 @@ def dropped_entries(previous, current, accounted):
     return dropped
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("page", type=Path)
     parser.add_argument("--previous", type=Path, help="the last published version")
     parser.add_argument("--dropped", type=Path, help="file accounting for dropped entries")
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
 
     try:
         current = read_page(arguments.page)

@@ -3,13 +3,16 @@
 Run with: python3 -m unittest test_audit_issues
 """
 
+import contextlib
+import io
 import json
 import os
-import subprocess
-import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
+
+import audit_issues
 
 from audit_issues import (
     approval_code,
@@ -242,38 +245,41 @@ class Plan(unittest.TestCase):
         self.assertNotEqual(approval_code([b"{}"]), approval_code([b"{ }"]))
 
 
-SCRIPT = Path(__file__).resolve().with_name("audit_issues.py")
+class StandInGitHub:
+    """Answers `gh api graphql` from a list of issues, the way GitHub would: a since-filter
+    keeps issues updated at or after that time, oldest first. Records the kind of each query."""
 
-# A stand-in for `gh api graphql`: it answers from tracker.json beside it, the way GitHub
-# would (a since-filter keeps issues updated at or after that time, oldest first), and
-# appends the kind of each query it answered to calls.log.
-STAND_IN_GH = """#!{python}
-import json, sys
-from pathlib import Path
-here = Path(__file__).resolve().parent
-args = sys.argv[1:]
-values = dict(a.split("=", 1) for flag, a in zip(args, args[1:]) if flag in ("-f", "-F"))
-query = values["query"]
-if "totalCount" in query and "nodes" not in query:
-    kind = "count"
-elif "filterBy" in query:
-    kind = "since"
-else:
-    kind = "full"
-with open(here / "calls.log", "a") as log:
-    log.write(kind + "\\n")
-issues = json.loads((here / "tracker.json").read_text())
-if kind == "count":
-    print(json.dumps({{"data": {{"repository": {{"issues": {{"totalCount": len(issues)}}}}}}}}))
-    sys.exit(0)
-if kind == "since":
-    issues = sorted((i for i in issues if i["updatedAt"] >= values["since"]), key=lambda i: i["updatedAt"])
-start = int(values.get("after", "0"))
-nodes = issues[start:start + 50]
-more = start + 50 < len(issues)
-print(json.dumps({{"data": {{"repository": {{"issues": {{
-    "pageInfo": {{"hasNextPage": more, "endCursor": str(start + 50)}}, "nodes": nodes}}}}}}}}))
-"""
+    def __init__(self):
+        self.issues, self.calls = [], []
+
+    def __call__(self, *args, stdin=None):
+        values = dict(a.split("=", 1) for flag, a in zip(args, args[1:]) if flag in ("-f", "-F"))
+        query = values["query"]
+        if "totalCount" in query and "nodes" not in query:
+            kind = "count"
+        elif "filterBy" in query:
+            kind = "since"
+        else:
+            kind = "full"
+        self.calls.append(kind)
+        issues = self.issues
+        if kind == "count":
+            return json.dumps({"data": {"repository": {"issues": {"totalCount": len(issues)}}}})
+        if kind == "since":
+            issues = sorted((i for i in issues if i["updatedAt"] >= values["since"]),
+                            key=lambda i: i["updatedAt"])
+        start = int(values.get("after", "0"))
+        more = start + 50 < len(issues)
+        return json.dumps({"data": {"repository": {"issues": {
+            "pageInfo": {"hasNextPage": more, "endCursor": str(start + 50)},
+            "nodes": issues[start:start + 50]}}}})
+
+
+class Result:
+    """What one run printed and returned, read like a finished command."""
+
+    def __init__(self, returncode, stdout, stderr):
+        self.returncode, self.stdout, self.stderr = returncode, stdout, stderr
 
 
 def tracked(number, updated, **fields):
@@ -284,34 +290,26 @@ class Mirror(unittest.TestCase):
     """Every command reads the tracker through a local copy that only fetches what changed."""
 
     def setUp(self):
-        self.folder = Path(tempfile.mkdtemp(prefix="audit-issues-test-"))
-        self.bin = self.folder / "bin"
-        self.bin.mkdir()
-        stand_in = self.bin / "gh"
-        stand_in.write_text(STAND_IN_GH.format(python=sys.executable))
-        stand_in.chmod(0o755)
+        folder = tempfile.TemporaryDirectory(prefix="audit-issues-test-")
+        self.addCleanup(folder.cleanup)
+        self.folder = Path(folder.name)
+        self.github = StandInGitHub()
         self.cache = self.folder / "cache"
         self.mirror = self.cache / "checkpickerupper" / "audit-issues" / "example__app.json"
         self.draft_body = self.folder / "draft.md"
         self.draft_body.write_text("error: row 40 rejected by the server")
 
-    def tearDown(self):
-        for path in sorted(self.folder.rglob("*"), reverse=True):
-            path.rmdir() if path.is_dir() else path.unlink()
-        self.folder.rmdir()
-
     def tracker(self, *issues):
-        (self.bin / "tracker.json").write_text(json.dumps(list(issues)))
+        self.github.issues = [json.loads(json.dumps(i)) for i in issues]
 
     def run_script(self, *args):
-        (self.bin / "calls.log").unlink(missing_ok=True)
-        env = {**os.environ, "PATH": f"{self.bin}{os.pathsep}{os.environ['PATH']}",
-               "XDG_CACHE_HOME": str(self.cache)}
-        result = subprocess.run([sys.executable, str(SCRIPT), *args, "--repo", "example/app"],
-                                capture_output=True, text=True, env=env, check=False)
-        log = self.bin / "calls.log"
-        calls = log.read_text().split() if log.is_file() else []
-        return result, calls
+        self.github.calls = []
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(audit_issues, "gh", self.github), \
+                mock.patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache)}), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = audit_issues.main([*args, "--repo", "example/app"])
+        return Result(code, out.getvalue(), err.getvalue()), self.github.calls
 
     def draft(self):
         return self.run_script("draft", "--title", "Import drops rows", "--body-file", str(self.draft_body))

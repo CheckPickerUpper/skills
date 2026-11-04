@@ -57,24 +57,24 @@ def reference_led_lines(report: str) -> list[ReferenceLedLine]:
     return found
 
 
-def main() -> None:
+def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("report", nargs="?", type=Path, help="report file; standard input when omitted")
-    arguments = parser.parse_args()
+    arguments = parser.parse_args(argv)
     report = sys.stdin.read() if arguments.report is None else arguments.report.read_text(encoding="utf-8")
     if not report.strip():
         print("The report is empty; pass the draft as a file or on standard input.", file=sys.stderr)
-        sys.exit(EXIT_EMPTY)
+        return EXIT_EMPTY
     found = reference_led_lines(report)
     if not found:
         print("No line opens with a tracker reference.")
-        return
+        return 0
     count = "1 line opens" if len(found) == 1 else f"{len(found)} lines open"
     print(f"{count} with a tracker reference.\n{RULE}\n")
     for finding in found:
         print(f"  line {finding.number}: {finding.text}")
-    sys.exit(EXIT_FINDINGS)
+    return EXIT_FINDINGS
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

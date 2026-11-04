@@ -1,12 +1,12 @@
-"""Behavioral tests of check_page.py at its command line."""
+"""Behavioral tests of check_page.py at its command line, called in-process."""
 
+import contextlib
+import io
 from pathlib import Path
-import subprocess
-import sys
 import tempfile
 import unittest
 
-SCRIPT = Path(__file__).resolve().parent / "check_page.py"
+import check_page
 
 STEPS_WITH_STATUS = """\
 <h1>Every ability step</h1>
@@ -33,6 +33,13 @@ STEPS_WITHOUT_STATUS = """\
 """
 
 
+class Result:
+    """What one run printed and returned, read like a finished command."""
+
+    def __init__(self, returncode, stdout):
+        self.returncode, self.stdout = returncode, stdout
+
+
 class CheckPage(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()
@@ -45,10 +52,10 @@ class CheckPage(unittest.TestCase):
         return path
 
     def check(self, *arguments):
-        return subprocess.run(
-            [sys.executable, str(SCRIPT), *map(str, arguments)],
-            capture_output=True, text=True, timeout=10,
-        )
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = check_page.main([str(argument) for argument in arguments])
+        return Result(code, out.getvalue())
 
     def test_plain_code_block_is_refused_with_its_line(self):
         page = self.page("page.html", "<p>Before</p>\n<pre><code>ReadBody(): Body</code></pre>")

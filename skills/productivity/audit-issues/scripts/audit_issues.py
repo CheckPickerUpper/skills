@@ -931,7 +931,7 @@ def apply(args):
     return 0
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name) for name in ("scan", "index", "draft", "plan", "apply")}
@@ -948,7 +948,7 @@ def main():
         parsers[name].add_argument("--verdicts", type=Path, action="append", default=[])
     parsers["plan"].add_argument("--page", type=Path, required=True)
     parsers["apply"].add_argument("--approved", required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     handlers = {"scan": scan, "index": index, "draft": draft, "plan": plan_command, "apply": apply}
     try:
         return handlers[args.command](args)

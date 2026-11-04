@@ -1,12 +1,13 @@
-"""Behavioral tests of check_report.py at its command line."""
+"""Behavioral tests of check_report.py at its command line, called in-process."""
 
+import contextlib
+import io
 from pathlib import Path
-import subprocess
-import sys
 import tempfile
 import unittest
+from unittest import mock
 
-SCRIPT = Path(__file__).resolve().parent / "check_report.py"
+import check_report
 
 TITLE_LIST = """\
 - #1407 test harness raises only real engine events
@@ -23,11 +24,19 @@ What you can see in the game from today's work: almost nothing.
 """
 
 
+class Result:
+    """What one run printed and returned, read like a finished command."""
+
+    def __init__(self, returncode, stdout):
+        self.returncode, self.stdout = returncode, stdout
+
+
 def check(report, *arguments):
-    return subprocess.run(
-        [sys.executable, str(SCRIPT), *arguments], input=report,
-        capture_output=True, text=True, timeout=10,
-    )
+    out = io.StringIO()
+    with mock.patch("sys.stdin", io.StringIO(report)), contextlib.redirect_stdout(out), \
+            contextlib.redirect_stderr(io.StringIO()):
+        code = check_report.main(list(arguments))
+    return Result(code, out.getvalue())
 
 
 class CheckReport(unittest.TestCase):
