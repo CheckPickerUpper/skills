@@ -1,6 +1,6 @@
 ---
 name: to-issues-clearly
-description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; makes each issue one cause with one fix, adding new sightings to the existing issue; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
+description: "Create GitHub issues from a plan, bug, finding, audit or PRD, whose titles and bodies a stranger can act on. Use when filing issues or turning work into issue-sized slices. Routes unresolved decisions to a plain-language Question/Why/Questions/Done when shape; writes each issue in its verifier's language as Outcome plus Done when; makes each issue one cause with one fix, its landed pieces as checklist lines rather than sub-issues, adding new sightings to the existing issue; labels by issue kind with bug priority; wires real sub-issue, blocked-by, and duplicate edges rather than prose references; and offers an existing or new milestone when the issues serve one deliverable."
 short_description: "Turn plans, findings, bugs, and PRDs into clear, verifiable GitHub issues."
 allow_implicit_invocation: true
 metadata:
@@ -202,25 +202,25 @@ An issue whose only symptom is "the type permits nonsense" is a real issue. Say 
 
 **An issue is one cause with one fix.** Two reports are the same issue when one change to one owner fixes both, whatever file, repository, language, rule instance or agent produced them. A new sighting of a filed cause is evidence: add it to that issue's evidence and stop. Search for the cause (the rule, symbol, owner or command the evidence names) as well as the words, because a second reporter describes the same cause in its own vocabulary.
 
-**A cause whose fix lands in pieces is a parent issue with sub-issues.** When one cause needs several separately landed changes (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), the cause is the parent issue and each piece is a GitHub sub-issue closed by the commit that finishes it, with `Closes #N` on that commit and `Part of #N` on any commit before it. The pieces are the sub-issues, not extra commits closing the parent. A new sighting still goes into the parent's evidence, never into a new issue.
+**A cause whose fix lands in pieces is one issue with a checklist.** When one cause needs several separately landed changes (the same change applied to many targets, such as each rule's examples, each language's reader, each package's budget; or one fix too large for one review), each piece is one checklist line with its own id, finished by the commit that says `Part of #N: <line id>`. The issue is the unit someone tracks; the commits are the steps. A piece becomes a sub-issue only when a different person or agent works it in parallel, someone else owns it, or it waits on something outside the issue; name which in the sub-issue's body. A new sighting still goes into the issue's evidence, never into a new issue.
 
 **Ask for the fix, never a workaround.** When the fix an issue would ask for is raising a timeout, adding a retry, an exceptions list, running things one at a time or one copy per language, find the cause that makes it needed and ask for that fix instead, under the issue that owns it. Keep a workaround only when it really is the fix (a documented contract, say), and write `Not a workaround: <why>` in the body.
 
 **Keep a milestone to about 10 causes.** A milestone's top-level issues are its causes. A new top-level issue that would take one past 10 is most often a slice of a cause already there; file it under that cause, or add `More than 10 causes because: <why>` to the milestone's description.
 
-**Split into separate parent issues only for different causes.** Parts with different causes, different fixes, different owners, or a decision one part waits on are separate issues, each with its own sub-issues if its fix lands in pieces.
+**Split into separate parent issues only for different causes.** Parts with different causes, different fixes, different owners, or a decision one part waits on are separate issues, each with its own checklist if its fix lands in pieces.
 
-**Count the acceptance criteria.** Four to six distinct outcomes is an issue. More than eight distinct outcomes is a system wearing an issue's clothes: each cluster of criteria with its own cause and fix is its own issue, and each cluster that is one cause landing in pieces becomes sub-issues of one parent.
+**Count the outcomes, not the steps.** An issue holds one outcome a person can check, with as many checklist lines as its pieces need. Criteria that cluster into different outcomes, each with its own cause and fix, are different issues.
 
 For a **decision issue**, keep the decision and the questions needed to make it together. Do not make one issue for every question in the decision body. Split only when the choices can be made independently, have different owners, or unblock different implementation work. Once a decision is made, its implementation is a separate issue or child issue unless the user explicitly asks for a decision-and-build issue.
 
 **Cut each issue vertically, not by layer.** One issue is a narrow but complete path through everything it touches — the shape, the code that reads it, the callers, the tests. An issue that is only the schema change, with the callers in a second issue, cannot be verified or landed on its own.
 
-**Size each piece of work to a single fresh context window.** Someone picks it up knowing nothing about today's conversation. If one cause needs more than they can hold at once, keep the cause as the parent issue and file each piece as a sub-issue closed by the commit that finishes it; if the parts have different causes, they are separate issues.
+**Size each checklist line to a single fresh context window.** Someone picks it up knowing nothing about today's conversation, so each line says enough to be done alone. A cause too large for one person to hold stays one issue with more lines, not more issues.
 
 **Apply the atomicity test before finalizing the split.** Can each issue land green on its own? If two slices only make sense together and cannot land separately, they are one issue. Splitting what must land atomically adds tracking overhead without reducing risk.
 
-**Look for the prefactor and file it first.** *Make the change easy, then make the easy change.* When one preparatory change would make three others straightforward, that is its own issue and it blocks them. Finding it after filing the three is finding it too late.
+**Look for the prefactor and put it first.** *Make the change easy, then make the easy change.* When one preparatory change would make the others straightforward, it is the issue's first checklist line. When it serves several issues, it is its own issue and blocks them. Finding it after the others are written is finding it too late.
 
 Use words a maintainer would recognise. Keep file paths and proposed APIs out of the title unless the user has already made that decision.
 
@@ -228,13 +228,15 @@ Use words a maintainer would recognise. Keep file paths and proposed APIs out of
 
 A **wide refactor** is one mechanical change — rename a field, retype a shared symbol, split a union — whose blast radius fans across the whole codebase. A single edit breaks hundreds of call sites at once, so no vertical slice can land green and forcing one produces an issue nobody can finish.
 
-Sequence it **expand → migrate → contract**, as separate issues:
+Sequence it **expand → migrate → contract** as ordered checklist lines of one issue:
 
-1. **Expand.** Add the new form beside the old. Nothing breaks, because everything still uses the old one. This issue lands green on its own.
-2. **Migrate**, in batches sized by blast radius — per package, per directory, per feature. **Each batch is its own issue, blocked by the expand.** CI stays green batch to batch because the old form still exists.
-3. **Contract.** Delete the old form once no caller remains. One issue, **blocked by every migrate batch.**
+1. **Expand.** Add the new form beside the old. Nothing breaks, because everything still uses the old one. This line lands green on its own.
+2. **Migrate**, in batches sized by blast radius — per package, per directory, per feature. **Each batch is its own line, landed after the expand.** CI stays green batch to batch because the old form still exists.
+3. **Contract.** Delete the old form once no caller remains. The last line, landed after every batch.
 
-When even a batch cannot stay green alone, keep the sequence but let the batches share an integration branch, and have them all block a final integrate-and-verify issue. Green is promised only there — say so in that issue rather than implying each batch is independently green.
+A batch becomes a sub-issue only when another person or agent migrates it in parallel.
+
+When even a batch cannot stay green alone, keep the sequence but let the batches share an integration branch, and end with an integrate-and-verify line. Green is promised only there — say so in that line rather than implying each batch is independently green.
 
 Spot one by asking: *would doing this in one commit break call sites in files this issue does not name?* If yes, it is a wide refactor, whatever it looks like.
 
@@ -411,7 +413,7 @@ Before each create, check the draft against the open tracker with the `audit-iss
 python3 <audit-issues folder>/scripts/audit_issues.py draft --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md [--milestone "MILESTONE TITLE"] [--parent N]
 ~~~
 
-It refuses while an open issue looks like the same cause (shared file paths, code names or error text) or the same subject (rare words its title shares with the draft's title), the draft asks for a workaround, or the draft would take its milestone past 10 causes. Act on each finding: add the sighting to that issue's body, file the draft as its sub-issue, or ask for the proper fix. Only when the finding does not apply, record why where it says (`Different cause from #N: <why>` or `Not a workaround: <why>` in the body, or the reason in the milestone description), and run it again. Read the closest titles it lists after its verdict before filing; they do not block. File the issue only once it exits 0, so the tracker never takes on what an audit would have to undo.
+It refuses while an open issue looks like the same cause (shared file paths, code names or error text) or the same subject (rare words its title shares with the draft's title), the draft asks for a workaround, or the draft would take its milestone past 10 causes. Act on each finding: add the sighting to that issue's body, add the draft to that issue as a checklist line, or ask for the proper fix. Only when the finding does not apply, record why where it says (`Different cause from #N: <why>` or `Not a workaround: <why>` in the body, or the reason in the milestone description), and run it again. Read the closest titles it lists after its verdict before filing; they do not block. File the issue only once it exits 0, so the tracker never takes on what an audit would have to undo.
 
 ~~~sh
 gh issue create --repo OWNER/REPO --title "..." --body-file ISSUE_BODY.md --label LABEL --milestone "MILESTONE TITLE"

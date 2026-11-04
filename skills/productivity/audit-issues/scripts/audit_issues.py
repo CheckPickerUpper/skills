@@ -338,7 +338,7 @@ def draft_findings(draft, issues, milestone_description):
                 and DIFFERENT_CAUSE.format(number=number) not in body):
             found.append(("same-cause", (
                 f"#{number} {titles[number]} looks like the same cause: add this sighting to its body,"
-                f" file this as its sub-issue, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
+                f" add this to it as a checklist line, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
                 " in the draft")))
     flagged = {int(re.search(r"#(\d+)", message).group(1)) for _, message in found}
     threshold = subject_threshold(opened)
@@ -346,7 +346,7 @@ def draft_findings(draft, issues, milestone_description):
         if score >= threshold and number not in flagged and DIFFERENT_CAUSE.format(number=number) not in body:
             found.append(("same-subject", (
                 f"#{number} {titles[number]} has the same subject ({', '.join(shared)}): add this to its"
-                f" body, file this as its sub-issue, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
+                f" body as a checklist line, or write '{DIFFERENT_CAUSE.format(number=number)} <why>'"
                 " in the draft")))
     hints = workaround_hints([candidate])
     if hints and NOT_A_WORKAROUND not in body:

@@ -42,9 +42,10 @@ beside this one.
    - **Duplicate:** of a named issue that stays open.
    - **Slice of a cause:** group issues by the fix that would make them all
      disappear, not by how each was reported. A slice is a checkbox in the
-     cause's `## Done when` (its details are copied into the cause and it
-     closes), or a sub-issue that stays open because it is a real separate
-     piece of work.
+     cause's `## Done when` with its own line id (its details are copied
+     into the cause and it closes), or a sub-issue only when a different
+     person or agent works it in parallel, someone else owns it, or it waits
+     on something outside the cause.
    - **Cause:** its own issue, with the reason it is a different cause from
      the ones it looks like.
    - **Wrong premise:** ask of every issue whether the fix it asks for is a
