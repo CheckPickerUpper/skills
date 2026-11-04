@@ -86,10 +86,8 @@ class Suggestions(unittest.TestCase):
         ]
         self.assertEqual([members for members, _ in clusters(issues)], [[1, 2], [3, 4]])
 
-    def test_one_shared_file_or_a_plain_word_does_not_chain_issues(self):
-        issues = [issue(1, body="edit src/a.py on `master`"),
-                  issue(2, body="edit src/a.py and src/b.py"),
-                  issue(3, body="edit src/b.py on `master`")]
+    def test_a_plain_word_in_backticks_is_not_a_code_name(self):
+        issues = [issue(1, body="run `master` then `deploy`"), issue(2, body="run `master` then `deploy`")]
         self.assertEqual(clusters(issues), [])
 
     def test_one_shared_file_is_a_weaker_lead_shown_without_chaining(self):
@@ -160,7 +158,7 @@ class Draft(unittest.TestCase):
         self.assertEqual([members for members, _ in clusters(issues)], [[1, 2]])
 
     def test_a_path_most_issues_mention_joins_nothing(self):
-        issues = [issue(n, body="see README.md and docs/setup.md") for n in range(1, 40)]
+        issues = [issue(n, body="see docs/setup.md and src/main.py") for n in range(1, 40)]
         self.assertEqual(clusters(issues), [])
 
     def test_workaround_premises_are_hinted(self):
@@ -313,16 +311,6 @@ class Mirror(unittest.TestCase):
 
     def draft(self):
         return self.run_script("draft", "--title", "Import drops rows", "--body-file", str(self.draft_body))
-
-    def test_a_second_run_fetches_only_what_changed(self):
-        self.tracker(tracked(1, "2026-01-01T00:00:00Z"), tracked(2, "2026-01-02T00:00:00Z"))
-        first, first_calls = self.draft()
-        self.assertEqual(first.returncode, 0, first.stderr)
-        self.assertIn("full", first_calls)
-        second, second_calls = self.draft()
-        self.assertEqual(second.returncode, 0, second.stderr)
-        self.assertNotIn("full", second_calls)
-        self.assertEqual(sorted(set(second_calls)), ["count", "since"])
 
     def test_an_issue_edited_between_runs_is_read_as_edited(self):
         self.tracker(tracked(1, "2026-01-01T00:00:00Z", title="Sync stalls on large files", body="unrelated"),

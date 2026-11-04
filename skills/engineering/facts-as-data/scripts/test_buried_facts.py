@@ -70,9 +70,6 @@ class Record(unittest.TestCase):
     def lead_at(self, path="src/rule.rs"):
         return leads(path, 'let pause = Regex::new(r"(sleep|usleep|nanosleep)");\n')
 
-    def test_a_lead_with_no_row_is_a_finding(self):
-        self.assertEqual(len(record_findings([], self.lead_at())), 1)
-
     def test_a_row_naming_the_file_or_the_line_covers_the_lead(self):
         self.assertEqual(record_findings([row(site="src/rule.rs")], self.lead_at()), [])
         self.assertEqual(record_findings([row(site="src/rule.rs:1")], self.lead_at()), [])

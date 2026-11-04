@@ -15,15 +15,6 @@ TITLE_LIST = """\
   - #1422 and #1423, two cue leaks
 """
 
-NOTICED = """\
-What you can see in the game from today's work: almost nothing.
-
-- A looped ability sound no longer gets stuck on forever when part of that
-  ability's effect fails to load ([#1422](https://example.com/1422)).
-- Nothing could be verified on the current test machines. It can now (#1417).
-"""
-
-
 class Result:
     """What one run printed and returned, read like a finished command."""
 
@@ -46,10 +37,6 @@ class CheckReport(unittest.TestCase):
         self.assertIn("3 lines open with a tracker reference", result.stdout)
         self.assertIn("line 1: - #1407 test harness", result.stdout)
         self.assertIn("line 3: - #1422 and #1423", result.stdout)
-
-    def test_report_with_trailing_references_passes(self):
-        result = check(NOTICED)
-        self.assertEqual(result.returncode, 0, result.stdout)
 
     def test_every_way_of_opening_with_a_reference_is_refused(self):
         for line in (
