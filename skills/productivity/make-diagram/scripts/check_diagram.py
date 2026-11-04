@@ -160,25 +160,35 @@ def launch(playwright):
         + "\n  ".join(failures))
 
 
-def measure(browser, url, scheme, out_dir, stem):
-    page = browser.new_page(viewport=VIEWPORT, color_scheme=scheme)
-    try:
-        page.goto(url)
-        page.wait_for_load_state("networkidle")
-        result = page.evaluate(GEOMETRY)
-        svgs = [
-            handle for handle in page.query_selector_all("svg")
-            if handle.evaluate("s => !!s.querySelector('.node, .decision')")
-        ]
-        images = []
-        for index, handle in enumerate(svgs):
-            suffix = f".{index + 1}" if len(svgs) > 1 else ""
-            image = out_dir / f"{stem}{suffix}.{scheme}.png"
-            handle.screenshot(path=str(image))
-            images.append(image)
-        return result, images
-    finally:
-        page.close()
+class Renderer:
+    """One open page. A check loads the file once and switches the colour scheme
+    in place: the page's styles and the geometry script both read the scheme live."""
+
+    def __init__(self, browser):
+        self.page = browser.new_page(viewport=VIEWPORT)
+
+    def load(self, url):
+        self.page.emulate_media(color_scheme="light")
+        self.page.goto(url)
+        # The layout settles when its fonts have loaded; waiting for the network to idle adds a fixed 500 ms.
+        self.page.evaluate("document.fonts.ready.then(() => true)")
+
+    def close(self):
+        self.page.close()
+
+
+def measure(renderer, scheme, out_dir, stem):
+    page = renderer.page
+    page.emulate_media(color_scheme=scheme)
+    result = page.evaluate(GEOMETRY)
+    svgs = page.query_selector_all("svg:has(.node, .decision)")
+    images = []
+    for index, handle in enumerate(svgs):
+        suffix = f".{index + 1}" if len(svgs) > 1 else ""
+        image = out_dir / f"{stem}{suffix}.{scheme}.png"
+        handle.screenshot(path=str(image))
+        images.append(image)
+    return result, images
 
 
 def report(path, findings, images, standing, accepted_path):
@@ -213,49 +223,58 @@ def main():
     if not path.is_file():
         print(f"{path}: not a file", file=sys.stderr)
         return EXIT_UNUSABLE
-    out_dir = (args.out or path.parent).resolve()
-    out_dir.mkdir(parents=True, exist_ok=True)
-    words = args.words or path.with_suffix(".words.txt")
-    accepted_path = args.accepted or path.with_suffix(".accepted.txt")
-    for named, given in ((words, args.words), (accepted_path, args.accepted)):
-        if given and not named.is_file():
+    for named in (args.words, args.accepted):
+        if named and not named.is_file():
             print(f"{named}: not a file", file=sys.stderr)
             return EXIT_UNUSABLE
-
-    findings = []
-    images = []
     try:
         with sync_playwright() as playwright:
             browser = launch(playwright)
+            renderer = Renderer(browser)
             try:
-                seen = set()
-                for scheme in ("light", "dark"):
-                    result, shots = measure(browser, path.as_uri(), scheme, out_dir, path.stem)
-                    images.extend(shots)
-                    if not result["diagrams"]:
-                        findings.append({"rule": "found", "message": "no diagram found"})
-                        break
-                    for finding in result["findings"]:
-                        key = (finding["rule"], finding["message"])
-                        if key in seen:
-                            continue
-                        seen.add(key)
-                        if scheme == "dark":
-                            finding = {**finding, "message": "dark theme: " + finding["message"]}
-                        findings.append(finding)
-                    if scheme == "light" and words.is_file():
-                        findings.extend(word_findings(result["texts"], read_words(words)))
-                    elif scheme == "light":
-                        findings.append({"rule": "words", "message": (
-                            f"{words.name} does not exist. Read every word on the drawing as"
-                            " someone outside the business who is not technical; replace each"
-                            " one they could not read, write each replacement there as"
-                            " `old => plain`, and create the file even when nothing changed")})
+                return check(renderer, path, args.out, args.words, args.accepted)
             finally:
+                renderer.close()
                 browser.close()
     except RuntimeError as error:
         print(error, file=sys.stderr)
         return EXIT_UNUSABLE
+
+
+def check(renderer, path, out=None, words=None, accepted=None):
+    """Check one diagram file with an open Renderer, print the report, and return
+    the exit code. Several checks can share one Renderer."""
+    path = Path(path).resolve()
+    out_dir = (Path(out) if out else path.parent).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    words = Path(words) if words else path.with_suffix(".words.txt")
+    accepted_path = Path(accepted) if accepted else path.with_suffix(".accepted.txt")
+    findings = []
+    images = []
+    seen = set()
+    renderer.load(path.as_uri())
+    for scheme in ("light", "dark"):
+        result, shots = measure(renderer, scheme, out_dir, path.stem)
+        images.extend(shots)
+        if not result["diagrams"]:
+            findings.append({"rule": "found", "message": "no diagram found"})
+            break
+        for finding in result["findings"]:
+            key = (finding["rule"], finding["message"])
+            if key in seen:
+                continue
+            seen.add(key)
+            if scheme == "dark":
+                finding = {**finding, "message": "dark theme: " + finding["message"]}
+            findings.append(finding)
+        if scheme == "light" and words.is_file():
+            findings.extend(word_findings(result["texts"], read_words(words)))
+        elif scheme == "light":
+            findings.append({"rule": "words", "message": (
+                f"{words.name} does not exist. Read every word on the drawing as"
+                " someone outside the business who is not technical; replace each"
+                " one they could not read, write each replacement there as"
+                " `old => plain`, and create the file even when nothing changed")})
 
     accepted = read_accepted(accepted_path) if accepted_path.is_file() else {}
     findings, standing = apply_accepted(findings, accepted, accepted_path)

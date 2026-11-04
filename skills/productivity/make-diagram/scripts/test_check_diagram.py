@@ -1,17 +1,24 @@
-"""Behavioral tests of check_diagram.py at its command line, in a real browser.
+"""Behavioral tests of check_diagram.py in a real browser.
 
 Each case breaks one rule in the reference example and expects the checker to
-name it. Run with: python3 -m unittest test_check_diagram (needs uv and Chrome
-or Playwright's Chromium).
+name it. One browser serves every case, as one check run serves several pages.
+Run with: uv run --with playwright==1.58.0 python -m unittest test_check_diagram
+(needs Chrome or Playwright's Chromium).
 """
 
+import contextlib
+import io
 from pathlib import Path
-import subprocess
+import sys
 import tempfile
 import unittest
+from unittest import mock
+
+from playwright.sync_api import sync_playwright
+
+import check_diagram
 
 HERE = Path(__file__).resolve().parent
-SCRIPT = HERE / "check_diagram.py"
 EXAMPLE = (HERE.parent / "references" / "example.svg").read_text()
 
 NO_ARROW = '<path class="arrow no" d="M700 415 V488" marker-end="url(#head-no)"/>'
@@ -29,6 +36,13 @@ CROSSING = ('arrow "Copy official stats" → "Settle the bet" crosses'
             ' the arrow "League box score" → "Settle the bet"')
 
 
+class Result:
+    """What one check printed and returned, read like a finished command."""
+
+    def __init__(self, returncode, stdout):
+        self.returncode, self.stdout, self.stderr = returncode, stdout, ""
+
+
 def replaced(old, new, text=EXAMPLE):
     if old not in text:
         raise AssertionError(f"fixture text not found: {old}")
@@ -40,6 +54,18 @@ def before_legend(markup):
 
 
 class CheckDiagram(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.playwright = sync_playwright().start()
+        cls.browser = check_diagram.launch(cls.playwright)
+        cls.renderer = check_diagram.Renderer(cls.browser)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.renderer.close()
+        cls.browser.close()
+        cls.playwright.stop()
+
     def run_check(self, content, name="diagram.svg", words="", accepted=None):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / name
@@ -48,12 +74,11 @@ class CheckDiagram(unittest.TestCase):
                 path.with_suffix(".words.txt").write_text(words)
             if accepted is not None:
                 path.with_suffix(".accepted.txt").write_text(accepted)
-            result = subprocess.run(
-                ["uv", "run", "--quiet", str(SCRIPT), str(path)],
-                capture_output=True, text=True, timeout=180,
-            )
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                code = check_diagram.check(self.renderer, path)
             images = sorted(p.name for p in Path(folder).glob("*.png"))
-        return result, images
+        return Result(code, out.getvalue()), images
 
     def assert_finding(self, content, *expected, **options):
         result, _ = self.run_check(content, **options)
@@ -234,11 +259,9 @@ class CheckDiagram(unittest.TestCase):
             "no diagram found", name="page.html")
 
     def test_a_missing_file_is_unusable(self):
-        result = subprocess.run(
-            ["uv", "run", "--quiet", str(SCRIPT), "/nonexistent/diagram.svg"],
-            capture_output=True, text=True, timeout=180,
-        )
-        self.assertEqual(result.returncode, 2)
+        with mock.patch.object(sys, "argv", ["check_diagram.py", "/nonexistent/diagram.svg"]), \
+                contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual(check_diagram.main(), 2)
 
 
 if __name__ == "__main__":
