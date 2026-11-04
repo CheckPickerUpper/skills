@@ -49,7 +49,7 @@ import re
 import subprocess
 import sys
 
-from checklist_proof import Evidence, checklist, closed_issues, line_findings, removed_findings, with_derived_ticks
+from checklist_proof import Evidence, checklist, section_lines, closed_issues, line_findings, removed_findings, with_derived_ticks
 
 EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
@@ -423,7 +423,10 @@ def completed(args):
     if issue["state"] == "CLOSED" and issue["stateReason"] != "COMPLETED":
         print(f"#{args.issue} is already closed as {issue['stateReason']}; reopen it first", file=sys.stderr)
         return EXIT_FINDINGS
-    write_body(args, issue, "## Proof", "\n".join(f"- {p}" for p in proof), base=with_derived_ticks(evidence))
+    # A reopened issue closes again on top of its earlier proof, never in place of it.
+    earlier = [line for line in section_lines(issue["body"], "## Proof") if line.strip()]
+    added = [line for line in dict.fromkeys(f"- {p}" for p in proof) if line not in earlier]
+    write_body(args, issue, "## Proof", "\n".join([*earlier, *added]), base=with_derived_ticks(evidence))
     if issue["state"] == "OPEN":
         gh("issue", "close", str(args.issue), "--repo", args.repo, "--reason", "completed")
     return read_back(args, "completed", "## Proof")
@@ -551,7 +554,7 @@ def pre_push(args):
     return EXIT_FINDINGS if refused else 0
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name)
@@ -572,7 +575,7 @@ def main():
     parsers["duplicate"].add_argument("--of", type=int, required=True)
     parsers["out-of-date"].add_argument("--evidence", required=True)
     parsers["not-planned"].add_argument("--owner-said", required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
     handlers = {"ready": ready, "sync": sync, "pre-push": pre_push, "reran": reran, "completed": completed, "duplicate": duplicate,
                 "out-of-date": out_of_date, "not-planned": not_planned}
     try:

@@ -47,7 +47,7 @@ that disappeared. Run every command inside a checkout of the repository.
      `--result still-fails`, leave the issue open, and keep working.
      `ready` and `completed` refuse until a rerun shows it fixed.
      `close_issue.py completed --repo R --issue N --proof "<commit url>" --proof "<test and its result>"`
-     writes the proof under `## Proof` and closes it. A commit with
+     adds the proof under `## Proof`, keeping any proof from an earlier close, and closes it. A commit with
      `Closes #N` closes the issue when it is pushed: run `ready` before that
      commit, and `completed` with the commit as proof right after the push.
      A "Done when" line that can only pass once the commit exists, such as an

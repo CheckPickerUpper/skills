@@ -3,12 +3,17 @@
 Run with: python3 -m unittest test_close_issue
 """
 
+import contextlib
+import io
+import json
 import unittest
+from unittest import mock
 
 import os
 import subprocess
 import tempfile
 
+import close_issue
 from checklist_proof import Evidence, closed_issues, line_findings, removed_findings, with_derived_ticks
 from close_issue import (
     commits_of,
@@ -127,6 +132,40 @@ class Reproduction(unittest.TestCase):
 
     def test_an_issue_without_a_reproduction_needs_no_rerun(self):
         self.assertEqual(ready(issue(body="## Outcome\n\nFaster import.\n")), [])
+
+
+class StandInGitHub:
+    """Answers the gh calls `completed` makes for one issue with no checklist."""
+
+    def __init__(self, item):
+        self.item = item
+
+    def __call__(self, *args, stdin=None):
+        match args[:2]:
+            case ("api", "graphql"):
+                if "userContentEdits" in args[3]:
+                    edits = {"nodes": [], "pageInfo": {"hasNextPage": False, "endCursor": None}}
+                    return json.dumps({"data": {"repository": {"issue": {"userContentEdits": edits}}}})
+                return json.dumps({"data": {"repository": {"issue": self.item}}})
+            case ("issue", "edit"):
+                self.item["body"] = stdin
+            case ("issue", "close"):
+                self.item.update(state="CLOSED", stateReason="COMPLETED")
+        return ""
+
+
+class CompletedProof(unittest.TestCase):
+    def complete(self, github, proof):
+        argv = ["completed", "--repo", REPO, "--issue", "7", "--proof", proof]
+        with mock.patch.object(close_issue, "gh", github), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(close_issue.main(argv), 0)
+
+    def test_closing_again_keeps_earlier_proof_and_adds_no_duplicate(self):
+        github = StandInGitHub(issue(body="Fix it.\n\n## Proof\n\n- first close: c0ffee1\n"))
+        self.complete(github, "second close: deadbee")
+        self.complete(github, "second close: deadbee")
+        self.assertEqual(close_issue.section_lines(github.item["body"], "## Proof"),
+                         ["", "- first close: c0ffee1", "- second close: deadbee"])
 
 
 class Duplicate(unittest.TestCase):
