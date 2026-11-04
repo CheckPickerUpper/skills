@@ -143,6 +143,9 @@ it) or `wait` (naming what it waits for and who owns that).
   - work that justified its time (bugs caught, tests repaired);
   - plans and order: what lands next, who was told what.
 
+  Fixing bugs and repairing tests is the cost of doing business, never
+  slowness: write that time off and report only the repeated work around it.
+
   When everything you find is on this list, the answer is "no repeated work
   found", followed by what you checked.
 
