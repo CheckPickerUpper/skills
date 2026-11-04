@@ -65,7 +65,10 @@ beside this one.
      names the check and why it cannot run.
 4. **Keep each milestone to about 10 causes.** A milestone that ends with more
    needs a reason in the plan; most often the excess are slices of a cause
-   already there.
+   already there. Every cause in no milestone gets one in the plan: an
+   existing milestone, or a new one named for the deliverable it serves.
+   Grouping causes into deliverables is your work, shown on the page for
+   approval, never a question for the owner.
 5. **Never decide scope.** Dropping a feature, changing a priority or answering
    a decision goes to the owner as a question, using the client's question
    tool where it has one, with the facts behind each choice.
@@ -81,12 +84,17 @@ beside this one.
    was written, then creates new causes, moves slices under their causes,
    copies folded details in, and closes through close-issues, deepest issues
    first. A failed run is safe to rerun; it resumes.
-8. **Report to whoever asked**, in their channel: the user, or the
+8. **Report to whoever asked**, once the work is done, in their channel: the user, or the
    conducting agent when an agent asked, never only printed
    where nobody is looking. Lead with outcomes as counts before and after
    ("312 open issues are now 41 causes in 4 milestones; 120 closed with
-   proof"), then the decisions waiting on the owner. Name every issue as a
-   link with its title.
+   proof"), then the decisions waiting on the owner.
+
+Never send a progress report. Between the request and the page, the only
+message is a question the work cannot go on without; "verdicts written for a
+third" costs the owner a turn and tells them nothing they can act on. In
+every message, the page included, name every issue as a link with its title,
+never a bare number.
 
 Done when scan exits 0, every open issue in scope has a verdict, the owner
 approved the page, apply finished, and the person who asked has the report.
