@@ -268,6 +268,14 @@ class RemovedLines(unittest.TestCase):
         self.assertEqual(self.removed(body, others={9: "- [ ] cleanse: Cleanse effects (was #1962)\n"}), [])
         self.assertEqual(kinds(self.removed(body, others={9: "- [ ] heal: Heal\n"})), ["moved-missing"])
 
+    def test_a_moved_line_that_gains_an_id_in_its_new_issue_arrives(self):
+        body = ("- [ ] cleanse: Cleanse effects\n\n## Checklist changes\n\n"
+                "- Show the heal number above the fighter: moved to #9\n")
+        carried = "- [ ] number: Show the heal number above the fighter (was #1962)\n"
+        self.assertEqual(self.removed(body, others={9: carried}), [])
+        unmarked = carried.replace(" (was #1962)", "")
+        self.assertEqual(kinds(self.removed(body, others={9: unmarked})), ["moved-missing"])
+
     def test_a_reworded_line_without_an_id_is_not_a_removal(self):
         body = "- [ ] cleanse: Cleanse effects\n- [ ] Show the healed amount above the fighter\n"
         self.assertEqual(self.removed(body), [])

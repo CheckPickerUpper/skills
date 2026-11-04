@@ -12,7 +12,8 @@ its box was ticked by hand:
 A line id is the lowercase word before the first colon: `- [ ] cleanse: Cleanse
 effects`. Every line that ever appeared in the body, read from its edit history,
 must still be there, be proved, or be recorded under `## Checklist changes` as
-`- <id or text>: moved to #M` (and found in #M) or `- <id or text>: dropped, <reason>`.
+`- <id or text>: moved to #M` (and found in #M, under the same key or with its
+wording, a new line id and `(was #N)`) or `- <id or text>: dropped, <reason>`.
 """
 
 import difflib
@@ -132,13 +133,16 @@ class Evidence:
         return None
 
 
+def unproved_lines(evidence):
+    """Every checklist line nothing proves: each one stops the issue closing."""
+    return [line for line in checklist(evidence.body) if not evidence.proof_of(line)]
+
+
 def line_findings(evidence):
     """(kind, message) for every line nothing proves: an unticked line is open work,
     a ticked one was ticked by hand."""
     me, found = f"#{evidence.number}", []
-    for line in checklist(evidence.body):
-        if evidence.proof_of(line):
-            continue
+    for line in unproved_lines(evidence):
         if not line.ticked:
             found.append(("unticked", f"{me} has an open line: {line.text}"))
         elif line.line_id:
@@ -149,6 +153,37 @@ def line_findings(evidence):
                           " hash; give it an id and land the commit that names it, or end it with the hash of"
                           " the landed commit that did it"))
     return found
+
+
+def moved_line(line_id, line, number):
+    """The checklist line that carries a line of issue #number into another issue."""
+    return f"- [ ] {line_id}: {line.wording} (was #{number})"
+
+
+def change_record(key, moved_to=None, dropped=None):
+    """The '## Checklist changes' line for a line that left the body; give moved_to or dropped."""
+    return f"- {key}: moved to #{moved_to}" if moved_to is not None else f"- {key}: dropped, {' '.join(dropped.split())}"
+
+
+def without_lines(body, keys):
+    """The body without the checklist lines whose key is in keys."""
+    out, fenced = [], False
+    for raw in (body or "").splitlines():
+        if FENCE.match(raw):
+            fenced = not fenced
+        elif not fenced and BOX.match(raw) and checklist(raw)[0].key in keys:
+            continue
+        out.append(raw)
+    return "\n".join(out) + ("\n" if (body or "").endswith("\n") else "")
+
+
+def carries(target_body, line, number):
+    """Whether another issue's body holds a line moved out of issue #number: the same key,
+    or the same wording under a new line id, marked '(was #number)'."""
+    marker = f"(was #{number})"
+    return any(other.key == line.key or (other.text.endswith(marker)
+               and other.wording[:-len(marker)].rstrip() == line.wording)
+               for other in checklist(target_body))
 
 
 def changes(body):
@@ -185,8 +220,7 @@ def removed_findings(evidence, revisions, read_body):
                 continue
             moved_to, why = recorded.get(line.key, (None, None))
             if moved_to is not None:
-                target = checklist(read_body(moved_to))
-                if not any(other.key == line.key for other in target):
+                if not carries(read_body(moved_to), line, evidence.number):
                     found.append(("moved-missing", f"{me} records '{line.key}' as moved to #{moved_to},"
                                   f" but #{moved_to} has no line '{line.key}'"))
             elif not why:
