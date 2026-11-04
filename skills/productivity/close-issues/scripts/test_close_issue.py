@@ -248,10 +248,13 @@ class Commits(unittest.TestCase):
     def test_commit_messages_are_read_whole_from_git(self):
         root = os.environ.get("TEST_SCRATCH") or tempfile.gettempdir()
         with tempfile.TemporaryDirectory(dir=root) as checkout:
-            run = lambda *a: subprocess.run(["git", "-C", checkout, *a], check=True, capture_output=True)
+            run = lambda *a: subprocess.run(["git", "-C", checkout, *a], check=True, capture_output=True,
+                                            text=True).stdout.strip()
             run("init", "-q")
-            run("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty",
-                "-m", "Cleanse effects", "-m", "Part of #1962: cleanse\nPart of #1962: heal")
+            # Plumbing makes the commit without running any commit hooks a machine adds.
+            commit = run("-c", "user.name=t", "-c", "user.email=t@example.com", "commit-tree", run("write-tree"),
+                         "-m", "Cleanse effects", "-m", "Part of #1962: cleanse\nPart of #1962: heal")
+            run("update-ref", "HEAD", commit)
             [(sha, message)] = commits_of(checkout, "HEAD")
             self.assertEqual(len(sha), 40)
             self.assertEqual(message.strip(), "Cleanse effects\n\nPart of #1962: cleanse\nPart of #1962: heal")

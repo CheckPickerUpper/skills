@@ -96,17 +96,19 @@ class Review(unittest.TestCase):
     """--since reports only leads on lines the diff adds, read from a real repository."""
 
     def git(self, *args):
-        subprocess.run(["git", "-C", self.repo, *args], check=True, capture_output=True)
+        return subprocess.run(["git", "-C", self.repo, *args], check=True, capture_output=True,
+                              text=True).stdout.strip()
 
     def setUp(self):
         self.scratch = tempfile.TemporaryDirectory(dir=os.environ.get("TEST_SCRATCH"))
         self.repo = self.scratch.name
         self.git("init", "-q")
-        self.git("config", "user.email", "t@example.com")
-        self.git("config", "user.name", "t")
         Path(self.repo, "rule.py").write_text('OLD = ["a1", "b2", "c3", "d4"]\n')
         self.git("add", "rule.py")
-        self.git("commit", "-qm", "base")
+        # Plumbing makes the base commit without running any commit hooks a machine adds.
+        tree = self.git("write-tree")
+        base = self.git("-c", "user.email=t@example.com", "-c", "user.name=t", "commit-tree", tree, "-m", "base")
+        self.git("update-ref", "HEAD", base)
 
     def tearDown(self):
         self.scratch.cleanup()
