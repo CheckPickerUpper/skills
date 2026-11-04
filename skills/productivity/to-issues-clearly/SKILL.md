@@ -282,11 +282,11 @@ Choose one:
 
 ## Done when
 
-- [ ] One option or policy is chosen and written in product language.
-- [ ] The affected people, surfaces, and boundaries are specified.
-- [ ] The relevant guest/authenticated, failure, empty, and privacy states are clear.
-- [ ] The resulting data or workflow joins the existing lifecycle without a parallel record.
-- [ ] The downstream issue can be built without guessing about this decision.
+- [ ] chosen: One option or policy is chosen and written in product language.
+- [ ] scope: The affected people, surfaces, and boundaries are specified.
+- [ ] states: The relevant guest/authenticated, failure, empty, and privacy states are clear.
+- [ ] lifecycle: The resulting data or workflow joins the existing lifecycle without a parallel record.
+- [ ] buildable: The downstream issue can be built without guessing about this decision.
 ~~~
 
 Use only the questions and criteria relevant to the decision. The checklist is a prompt for missing boundaries, not boilerplate to paste into every issue. If the source does not establish a fact, turn it into a question or constraint; do not invent the answer.
@@ -299,7 +299,6 @@ Do not prepend the generic `Outcome` and `Done when` sections to a decision issu
 
 When the choice is made, edit the decision issue itself:
 - Add a `## Decision` section at the top of the body: the chosen option and its terms, who decided, and the date.
-- Tick the satisfied `Done when` boxes.
 - Link the build issue.
 - Close the issue as completed.
 
@@ -323,14 +322,20 @@ what should be true instead.
 
 ## Done when
 
-- [ ] Something checkable that shows it is done.
-- [ ] The failure, boundary or empty case, when there is one.
-- [ ] The old bad state is no longer reachable through the supported path.
+- [ ] works: Something checkable that shows it is done.
+- [ ] edge: The failure, boundary or empty case, when there is one.
+- [ ] unreachable: The old bad state is no longer reachable through the supported path.
 
 ## Evidence
 
 Only for a defect that exists now: where it is, and the quoted code that proves it.
 ~~~
+
+Every checklist line starts with a short lowercase id and a colon, unique in
+its issue. The commit that finishes a line names it, `Part of #N: works`, and
+that commit, not a hand-ticked box, is what marks it done. Never tick a box by
+hand, and never delete a line silently: record it under `## Checklist changes`
+as moved to another issue or dropped with its reason.
 
 The verifier's language governs the body too. It is a report, not a case being argued.
 

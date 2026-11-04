@@ -8,9 +8,21 @@ quoted). Open sub-issues and unticked checklist lines block every close; a
 duplicate's unticked lines may close once the survivor carries them. An issue
 whose body has a reproduction section closes as completed only after a rerun of
 that reproduction is recorded and shows it fixed: passing tests are not a rerun.
+A checklist line is done only when a landed commit names it ('Part of #N: <id>')
+or another proof in checklist_proof.py holds; a box ticked by hand counts for
+nothing, and a line that left the body needs a recorded move or drop.
+
+Run every command inside a checkout of the repository: the landed commits are
+read from its origin's landing branch (the repository's default branch, or
+--branch).
 
     close_issue.py ready --repo OWNER/REPO --issue N
         Lists what stops N closing. Exits 1 while anything does.
+    close_issue.py sync --repo OWNER/REPO --issue N
+        Sets every checklist box of N to what its proof shows.
+    close_issue.py pre-push REMOTE URL
+        The pre-push hook: refuses a push to the landing branch whose commits
+        say 'Closes #N' while N cannot close, because GitHub closes N on push.
     close_issue.py reran --repo OWNER/REPO --issue N --ran TEXT --saw TEXT --result fixed|still-fails
         Writes the rerun of N's reproduction under '## Reproduction rerun'. Refuses
         a rerun that runs none of the reproduction's commands. Exits 1 while the
@@ -37,14 +49,19 @@ import re
 import subprocess
 import sys
 
+from checklist_proof import Evidence, checklist, closed_issues, line_findings, removed_findings, with_derived_ticks
+
 EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
 
 RULE = (
     "An issue closes as completed with proof, as a duplicate once the survivor"
     " holds its details, or as not planned on the owner's word. Nothing closes"
-    " while it has open sub-issues or unticked checklist lines: finish them, move"
-    " them under an open parent, or close each with its own reason first. An issue"
+    " while it has open sub-issues or unproved checklist lines: finish them, move"
+    " them under an open parent, or close each with its own reason first. A line is"
+    " proved by a landed commit that names it ('Part of #N: <line id>'), never by a"
+    " box ticked by hand, and a line leaves the body only with a recorded move or"
+    " drop under '## Checklist changes'. An issue"
     " with a reproduction closes as completed only once a recorded rerun of that"
     " reproduction shows it fixed; tests that pass are not that rerun."
 )
@@ -109,15 +126,21 @@ def is_decision(issue):
     return any(DECISION_LABEL.search(label["name"]) for label in issue["labels"]["nodes"])
 
 
-def open_pieces(issue):
+def evidence_for(issue, repo, commits):
+    decided = is_decision(issue) and has_section(issue["body"], "## Decision")
+    return Evidence(issue["number"], repo, tuple(commits), issue["body"] or "", decided)
+
+
+def open_pieces(issue, evidence, revisions=(), read_body=None):
     """What open work sits under the issue: (kind, message) pairs."""
     me = f"#{issue['number']}"
     found = []
     for child in issue["subIssues"]["nodes"]:
         if child["state"] == "OPEN":
             found.append(("open-sub-issue", f"{me} has open sub-issue #{child['number']} {child['title']}"))
-    for text in unticked_lines(issue["body"]):
-        found.append(("unticked", f"{me} has an unticked line: {text}"))
+    found += line_findings(evidence)
+    if revisions:
+        found += removed_findings(evidence, revisions, read_body)
     return found
 
 
@@ -214,8 +237,8 @@ def rerun_findings(issue):
     return []
 
 
-def ready_findings(issue):
-    found = open_pieces(issue)
+def ready_findings(issue, evidence, revisions=(), read_body=None):
+    found = open_pieces(issue, evidence, revisions, read_body)
     if is_decision(issue) and not has_section(issue["body"], "## Decision"):
         found.append(("no-decision", f"#{issue['number']} is a decision issue with no '## Decision' section"))
     return found + rerun_findings(issue)
@@ -251,6 +274,73 @@ def read_issue(repo, number):
     return issue
 
 
+def read_revisions(repo, number):
+    """Every earlier text of the issue's body, newest first, from GitHub's edit history."""
+    owner, name = repo.split("/")
+    query = """query($owner: String!, $name: String!, $number: Int!, $after: String) {
+      repository(owner: $owner, name: $name) { issue(number: $number) {
+        userContentEdits(first: 100, after: $after) { nodes { diff } pageInfo { hasNextPage endCursor } }
+      } }
+    }"""
+    texts, after = [], None
+    while True:
+        variables = {"owner": owner, "name": name, "number": number}
+        if after:
+            variables["after"] = after
+        edits = graphql(query, **variables)["repository"]["issue"]["userContentEdits"]
+        texts += [node["diff"] or "" for node in edits["nodes"]]
+        if not edits["pageInfo"]["hasNextPage"]:
+            return texts
+        after = edits["pageInfo"]["endCursor"]
+
+
+def git(checkout, *args):
+    result = subprocess.run(["git", "-C", checkout, *args], capture_output=True, text=True, check=False)
+    if result.returncode != 0:
+        raise RuntimeError(f"git -C {checkout} {' '.join(args)}: {result.stderr.strip()}")
+    return result.stdout
+
+
+REMOTE_SLUG = re.compile(r"github\.com[:/](?P<slug>[^/]+/[^/]+?)(?:\.git)?/?$")
+
+
+def remote_slug(url):
+    match = REMOTE_SLUG.search(url.strip())
+    return match["slug"] if match else None
+
+
+def landing_branch(args):
+    return args.branch or gh("api", f"repos/{args.repo}", "--jq", ".default_branch").strip()
+
+
+def commits_of(checkout, *revs):
+    """(sha, message) pairs of the commits revs select."""
+    out = git(checkout, "log", "--format=%H%x1f%B%x1e", *revs)
+    pairs = [entry.strip("\n").split("\x1f", 1) for entry in out.split("\x1e") if entry.strip()]
+    return [(sha, message) for sha, message in pairs]
+
+
+def landed_commits(args, number):
+    """The commits on origin's landing branch that mention #number."""
+    url = git(args.checkout, "remote", "get-url", "origin").strip()
+    if (remote_slug(url) or "").lower() != args.repo.lower():
+        raise RuntimeError(f"{args.checkout} is a checkout of {url}, not {args.repo}; run inside a checkout"
+                           f" of {args.repo} or pass --checkout")
+    branch = landing_branch(args)
+    git(args.checkout, "fetch", "--quiet", "origin", branch)
+    return commits_of(args.checkout, f"origin/{branch}", "--fixed-strings", f"--grep=#{number}")
+
+
+def assess(args, issue, pushed=()):
+    """The issue's evidence and every finding that stops it closing."""
+    revisions = read_revisions(args.repo, issue["number"])
+    needs_commits = bool(checklist(issue["body"])) or any(checklist(text) for text in revisions)
+    commits = [*landed_commits(args, issue["number"]), *pushed] if needs_commits else []
+    evidence = evidence_for(issue, args.repo, commits)
+    read_body = lambda number: read_issue(args.repo, number)["body"]
+    return evidence, ready_findings(issue, evidence, revisions, read_body)
+
+
 def print_findings(found):
     for kind, message in found:
         print(f"  - {message}")
@@ -258,7 +348,7 @@ def print_findings(found):
 
 def ready(args):
     issue = read_issue(args.repo, args.issue)
-    found = ready_findings(issue)
+    _, found = assess(args, issue)
     print(RULE)
     if not found:
         print(f"\n#{args.issue} has nothing open under it and can close.")
@@ -268,8 +358,8 @@ def ready(args):
     return EXIT_FINDINGS
 
 
-def write_body(args, issue, heading, content):
-    updated = with_section(issue["body"], heading, content)
+def write_body(args, issue, heading, content, base=None):
+    updated = with_section(issue["body"] if base is None else base, heading, content)
     if updated != (issue["body"] or ""):
         gh("issue", "edit", str(args.issue), "--repo", args.repo, "--body-file", "-", stdin=updated)
 
@@ -307,8 +397,9 @@ def close_finished_milestone(args, issue):
         print(f"Milestone '{issue['milestone']['title']}' has no open issue left; closed it.")
 
 
-def refuse_open_pieces(issue):
-    found = open_pieces(issue)
+def refuse_open_pieces(args, issue):
+    evidence, _ = assess(args, issue)
+    found = open_pieces(issue, evidence)
     if found:
         print(RULE, file=sys.stderr)
         for _, message in found:
@@ -323,7 +414,7 @@ def completed(args):
         print("completed needs proof a person can check: a commit, a test run, a walk through the product",
               file=sys.stderr)
         return EXIT_FINDINGS
-    found = ready_findings(issue)
+    evidence, found = assess(args, issue)
     if found:
         print(RULE, file=sys.stderr)
         for _, message in found:
@@ -332,7 +423,7 @@ def completed(args):
     if issue["state"] == "CLOSED" and issue["stateReason"] != "COMPLETED":
         print(f"#{args.issue} is already closed as {issue['stateReason']}; reopen it first", file=sys.stderr)
         return EXIT_FINDINGS
-    write_body(args, issue, "## Proof", "\n".join(f"- {p}" for p in proof))
+    write_body(args, issue, "## Proof", "\n".join(f"- {p}" for p in proof), base=with_derived_ticks(evidence))
     if issue["state"] == "OPEN":
         gh("issue", "close", str(args.issue), "--repo", args.repo, "--reason", "completed")
     return read_back(args, "completed", "## Proof")
@@ -396,7 +487,7 @@ def out_of_date(args):
     if not evidence:
         print("out of date needs the evidence: the commit, release or code that moved on", file=sys.stderr)
         return EXIT_FINDINGS
-    if refuse_open_pieces(issue):
+    if refuse_open_pieces(args, issue):
         return EXIT_FINDINGS
     write_body(args, issue, "## Out of date", evidence)
     gh("issue", "close", str(args.issue), "--repo", args.repo, "--reason", "not planned")
@@ -409,21 +500,71 @@ def not_planned(args):
     if not said:
         print("not planned is the owner's decision: quote what they said", file=sys.stderr)
         return EXIT_FINDINGS
-    if refuse_open_pieces(issue):
+    if refuse_open_pieces(args, issue):
         return EXIT_FINDINGS
     write_body(args, issue, "## Not planned", f"The owner decided: {said}")
     gh("issue", "close", str(args.issue), "--repo", args.repo, "--reason", "not planned")
     return read_back(args, "not-planned", "## Not planned")
 
 
+def sync(args):
+    issue = read_issue(args.repo, args.issue)
+    evidence, found = assess(args, issue)
+    updated = with_derived_ticks(evidence)
+    if updated != (issue["body"] or ""):
+        gh("issue", "edit", str(args.issue), "--repo", args.repo, "--body-file", "-", stdin=updated)
+    proved = sum(1 for line in checklist(updated) if line.ticked)
+    print(f"#{args.issue}: {proved} of {len(checklist(updated))} lines proved; boxes set to match.")
+    print_findings(found)
+    return EXIT_FINDINGS if found else 0
+
+
+ZERO = "0" * 40
+
+
+def pre_push(args):
+    """Refuse a push to the landing branch that would close an issue GitHub-side
+    while the issue cannot close."""
+    args.repo = remote_slug(args.url)
+    if args.repo is None:
+        return 0
+    branch = landing_branch(args)
+    refused = False
+    for update in sys.stdin.read().splitlines():
+        local_ref, local_sha, remote_ref, remote_sha = (update.split() + ["", "", "", ""])[:4]
+        if local_sha == ZERO or remote_ref != f"refs/heads/{branch}":
+            continue
+        span = [local_sha, "--not", f"--remotes={args.remote}"] if remote_sha == ZERO else [f"{remote_sha}..{local_sha}"]
+        pushed = commits_of(args.checkout, *span)
+        for number in sorted({n for _, message in pushed for n in closed_issues(message, args.repo)}):
+            issue = read_issue(args.repo, number)
+            _, found = assess(args, issue, pushed)
+            if found:
+                refused = True
+                print(f"This push says 'Closes #{number}', and GitHub would close it now, but it cannot close:",
+                      file=sys.stderr)
+                for _, message in found:
+                    print(f"  - {message}", file=sys.stderr)
+    if refused:
+        print(RULE, file=sys.stderr)
+        print("Say 'Part of #N: <line id>' instead, or finish what is listed, then push again.", file=sys.stderr)
+    return EXIT_FINDINGS if refused else 0
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     commands = parser.add_subparsers(dest="command", required=True)
     parsers = {name: commands.add_parser(name)
-               for name in ("ready", "reran", "completed", "duplicate", "out-of-date", "not-planned")}
+               for name in ("ready", "sync", "reran", "completed", "duplicate", "out-of-date", "not-planned")}
     for sub in parsers.values():
         sub.add_argument("--repo", required=True)
         sub.add_argument("--issue", type=int, required=True)
+    parsers["pre-push"] = commands.add_parser("pre-push")
+    parsers["pre-push"].add_argument("remote")
+    parsers["pre-push"].add_argument("url")
+    for sub in parsers.values():
+        sub.add_argument("--checkout", default=".")
+        sub.add_argument("--branch")
     parsers["reran"].add_argument("--ran", required=True)
     parsers["reran"].add_argument("--saw", required=True)
     parsers["reran"].add_argument("--result", choices=sorted(RESULTS), required=True)
@@ -432,7 +573,7 @@ def main():
     parsers["out-of-date"].add_argument("--evidence", required=True)
     parsers["not-planned"].add_argument("--owner-said", required=True)
     args = parser.parse_args()
-    handlers = {"ready": ready, "reran": reran, "completed": completed, "duplicate": duplicate,
+    handlers = {"ready": ready, "sync": sync, "pre-push": pre_push, "reran": reran, "completed": completed, "duplicate": duplicate,
                 "out-of-date": out_of_date, "not-planned": not_planned}
     try:
         return handlers[args.command](args)

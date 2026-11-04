@@ -5,7 +5,14 @@ Run with: python3 -m unittest test_close_issue
 
 import unittest
 
+import os
+import subprocess
+import tempfile
+
+from checklist_proof import Evidence, closed_issues, line_findings, removed_findings, with_derived_ticks
 from close_issue import (
+    commits_of,
+    evidence_for,
     finished_milestone,
     open_pieces,
     ready_findings,
@@ -30,6 +37,17 @@ def issue(number=7, state="OPEN", reason=None, body="", labels=(), parent=None,
     }
 
 
+REPO = "example/app"
+
+
+def ev(item, commits=()):
+    return evidence_for(item, REPO, commits)
+
+
+def ready(item, commits=()):
+    return ready_findings(item, ev(item, commits))
+
+
 def kinds(found):
     return [kind for kind, _ in found]
 
@@ -52,17 +70,19 @@ class Body(unittest.TestCase):
 
 class Ready(unittest.TestCase):
     def test_open_sub_issue_and_unticked_line_block_closing(self):
-        found = open_pieces(issue(body="- [ ] migrate", children=[(8, "OPEN"), (9, "CLOSED")]))
+        item = issue(body="- [ ] migrate", children=[(8, "OPEN"), (9, "CLOSED")])
+        found = open_pieces(item, ev(item))
         self.assertEqual(kinds(found), ["open-sub-issue", "unticked"])
         self.assertIn("#8", found[0][1])
 
     def test_decision_without_its_answer_cannot_close(self):
-        self.assertEqual(kinds(ready_findings(issue(labels=["needs-decision"]))), ["no-decision"])
-        self.assertEqual(ready_findings(issue(labels=["needs-decision"], body="## Decision\n\nYes.")), [])
+        self.assertEqual(kinds(ready(issue(labels=["needs-decision"]))), ["no-decision"])
+        self.assertEqual(ready(issue(labels=["needs-decision"], body="## Decision\n\nYes.")), [])
 
 
 REPRO = ("## Steps to reproduce\n\n```sh\n# start from a clean checkout\n"
-         "example-app import fixtures/empty.csv\n```\n\nIt crashes with KeyError.\n\n## Done when\n\n- [x] it imports\n")
+         "example-app import fixtures/empty.csv\n```\n\nIt crashes with KeyError.\n\n## Done when\n\n- [x] imports: it imports\n")
+IMPORT_FIX = [("a1b2c3d4e5f6", "Import an empty CSV\n\nPart of #7: imports")]
 
 
 def rerun(ran, result, saw="it printed 0 rows imported"):
@@ -83,30 +103,30 @@ class Reproduction(unittest.TestCase):
 
     def test_passing_tests_without_a_rerun_cannot_close(self):
         body = REPRO + "\n## Proof\n\n- pytest: 212 passed\n"
-        self.assertEqual(kinds(ready_findings(issue(body=body))), ["no-rerun"])
+        self.assertEqual(kinds(ready(issue(body=body), IMPORT_FIX)), ["no-rerun"])
 
     def test_a_rerun_that_still_fails_blocks_even_with_green_tests(self):
         body = REPRO + "\n## Proof\n\n- pytest: 212 passed\n" + rerun(
             "example-app import fixtures/empty.csv", "still fails", saw="KeyError: 'id'")
-        found = ready_findings(issue(body=body))
+        found = ready(issue(body=body), IMPORT_FIX)
         self.assertEqual(kinds(found), ["repro-still-fails"])
         self.assertIn("KeyError: 'id'", found[0][1])
 
     def test_an_unrelated_green_test_is_not_a_rerun(self):
         body = REPRO + rerun("pytest tests/test_export.py", "fixed", saw="4 passed")
-        self.assertEqual(kinds(ready_findings(issue(body=body))), ["rerun-unrelated"])
+        self.assertEqual(kinds(ready(issue(body=body), IMPORT_FIX)), ["rerun-unrelated"])
 
     def test_a_fixed_rerun_of_the_reproduction_lets_it_close(self):
         body = REPRO + rerun("`example-app import fixtures/empty.csv` on 3f2a1c9", "fixed")
-        self.assertEqual(ready_findings(issue(body=body)), [])
+        self.assertEqual(ready(issue(body=body), IMPORT_FIX), [])
 
     def test_a_prose_reproduction_takes_any_recorded_rerun(self):
         body = "## Reproduction\n\nOpen settings, then press Save twice.\n"
-        self.assertEqual(kinds(ready_findings(issue(body=body))), ["no-rerun"])
-        self.assertEqual(ready_findings(issue(body=body + rerun("pressed Save twice", "fixed"))), [])
+        self.assertEqual(kinds(ready(issue(body=body), IMPORT_FIX)), ["no-rerun"])
+        self.assertEqual(ready(issue(body=body + rerun("pressed Save twice", "fixed")), IMPORT_FIX), [])
 
     def test_an_issue_without_a_reproduction_needs_no_rerun(self):
-        self.assertEqual(ready_findings(issue(body="## Outcome\n\nFaster import.\n")), [])
+        self.assertEqual(ready(issue(body="## Outcome\n\nFaster import.\n")), [])
 
 
 class Duplicate(unittest.TestCase):
@@ -140,3 +160,98 @@ class Milestone(unittest.TestCase):
     def test_a_closed_milestone_or_no_milestone_needs_nothing(self):
         self.assertIsNone(finished_milestone(milestoned(state="CLOSED")))
         self.assertIsNone(finished_milestone({**issue(), "milestone": None}))
+
+
+def lines_issue(body, labels=()):
+    return issue(number=1962, body=body, labels=labels)
+
+
+CLEANSE = "## Done when\n\n- [x] cleanse: Cleanse effects\n- [ ] heal: Heal a fighter\n"
+
+
+class EarnedTicks(unittest.TestCase):
+    def test_a_box_ticked_by_hand_proves_nothing(self):
+        found = line_findings(ev(lines_issue(CLEANSE)))
+        self.assertEqual(kinds(found), ["ticked-unproven", "unticked"])
+        self.assertIn("Part of #1962: cleanse", found[0][1])
+
+    def test_a_landed_commit_naming_the_line_proves_it_even_unticked(self):
+        commits = [("c0ffee1234", "Cleanse effects\n\nPart of #1962: cleanse, heal")]
+        self.assertEqual(line_findings(ev(lines_issue(CLEANSE), commits)), [])
+
+    def test_a_commit_for_another_issue_number_proves_nothing(self):
+        commits = [("c0ffee1234", "Part of #19620: cleanse\nPart of other/repo#1962: heal")]
+        self.assertEqual(kinds(line_findings(ev(lines_issue(CLEANSE), commits))), ["ticked-unproven", "unticked"])
+
+    def test_a_line_ending_in_a_hash_needs_that_commit_to_name_the_issue(self):
+        body = "- [x] Cleanse effects (c0ffee1)\n"
+        named = [("c0ffee1234", "Cleanse effects\n\nCloses #1962")]
+        unnamed = [("c0ffee1234", "Cleanse effects")]
+        other_issue = [("c0ffee1234", "Cleanse effects\n\nCloses #19620")]
+        self.assertEqual(line_findings(ev(lines_issue(body), named)), [])
+        self.assertEqual(kinds(line_findings(ev(lines_issue(body), unnamed))), ["ticked-unproven"])
+        self.assertEqual(kinds(line_findings(ev(lines_issue(body), other_issue))), ["ticked-unproven"])
+
+    def test_a_proof_line_with_a_link_proves_its_line(self):
+        body = CLEANSE + "\n## Proof\n\n- cleanse: walked it https://example.com/clip\n- heal: it works\n"
+        self.assertEqual(kinds(line_findings(ev(lines_issue(body)))), ["unticked"])
+
+    def test_a_decision_proves_its_own_lines(self):
+        body = "## Decision\n\nShip it.\n\n## Done when\n\n- [x] chosen: One option is chosen\n"
+        self.assertEqual(line_findings(ev(lines_issue(body, labels=["decision"]))), [])
+        self.assertEqual(kinds(line_findings(ev(lines_issue(body)))), ["ticked-unproven"])
+
+    def test_derived_ticks_untick_hand_ticks_and_tick_proved_lines(self):
+        commits = [("c0ffee1234", "Part of #1962: heal")]
+        self.assertEqual(with_derived_ticks(ev(lines_issue(CLEANSE), commits)),
+                         "## Done when\n\n- [ ] cleanse: Cleanse effects\n- [x] heal: Heal a fighter\n")
+
+
+class RemovedLines(unittest.TestCase):
+    EARLIER = ["- [ ] cleanse: Cleanse effects\n- [ ] Show the heal number above the fighter\n"]
+
+    def removed(self, body, commits=(), others=None):
+        return removed_findings(ev(lines_issue(body), commits), self.EARLIER, lambda n: (others or {})[n])
+
+    def test_a_line_deleted_without_a_record_blocks(self):
+        found = self.removed("- [ ] Show the heal number above the fighter\n")
+        self.assertEqual(kinds(found), ["removed-unrecorded"])
+        self.assertIn("cleanse", found[0][1])
+
+    def test_a_dropped_line_with_its_reason_is_allowed(self):
+        body = "- [ ] Show the heal number above the fighter\n\n## Checklist changes\n\n- cleanse: dropped, the owner cut it\n"
+        self.assertEqual(self.removed(body), [])
+        bare = body.replace("dropped, the owner cut it", "dropped")
+        self.assertEqual(kinds(self.removed(bare)), ["removed-unrecorded"])
+
+    def test_a_moved_line_must_arrive_in_its_new_issue(self):
+        body = "- [ ] Show the heal number above the fighter\n\n## Checklist changes\n\n- cleanse: moved to #9\n"
+        self.assertEqual(self.removed(body, others={9: "- [ ] cleanse: Cleanse effects (was #1962)\n"}), [])
+        self.assertEqual(kinds(self.removed(body, others={9: "- [ ] heal: Heal\n"})), ["moved-missing"])
+
+    def test_a_reworded_line_without_an_id_is_not_a_removal(self):
+        body = "- [ ] cleanse: Cleanse effects\n- [ ] Show the healed amount above the fighter\n"
+        self.assertEqual(self.removed(body), [])
+
+    def test_a_line_removed_after_its_commit_landed_is_fine(self):
+        body = "- [ ] Show the heal number above the fighter\n"
+        self.assertEqual(self.removed(body, [("c0ffee1234", "Part of #1962: cleanse")]), [])
+
+
+class ClosingKeywords(unittest.TestCase):
+    def test_only_closing_keywords_for_this_repository_count(self):
+        message = "Closes #7\nfixes example/app#8\nResolves other/repo#9\nPart of #10: x\nfix: tidy #11"
+        self.assertEqual(closed_issues(message, REPO), {7, 8})
+
+
+class Commits(unittest.TestCase):
+    def test_commit_messages_are_read_whole_from_git(self):
+        root = os.environ.get("TEST_SCRATCH") or tempfile.gettempdir()
+        with tempfile.TemporaryDirectory(dir=root) as checkout:
+            run = lambda *a: subprocess.run(["git", "-C", checkout, *a], check=True, capture_output=True)
+            run("init", "-q")
+            run("-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "--allow-empty",
+                "-m", "Cleanse effects", "-m", "Part of #1962: cleanse\nPart of #1962: heal")
+            [(sha, message)] = commits_of(checkout, "HEAD")
+            self.assertEqual(len(sha), 40)
+            self.assertEqual(message.strip(), "Cleanse effects\n\nPart of #1962: cleanse\nPart of #1962: heal")

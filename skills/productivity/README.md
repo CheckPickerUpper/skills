@@ -6,7 +6,7 @@ General workflow tools.
 |---|---|---|
 | [anti-ai-slop-writing](./anti-ai-slop-writing/SKILL.md) | You are having an agent write a web page, article, email or document, and you don't want it to read like a chatbot wrote it. It also bans lists of three. | `/anti-ai-slop-writing write the About page for our bakery` |
 | [audit-issues](./audit-issues/SKILL.md) | Your GitHub repository has so many open issues that you cannot tell which are duplicates, already done, or still need work. | `/audit-issues OWNER/REPO` |
-| [close-issues](./close-issues/SKILL.md) | An agent is about to close a GitHub issue. It refuses until every sub-issue and checklist item is done, and writes the proof into the issue. | `/close-issues #142 is finished` |
+| [close-issues](./close-issues/SKILL.md) | An agent is about to close a GitHub issue. It refuses until every sub-issue and checklist item is done, counts a checklist item done only when a landed commit names it, and writes the proof into the issue. | `/close-issues #142 is finished` |
 | [compose-goal](./compose-goal/SKILL.md) | You are handing a task to another agent and want it to get the outcome, the issue links and how to prove it works. | `/compose-goal hand #142 to another agent` |
 | [cut-extraneous-load](./cut-extraneous-load/SKILL.md) | Your agent's replies are pretentious and long-winded, and you want only what you need to know. Especially useful at the end of a long day, when your brain hurts. | `/cut-extraneous-load say that again without the filler` |
 | [dependency-trace](./dependency-trace/SKILL.md) | Before building a feature, to work out what has to exist first and in what order. | `/dependency-trace what does checkout depend on?` |
