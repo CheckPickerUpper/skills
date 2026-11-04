@@ -37,6 +37,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 
@@ -680,10 +681,17 @@ def read_mirror(path):
 
 def write_mirror(path, by_number, synced_at):
     path.parent.mkdir(parents=True, exist_ok=True)
-    partial = path.with_suffix(".partial")
-    partial.write_text(json.dumps({"version": MIRROR_VERSION, "fields": MIRROR_FIELDS,
-                                   "synced_at": synced_at, "issues": by_number}))
-    partial.replace(path)
+    # Each writer gets its own partial file, so concurrent audits of one repository never
+    # rename each other's; os.replace is atomic, so a reader sees one whole mirror or another.
+    handle, partial = tempfile.mkstemp(dir=path.parent, prefix=f"{path.name}.", suffix=".partial")
+    try:
+        with os.fdopen(handle, "w") as out:
+            json.dump({"version": MIRROR_VERSION, "fields": MIRROR_FIELDS,
+                       "synced_at": synced_at, "issues": by_number}, out)
+        os.replace(partial, path)
+    except BaseException:
+        os.unlink(partial)
+        raise
 
 
 def refresh_links(by_number):

@@ -8,6 +8,7 @@ import io
 import json
 import os
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -311,6 +312,44 @@ class Result:
 
 def tracked(number, updated, **fields):
     return {**issue(number, **fields), "updatedAt": updated}
+
+
+class MirrorWrites(unittest.TestCase):
+    def test_overlapping_writes_each_finish_and_leave_whole_json(self):
+        folder = tempfile.TemporaryDirectory(prefix="audit-issues-test-")
+        self.addCleanup(folder.cleanup)
+        path = Path(folder.name) / "example__app.json"
+        real_replace, lock = os.replace, threading.Lock()
+        first_paused, second_done, calls = threading.Event(), threading.Event(), []
+
+        def replace_after_the_other(source, target):
+            with lock:
+                calls.append(source)
+                first = len(calls) == 1
+            if first:
+                first_paused.set()
+                second_done.wait(timeout=5)
+            real_replace(source, target)
+            if not first:
+                second_done.set()
+
+        errors = []
+
+        def first_write():
+            try:
+                audit_issues.write_mirror(path, {"1": issue(1)}, "first")
+            except OSError as error:
+                errors.append(error)
+
+        with mock.patch("os.replace", replace_after_the_other):
+            writer = threading.Thread(target=first_write)
+            writer.start()
+            first_paused.wait(timeout=5)
+            audit_issues.write_mirror(path, {"2": issue(2)}, "second")
+            writer.join(timeout=5)
+        self.assertEqual(errors, [])
+        self.assertEqual(json.loads(path.read_text())["synced_at"], "first")
+        self.assertEqual([p.name for p in path.parent.iterdir()], [path.name])
 
 
 class Mirror(unittest.TestCase):
