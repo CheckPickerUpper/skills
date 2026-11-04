@@ -103,6 +103,11 @@ it) or `wait` (naming what it waits for and who owns that).
 - **Fix an unfailable test by loosening or deleting it** when the code
   collapsed the failures it should tell apart; fix the code.
 - **Fix one test at a time** when its cause is shared. Name the class first.
+- **Count an open issue as the fix.** "Issue #N already requires it" leaves
+  the slow check running. The fix lands now, as the next thing you land.
+- **Queue the speed fix behind the work that pays for it.** When queued
+  commits each pay a slow gate, test or landing step, the commit that makes
+  it fast lands first, ahead of every one of them.
 - **Fake the number.** No moving work out of the timed region, no splitting a
   slow test into several just under the bar, no caching that skips the
   assertion, no tuning to a hair under the bar. Fix the slow algorithm, the
@@ -367,7 +372,11 @@ nothing about them.
       server; per-file setup hands out copies), so a test file has nothing
       to configure;
     - the cheap path is the default and the exception has its own named
-      helper, so choosing the expensive one shows in the test's code.
+      helper, so choosing the expensive one shows in the test's code;
+    - a procedure agents run step by step (landing a commit, releasing,
+      rebuilding when the main branch moves) is one command the repository
+      owns, and the fix changes that command. A rules file telling agents
+      which steps to skip is a reminder, not a fix.
 
     Only when the owner cannot make the shape unwritable, add a rule to a
     linter or type checker the repository already runs on every change,
