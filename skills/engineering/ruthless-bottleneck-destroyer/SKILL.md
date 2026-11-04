@@ -112,6 +112,11 @@ it) or `wait` (naming what it waits for and who owns that).
   none of it; the time comes back on a busier machine. They are allowed only
   after every remaining unit of work is accounted for and none repeats (step
   7), and never reported as the fix.
+- **Hand-roll a mechanism this skill prescribes.** Breaking code on purpose
+  is mutation testing, per-test timing and limits belong to the runner's
+  reporter and hooks, and shared templates, locks and caches have maintained
+  owners too. Name the standard tool for the stack and use it; write your own
+  only when a search shows none fits, and say which you checked.
 - **Cut parallelism to make a repeat fit.** Fewer workers or a lower
   concurrency limit spreads the same repeated setup over more time instead of
   removing it; it is throwing hardware at it in reverse.
@@ -149,11 +154,16 @@ deletion in making it fast.
 <what-to-do>
 1. **Name the rule** the test is for, in one sentence: what must be true and
    at which entry point.
-2. **Break the rule on purpose,** in the smallest plausible wrong way: skip
-   the request, return the default, swap the currency, drop the write, take
-   the other branch. Also break what the test depends on, not just what it
-   asserts: make the request never arrive, the file never open, the service
-   unreachable.
+2. **Break the rule on purpose.** Run the stack's mutation-testing tool
+   first (cosmic-ray or mutmut for Python, StrykerJS for JavaScript and
+   TypeScript, cargo-mutants for Rust, PIT for Java, gremlins for Go): it
+   breaks one site at a time and records which tests fail, so a test no break
+   fails shows at once. A tool's break that fails several tests marks a
+   suspect, never a duplicate. Then break the rule the test names by hand, in
+   the smallest plausible wrong way: skip the request, return the default,
+   swap the currency, drop the write, take the other branch. Also break what
+   the test depends on, not just what it asserts: make the request never
+   arrive, the file never open, the service unreachable.
 3. **Run the tests of that module** and record which fail.
    - Nothing fails: the test cannot fail. Go to step 4.
    - Only this test fails: it is needed. Keep it.
@@ -211,7 +221,9 @@ nothing about them.
    `gotestsum tool slowest` for Go, the built-in test reporter for Node,
    `--durations=0` or a duration hook for pytest, `--reporter=json` for
    Vitest or Jest. Keep a history file, and make the runner itself read the
-   recorded bar, print every test over it and fail it; the full check fails
+   recorded bar through its own hook (a pytest plugin hook, a Jest or Vitest
+   reporter, a gotestsum post-run step), never a second runner written beside
+   it, print every test over it and fail it; the full check fails
    the same way over its own limit. Time spent waiting on other machine work
    is subtracted, so the judge cannot fail on load. Whole-command wall clocks
    and prose ("the suite is slow") are never evidence.
