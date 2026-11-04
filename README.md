@@ -130,6 +130,13 @@ new skill, `patch` for a fix or wording change), and describe what changed for
 someone who uses the skill. Commit the generated `.changeset/*.md` with the
 change.
 
+A changeset describes what the release changes compared with the last
+release, never what one commit did. While a change is unreleased, a later
+commit to it edits that change's changeset, or deletes the one it supersedes,
+and never adds a second changeset for the same change. Before each commit,
+check that every pending file in `.changeset/` still says what the code now
+does.
+
 Write one changeset per change, in the shape of the existing entries in
 `CHANGELOG.md`:
 
