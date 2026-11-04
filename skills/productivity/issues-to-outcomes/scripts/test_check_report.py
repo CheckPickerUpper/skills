@@ -58,7 +58,7 @@ class CheckReport(unittest.TestCase):
             "1. PR #1407 harness",
             "| owner/repo#1407 | harness |",
             "https://github.com/owner/repo/pull/1407 harness",
-            "* [x] NRO-1407 harness",
+            "* [x] APP-1407 harness",
             "## #1407 harness",
             "- pr #1407 harness",
         ):
