@@ -74,9 +74,6 @@ Tools kept around but rarely used. None yet.
 ./scripts/link-skills.sh --client codex
 ./scripts/link-skills.sh --client gemini
 ./scripts/link-skills.sh --client pi
-./scripts/link-skills-all.sh
-# Replace stale real copies with links to this repo, keeping recoverable backups.
-./scripts/link-skills-all.sh --replace-existing
 ```
 
 ## Client targeting
