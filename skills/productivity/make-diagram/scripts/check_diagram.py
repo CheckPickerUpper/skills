@@ -161,34 +161,44 @@ def launch(playwright):
 
 
 class Renderer:
-    """One open page. A check loads the file once and switches the colour scheme
-    in place: the page's styles and the geometry script both read the scheme live."""
+    """One open page. A file is loaded once and the colour scheme switched in
+    place: the page's styles and the geometry script both read the scheme live."""
 
     def __init__(self, browser):
         self.page = browser.new_page(viewport=VIEWPORT)
+        self.url = None
 
-    def load(self, url):
-        self.page.emulate_media(color_scheme="light")
-        self.page.goto(url)
-        # The layout settles when its fonts have loaded; waiting for the network to idle adds a fixed 500 ms.
-        self.page.evaluate("document.fonts.ready.then(() => true)")
+    def show(self, url, scheme):
+        if url != self.url:
+            self.page.emulate_media(color_scheme=scheme)
+            self.page.goto(url)
+            # The layout settles when its fonts have loaded; waiting for the network to idle adds a fixed 500 ms.
+            self.page.evaluate("document.fonts.ready.then(() => true)")
+            self.url = url
+        else:
+            self.page.emulate_media(color_scheme=scheme)
+        return self.page
 
     def close(self):
         self.page.close()
 
 
-def measure(renderer, scheme, out_dir, stem):
-    page = renderer.page
-    page.emulate_media(color_scheme=scheme)
-    result = page.evaluate(GEOMETRY)
-    svgs = page.query_selector_all("svg:has(.node, .decision)")
+SCHEMES = ("light", "dark")
+
+
+def render(renderer, path, out_dir):
+    """Write one PNG per diagram per colour scheme and return their paths."""
+    path = Path(path).resolve()
     images = []
-    for index, handle in enumerate(svgs):
-        suffix = f".{index + 1}" if len(svgs) > 1 else ""
-        image = out_dir / f"{stem}{suffix}.{scheme}.png"
-        handle.screenshot(path=str(image))
-        images.append(image)
-    return result, images
+    for scheme in SCHEMES:
+        page = renderer.show(path.as_uri(), scheme)
+        svgs = page.query_selector_all("svg:has(.node, .decision)")
+        for index, handle in enumerate(svgs):
+            suffix = f".{index + 1}" if len(svgs) > 1 else ""
+            image = out_dir / f"{path.stem}{suffix}.{scheme}.png"
+            handle.screenshot(path=str(image))
+            images.append(image)
+    return images
 
 
 def report(path, findings, images, standing, accepted_path):
@@ -241,21 +251,16 @@ def main():
         return EXIT_UNUSABLE
 
 
-def check(renderer, path, out=None, words=None, accepted=None):
-    """Check one diagram file with an open Renderer, print the report, and return
-    the exit code. Several checks can share one Renderer."""
+def judge(renderer, path, words=None, accepted=None):
+    """The findings for one diagram file, the judgment calls its accepted file
+    lets stand, and that file's path."""
     path = Path(path).resolve()
-    out_dir = (Path(out) if out else path.parent).resolve()
-    out_dir.mkdir(parents=True, exist_ok=True)
     words = Path(words) if words else path.with_suffix(".words.txt")
     accepted_path = Path(accepted) if accepted else path.with_suffix(".accepted.txt")
     findings = []
-    images = []
     seen = set()
-    renderer.load(path.as_uri())
-    for scheme in ("light", "dark"):
-        result, shots = measure(renderer, scheme, out_dir, path.stem)
-        images.extend(shots)
+    for scheme in SCHEMES:
+        result = renderer.show(path.as_uri(), scheme).evaluate(GEOMETRY)
         if not result["diagrams"]:
             findings.append({"rule": "found", "message": "no diagram found"})
             break
@@ -278,6 +283,17 @@ def check(renderer, path, out=None, words=None, accepted=None):
 
     accepted = read_accepted(accepted_path) if accepted_path.is_file() else {}
     findings, standing = apply_accepted(findings, accepted, accepted_path)
+    return findings, standing, accepted_path
+
+
+def check(renderer, path, out=None, words=None, accepted=None):
+    """Judge and render one diagram file with an open Renderer, print the report,
+    and return the exit code. Several checks can share one Renderer."""
+    path = Path(path).resolve()
+    out_dir = (Path(out) if out else path.parent).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
+    findings, standing, accepted_path = judge(renderer, path, words, accepted)
+    images = render(renderer, path, out_dir)
     report(path, findings, images, standing, accepted_path)
     return EXIT_FINDINGS if findings else 0
 

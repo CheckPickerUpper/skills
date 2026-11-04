@@ -1,8 +1,9 @@
 """Behavioral tests of check_diagram.py in a real browser.
 
 Each case breaks one rule in the reference example and expects the checker to
-name it. One browser serves every case, as one check run serves several pages.
-Run with: uv run --with playwright==1.58.0 python -m unittest test_check_diagram
+name it. One browser serves every case. Only the rendering case writes images;
+the rule cases judge the diagram without them.
+Run with: uv run --with pytest==8.4.2 --with playwright==1.58.0 pytest test_check_diagram.py
 (needs Chrome or Playwright's Chromium).
 """
 
@@ -66,7 +67,7 @@ class CheckDiagram(unittest.TestCase):
         cls.browser.close()
         cls.playwright.stop()
 
-    def run_check(self, content, name="diagram.svg", words="", accepted=None):
+    def run_check(self, content, name="diagram.svg", words="", accepted=None, render=False):
         with tempfile.TemporaryDirectory() as folder:
             path = Path(folder) / name
             path.write_text(content)
@@ -76,7 +77,12 @@ class CheckDiagram(unittest.TestCase):
                 path.with_suffix(".accepted.txt").write_text(accepted)
             out = io.StringIO()
             with contextlib.redirect_stdout(out):
-                code = check_diagram.check(self.renderer, path)
+                if render:
+                    code = check_diagram.check(self.renderer, path)
+                else:
+                    findings, standing, accepted_path = check_diagram.judge(self.renderer, path)
+                    check_diagram.report(path, findings, [], standing, accepted_path)
+                    code = check_diagram.EXIT_FINDINGS if findings else 0
             images = sorted(p.name for p in Path(folder).glob("*.png"))
         return Result(code, out.getvalue()), images
 
@@ -87,7 +93,7 @@ class CheckDiagram(unittest.TestCase):
             self.assertIn(text, result.stdout)
 
     def test_the_example_passes_and_renders_both_themes(self):
-        result, images = self.run_check(EXAMPLE)
+        result, images = self.run_check(EXAMPLE, render=True)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(images, ["diagram.dark.png", "diagram.light.png"])
 
