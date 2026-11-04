@@ -14,7 +14,7 @@ import subprocess
 import tempfile
 
 import close_issue
-from checklist_proof import Evidence, closed_issues, line_findings, removed_findings, with_derived_ticks
+from checklist_proof import Evidence, closed_issues, without_lines, line_findings, removed_findings, with_derived_ticks
 from close_issue import (
     commits_of,
     evidence_for,
@@ -290,6 +290,17 @@ class RemovedLines(unittest.TestCase):
     def test_a_line_removed_after_its_commit_landed_is_fine(self):
         body = "- [ ] Show the heal number above the fighter\n"
         self.assertEqual(self.removed(body, [("c0ffee1234", "Part of #1962: cleanse")]), [])
+
+
+class LineRemoval(unittest.TestCase):
+    def test_a_section_emptied_by_removing_its_lines_goes_with_them(self):
+        body = ("Fix it.\n\n## Done when\n\n- [ ] heal: Heal a fighter\n\n## Notes\n\nKeep this.\n\n"
+                "## Untouched\n\n")
+        self.assertEqual(without_lines(body, {"heal"}), "Fix it.\n\n## Notes\n\nKeep this.\n\n## Untouched\n\n")
+
+    def test_a_section_that_keeps_a_line_keeps_its_heading(self):
+        body = "## Done when\n\n- [ ] heal: Heal a fighter\n- [ ] cleanse: Cleanse effects\n"
+        self.assertEqual(without_lines(body, {"heal"}), "## Done when\n\n- [ ] cleanse: Cleanse effects\n")
 
 
 class ClosingKeywords(unittest.TestCase):

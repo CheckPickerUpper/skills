@@ -166,14 +166,24 @@ def change_record(key, moved_to=None, dropped=None):
 
 
 def without_lines(body, keys):
-    """The body without the checklist lines whose key is in keys."""
-    out, fenced = [], False
+    """The body without the checklist lines whose key is in keys, and without the heading
+    of any section those lines leave empty."""
+    sections, fenced = [[None, [], False]], False
     for raw in (body or "").splitlines():
         if FENCE.match(raw):
             fenced = not fenced
-        elif not fenced and BOX.match(raw) and checklist(raw)[0].key in keys:
+        elif not fenced and HEADING.match(raw):
+            sections.append([raw, [], False])
             continue
-        out.append(raw)
+        elif not fenced and BOX.match(raw) and checklist(raw)[0].key in keys:
+            sections[-1][2] = True
+            continue
+        sections[-1][1].append(raw)
+    out = []
+    for heading, lines, emptied in sections:
+        if emptied and heading is not None and not any(line.strip() for line in lines):
+            continue
+        out += ([heading] if heading is not None else []) + lines
     return "\n".join(out) + ("\n" if (body or "").endswith("\n") else "")
 
 
