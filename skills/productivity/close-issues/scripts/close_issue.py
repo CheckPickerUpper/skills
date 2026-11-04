@@ -238,8 +238,9 @@ CLOSE_PASS = {"CLOSE_ISSUES_SCRIPT": "close_issue.py"}
 
 
 def gh(*args, stdin=None):
-    result = subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True,
-                            env={**os.environ, **CLOSE_PASS}, check=False)
+    # Only a close carries the pass, so the shared helper cannot close behind this script's checks.
+    env = {**os.environ, **CLOSE_PASS} if args[:2] == ("issue", "close") else None
+    result = subprocess.run(["gh", *args], input=stdin, capture_output=True, text=True, env=env, check=False)
     if result.returncode != 0:
         raise RuntimeError(f"gh {' '.join(args[:3])}: {result.stderr.strip()}")
     return result.stdout
