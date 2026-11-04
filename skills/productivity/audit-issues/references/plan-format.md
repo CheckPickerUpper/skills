@@ -26,7 +26,9 @@ holds what spans batches.
     "105": {"verdict": "done", "proof": ["https://github.com/o/r/commit/abc123", "test_refund passes"]},
     "106": {"verdict": "wrong-premise", "title": "Import validates each row as the server does",
             "fix": "Validate in the shared writer instead of retrying rejected rows.", "under": "import-writer"},
-    "107": {"verdict": "out-of-date", "evidence": "0.1.170 replaced the release this describes"},
+    "107": {"verdict": "out-of-date", "evidence": "0.1.170 replaced the release this describes",
+            "lines": {"csv-export": {"moved": 101, "id": "refund-csv"},
+                      "Show the old totals screen": {"dropped": "0.1.170 removed that screen"}}},
     "108": {"verdict": "still-real", "evidence": "reproduced: the import drops row 40"},
     "109": {"verdict": "unsure", "check": "replay the June import against production",
             "impossible_because": "production data is not reachable from this machine"}
@@ -46,15 +48,33 @@ An issue with verdicts in two files is refused.
 
 | Verdict | Needs | What apply does |
 |---|---|---|
-| `done` | `proof` (a list) | `close_issue.py completed` with each proof |
+| `done` | `proof` (a list), and `lines` while it has open lines | settles its `lines`, then `close_issue.py completed` with each proof |
 | `duplicate` | `of` | copies its details into `of` under `(was #N)`, then `close_issue.py duplicate` |
 | `slice`, as `checkbox` | `cause`, `line` as `<id>: <text>`, the id new in the cause | adds `- [ ] <id>: <text> (was #N)` to the cause's `## Done when`, copies its details under `## Folded in`, then closes it as a duplicate of the cause |
 | `slice`, as `sub-issue` | `cause`, `because` (`parallel`, `other-owner` or `outside-wait`), `detail` | makes it a sub-issue of the cause |
 | `cause` | `reason` | nothing; it stays open at the top |
 | `wrong-premise` | `title`, `fix`, `under` | retitles it, writes `## Proper fix`, makes it a sub-issue of `under` |
-| `out-of-date` | `evidence` | `close_issue.py out-of-date` with the evidence |
+| `out-of-date` | `evidence`, and `lines` while it has open lines | settles its `lines`, then `close_issue.py out-of-date` with the evidence |
 | `still-real` | `evidence` | nothing |
 | `unsure` | `check`, `impossible_because` | nothing; the page lists it |
 
 A slice with open sub-issues stays a sub-issue, and an issue that closes may
 not leave open sub-issues under it; `plan` refuses both.
+
+A `done` or `out-of-date` issue closes only once every checklist line that
+close-issues would call open (no landed commit, `## Proof` link or decision
+proves it) has a fate in `lines`, keyed by the line's id, or by its text when
+it has no id:
+
+| Fate | Means | What apply does |
+|---|---|---|
+| `{"moved": <cause>, "id": "<id>"}` | the work carries on in `<cause>`, an issue number or `new_causes` key that stays open; `id` is new in that cause, and may be left out when the line already has an id | adds `- [ ] <id>: <text> (was #N)` to the cause's `## Done when` and records `- <key>: moved to #M` |
+| `{"dropped": "<reason>"}` | the work is no longer wanted | records `- <key>: dropped, <reason>` |
+
+`plan` refuses a missing fate, a fate for a line the issue does not have, a
+move to a cause that does not stay open, and a moved id that is missing or
+already in the cause. The page lists every fate. `apply` records each one
+under the closing issue's `## Checklist changes`, removes the lines from its
+body, then closes it; a rerun repeats none of these edits. A `duplicate` or
+checkbox `slice` needs no `lines`: its whole body is copied into the issue it
+joins.

@@ -59,6 +59,11 @@ beside this one.
    - **Out of date:** the code or release it describes has moved on ("Release
      0.1.166" after 0.1.170 shipped). Name the evidence; this is not a scope
      decision and does not wait on the owner.
+   - A **done** or **out-of-date** issue with open checklist lines gives each
+     line a fate in its verdict's `lines`: moved to a cause that stays open,
+     with a line id new there, or dropped with the reason. The page shows
+     every fate and `apply` makes the edits, so nothing is decided by hand
+     after approval.
    - **Still real:** you reproduced it or read the code that still has it.
    - **Unsure** is not a parking spot. Run the check that settles it. Unsure
      stands only when that check is truly impossible here, and the verdict
@@ -74,16 +79,19 @@ beside this one.
    tool where it has one, with the facts behind each choice.
 6. **Show the plan before changing anything.** Run
    `audit plan --repo R --plan PLAN.json [--verdicts BATCH.json ...] --page PAGE.md`
-   until it exits 0. It writes a short page: open and top-level counts before
-   and after per milestone, each cause with its slice count, what closes, and
-   every unsure issue with its check. Show the owner that page, as a page they
-   can open where the client can publish one, never the plan file itself.
+   inside a checkout of the repository (it reads landed commits, as
+   close-issues does) until it exits 0. It writes a short page: open and
+   top-level counts before and after per milestone, each cause with its slice
+   count, what closes, where each open line of a closing issue goes, and
+   every unsure issue with its check. Show the owner that page, as a page
+   they can open where the client can publish one, never the plan file itself.
 7. **Apply only what they approved.** Run
    `audit apply --repo R --plan PLAN.json [--verdicts ...] --approved CODE`
    with the code `plan` printed. It refuses a plan that changed since the page
    was written, then creates new causes, moves slices under their causes,
-   copies folded details in, and closes through close-issues, deepest issues
-   first. A failed run is safe to rerun; it resumes.
+   copies folded details in, moves or drops each closing issue's open lines,
+   and closes through close-issues, deepest issues first. A failed run is safe
+   to rerun; it resumes.
 8. **Report to whoever asked**, once the work is done, in their channel: the user, or the
    conducting agent when an agent asked, never only printed
    where nobody is looking. Lead with outcomes as counts before and after

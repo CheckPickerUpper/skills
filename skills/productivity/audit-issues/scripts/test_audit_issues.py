@@ -216,6 +216,52 @@ class Plan(unittest.TestCase):
         verdicts.update({2: {"verdict": "still-real", "evidence": "e"}, 4: {"verdict": "still-real", "evidence": "e"}})
         self.assertEqual(kinds(plan_findings(plan_of(verdicts), self.issues)), ["line-id"])
 
+    def closing_with_lines(self, fates=None, verdict="out-of-date"):
+        self.issues[0] = issue(1, title="Sync loses rows", body="## Done when\n\n- [ ] keep-rows: Keep rows\n")
+        self.issues[1] = issue(2, body="## Done when\n\n- [ ] order: Keep row order\n- [ ] Write the import guide\n")
+        verdicts = {n: {"verdict": "still-real", "evidence": "e"} for n in (1, 3, 4, 5)}
+        verdicts[2] = {"verdict": verdict, "evidence": "0.2 replaced it", "proof": ["c1"]}
+        if fates is not None:
+            verdicts[2]["lines"] = fates
+        return plan_of(verdicts)
+
+    def test_a_closing_issue_gives_each_open_line_a_fate(self):
+        found = plan_findings(self.closing_with_lines(), self.issues)
+        self.assertEqual(kinds(found), ["line-fate", "line-fate"])
+        self.assertIn("#2", found[0][1])
+        self.assertIn("order: Keep row order", found[0][1])
+        self.assertIn('"dropped"', found[0][1])
+        self.assertIn("Write the import guide", found[1][1])
+        self.assertEqual(kinds(plan_findings(self.closing_with_lines(verdict="done"), self.issues)),
+                         ["line-fate", "line-fate"])
+
+    def test_line_fates_name_real_lines_and_new_ids_in_a_cause_that_stays_open(self):
+        fates = {"order": {"moved": 1}, "Write the import guide": {"dropped": "the guide moved to the wiki"}}
+        self.assertEqual(plan_findings(self.closing_with_lines(fates), self.issues), [])
+        cases = {
+            "no-such-line": {**fates, "colour": {"dropped": "never mind"}},
+            "id-taken": {**fates, "order": {"moved": 1, "id": "keep-rows"}},
+            "no-id": {**fates, "Write the import guide": {"moved": 1}},
+            "closing-target": {**fates, "order": {"moved": 2}},
+            "no-reason": {**fates, "order": {"dropped": " "}},
+        }
+        for name, case in cases.items():
+            with self.subTest(name):
+                self.assertEqual(kinds(plan_findings(self.closing_with_lines(case), self.issues)), ["line-fate"])
+
+    def test_a_line_a_landed_commit_proves_needs_no_fate(self):
+        plan = self.closing_with_lines({"Write the import guide": {"dropped": "the guide moved to the wiki"}})
+        proofs = audit_issues.closing_evidence(plan, self.issues, "example/app",
+                                               lambda number: [("c0ffee1234", f"Part of #{number}: order")])
+        self.assertEqual(plan_findings(plan, self.issues, proofs), [])
+
+    def test_the_page_shows_each_closing_issues_line_fates(self):
+        fates = {"order": {"moved": 1, "id": "row-order"},
+                 "Write the import guide": {"dropped": "the guide moved to the wiki"}}
+        text = page(self.closing_with_lines(fates), self.issues, "OWNER/REPO")
+        self.assertIn("- #2 Issue 2: 'order: Keep row order' moves to #1 Sync loses rows as 'row-order'", text)
+        self.assertIn("- #2 Issue 2: 'Write the import guide' is dropped: the guide moved to the wiki", text)
+
     def test_a_sub_issue_slice_names_why_it_is_not_a_checklist_line(self):
         verdicts = {1: {"verdict": "cause", "reason": "sync"},
                     2: {"verdict": "slice", "cause": 1, "as": "sub-issue"},
@@ -433,6 +479,103 @@ class Mirror(unittest.TestCase):
         self.assertIn("Expecting property name", result.stderr)
         self.assertIn("full", calls)
         self.assertEqual(list(json.loads(self.mirror.read_text())["issues"]), ["1"])
+
+
+class StandInTracker(StandInGitHub):
+    """Also answers single-issue reads, body edit history, edits and closes, for apply and
+    close-issues alike. Each edit keeps the earlier body, as GitHub's edit history does."""
+
+    def __call__(self, *args, stdin=None):
+        by_number = {i["number"]: i for i in self.issues}
+        match args[:2]:
+            case ("issue", "edit"):
+                item = by_number[int(args[2])]
+                item.setdefault("history", [item["body"]]).insert(0, stdin)
+                item["body"] = stdin
+                return ""
+            case ("issue", "close"):
+                reason = args[args.index("--reason") + 1]
+                by_number[int(args[2])].update(
+                    state="CLOSED", stateReason={"completed": "COMPLETED"}.get(reason, "NOT_PLANNED"))
+                return ""
+            case ("api", "graphql"):
+                values = dict(a.split("=", 1) for flag, a in zip(args, args[1:]) if flag in ("-f", "-F"))
+                if "issue(number" in values["query"]:
+                    item = by_number[int(values["number"])]
+                    if "userContentEdits" in values["query"]:
+                        edits = {"nodes": [{"diff": text} for text in item.get("history", [])],
+                                 "pageInfo": {"hasNextPage": False, "endCursor": None}}
+                        return json.dumps({"data": {"repository": {"issue": {"userContentEdits": edits}}}})
+                    fields = {k: v for k, v in item.items() if k != "history"}
+                    return json.dumps({"data": {"repository": {"issue": fields}}})
+        return super().__call__(*args, stdin=stdin)
+
+
+class ApplyLineFates(unittest.TestCase):
+    """apply settles each open line of a closing issue the way its page said, so close-issues
+    accepts the close."""
+
+    def setUp(self):
+        folder = tempfile.TemporaryDirectory(prefix="audit-issues-test-")
+        self.addCleanup(folder.cleanup)
+        self.folder = Path(folder.name)
+        self.github = StandInTracker()
+        cause_body = "## Outcome\n\nRows survive a sync.\n\n## Done when\n\n- [ ] keep-rows: Keep rows\n"
+        self.github.issues = [
+            tracked(1, "2026-01-01T00:00:00Z", title="Sync loses rows", body=cause_body, milestone=None),
+            tracked(2, "2026-01-01T00:00:00Z", milestone=None, body=(
+                "Old importer.\n\n## Done when\n\n- [ ] order: Keep row order\n"
+                "- [ ] Write the import guide\n- [ ] colour: Colour the progress bar\n")),
+            tracked(3, "2026-01-01T00:00:00Z", milestone=None,
+                    body="## Done when\n\n- [ ] retry: Retry a failed row\n"),
+        ]
+        self.plan = self.folder / "plan.json"
+        self.plan.write_text(json.dumps(plan_of({
+            1: {"verdict": "still-real", "evidence": "reproduced"},
+            2: {"verdict": "out-of-date", "evidence": "0.2 replaced the importer", "lines": {
+                "order": {"moved": 1},
+                "Write the import guide": {"moved": 1, "id": "import-guide"},
+                "colour": {"dropped": "the progress bar is gone"}}},
+            3: {"verdict": "done", "proof": ["c0ffee1 rows go through the shared writer"], "lines": {
+                "retry": {"dropped": "the shared writer never fails a row"}}},
+        })))
+
+    def run_script(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        with mock.patch.object(audit_issues, "gh", self.github), \
+                mock.patch.object(audit_issues.close_issue, "gh", self.github), \
+                mock.patch.object(audit_issues.close_issue, "landed_commits", lambda args, number: []), \
+                mock.patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.folder / "cache")}), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = audit_issues.main([*args, "--repo", "example/app"])
+        return Result(code, out.getvalue(), err.getvalue())
+
+    def body(self, number):
+        return next(i for i in self.github.issues if i["number"] == number)["body"]
+
+    def test_apply_moves_and_drops_open_lines_then_closes_on_the_first_run(self):
+        code = audit_issues.approval_code([self.plan.read_bytes()])
+        first = self.run_script("apply", "--plan", str(self.plan), "--approved", code)
+        self.assertEqual(first.returncode, 0, first.stdout + first.stderr)
+        states = {i["number"]: (i["state"], i["stateReason"]) for i in self.github.issues}
+        self.assertEqual(states, {1: ("OPEN", None), 2: ("CLOSED", "NOT_PLANNED"), 3: ("CLOSED", "COMPLETED")})
+        self.assertIn("- [ ] keep-rows: Keep rows\n- [ ] order: Keep row order (was #2)\n"
+                      "- [ ] import-guide: Write the import guide (was #2)\n", self.body(1))
+        self.assertNotIn("[ ]", self.body(2))
+        self.assertIn("## Checklist changes\n\n- order: moved to #1\n- Write the import guide: moved to #1\n"
+                      "- colour: dropped, the progress bar is gone\n", self.body(2))
+        self.assertIn("- retry: dropped, the shared writer never fails a row", self.body(3))
+        for number in (2, 3):
+            ready = io.StringIO()
+            with mock.patch.object(audit_issues.close_issue, "gh", self.github), \
+                    mock.patch.object(audit_issues.close_issue, "landed_commits", lambda args, n: []), \
+                    contextlib.redirect_stdout(ready):
+                self.assertEqual(audit_issues.close_issue.main(
+                    ["ready", "--repo", "example/app", "--issue", str(number)]), 0, ready.getvalue())
+        bodies = [self.body(n) for n in (1, 2, 3)]
+        second = self.run_script("apply", "--plan", str(self.plan), "--approved", code)
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+        self.assertEqual([self.body(n) for n in (1, 2, 3)], bodies)
 
 
 if __name__ == "__main__":

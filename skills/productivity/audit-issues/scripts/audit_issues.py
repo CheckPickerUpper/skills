@@ -18,8 +18,12 @@
         Exits 1 while the plan has findings.
     audit_issues.py apply --repo OWNER/REPO --plan PLAN.json [--verdicts FILE ...] --approved CODE
         Applies the approved plan one verified step at a time. Refuses a plan
-        whose files changed since the owner saw its page. Every close runs
-        through close-issues' close_issue.py. Safe to rerun after a failure.
+        whose files changed since the owner saw its page. Moves or drops each open
+        line of a closing issue as its verdict says, then closes it through
+        close-issues' close_issue.py. Safe to rerun after a failure.
+
+plan and apply read landed commits the way close-issues does, so run them inside a
+checkout of the repository.
 
 Every command reads issues through a local copy kept in
 $XDG_CACHE_HOME/checkpickerupper/audit-issues/ (default ~/.cache), refreshed with only the
@@ -30,7 +34,9 @@ The plan format is in references/plan-format.md beside this skill.
 """
 
 import argparse
+import contextlib
 import hashlib
+import io
 import json
 import math
 import os
@@ -40,6 +46,16 @@ import sys
 import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
+
+# Checklists are read, proved and closed by the close-issues skill beside this one.
+CLOSE_ISSUES = Path(__file__).resolve().parents[2] / "close-issues" / "scripts"
+sys.path.insert(0, str(CLOSE_ISSUES))
+try:
+    import close_issue
+    from checklist_proof import ID, LINE_ID, carries, change_record, changes, checklist, moved_line, unproved_lines, without_lines
+except ModuleNotFoundError as error:
+    raise SystemExit(f"audit_issues.py reads checklists and closes through the close-issues skill,"
+                     f" expected at {CLOSE_ISSUES}: {error}") from error
 
 EXIT_FINDINGS = 1
 EXIT_UNREADABLE = 2
@@ -102,13 +118,16 @@ VERDICT_FIELDS = {
     "unsure": ("check", "impossible_because"),
 }
 CLOSING = {"done", "duplicate", "out-of-date"}
+# These close with nothing carrying their open lines, so each line needs a fate in "lines".
+# A duplicate or folded slice carries its whole body into its survivor instead.
+FATED = {"done", "out-of-date"}
+FATE_SHAPES = ('{"moved": <issue number or new_causes key>, "id": "<line id>"}'
+               ' (id may be left out when the line has one) or {"dropped": "<reason>"}')
 MOVING = {"slice", "wrong-premise"}
 STAYING_TOP = {"cause", "still-real", "unsure"}
 SLICE_FORMS = ("checkbox", "sub-issue")
 # The only reasons a slice of a cause stays its own sub-issue; every other slice is a
 # checklist line of the cause. Already being a sub-issue is not a reason.
-# A folded line is "<id>: <text>", the checklist line shape close-issues proves by its id.
-FOLDED_LINE = re.compile(r"^(?P<id>[a-z0-9][a-z0-9-]*):\s+\S")
 SUB_ISSUE_REASONS = {
     "parallel": "a different person or agent works it at the same time as the rest",
     "other-owner": "someone other than the cause's owner owns it",
@@ -384,9 +403,28 @@ def verdicts_of(plan):
     return {int(n): v for n, v in plan.get("verdicts", {}).items()}
 
 
-def plan_findings(plan, issues):
-    """(kind, message) pairs for everything that stops the plan being applied."""
+def closing_evidence(plan, issues, repo, commits_of):
+    """close-issues' evidence for each issue a fated verdict closes, keyed by number, with
+    commits_of(number) giving the landed commits that can prove its lines."""
     by_number = {i["number"]: i for i in issues}
+    return {number: close_issue.evidence_for(
+                by_number[number], repo,
+                commits_of(number) if checklist(by_number[number]["body"]) else [])
+            for number, verdict in verdicts_of(plan).items()
+            if verdict.get("verdict") in FATED and number in by_number}
+
+
+def landed_commits_of(repo):
+    """Reads landed commits from the current checkout, as close_issue.py does when apply runs it."""
+    where = argparse.Namespace(repo=repo, checkout=".", branch=None)
+    return lambda number: close_issue.landed_commits(where, number)
+
+
+def plan_findings(plan, issues, proofs=None):
+    """(kind, message) pairs for everything that stops the plan being applied. proofs is
+    closing_evidence's result; without it no landed commit proves any line."""
+    by_number = {i["number"]: i for i in issues}
+    proofs = proofs if proofs is not None else closing_evidence(plan, issues, "", lambda number: [])
     scope = {i["number"] for i in in_scope(plan, issues)}
     verdicts = verdicts_of(plan)
     new_causes = plan.get("new_causes", {})
@@ -407,8 +445,43 @@ def plan_findings(plan, issues):
     line_ids = set()
 
     def existing_ids(cause):
-        body = by_number[cause]["body"] if cause in by_number else ""
-        return {m["id"] for m in re.finditer(r"^\s*[-*+] \[[ xX]\] (?P<id>[a-z0-9][a-z0-9-]*):", body or "", re.M)}
+        body = by_number[cause]["body"] if cause in by_number else new_causes.get(cause, {}).get("body", "")
+        return {line.line_id for line in checklist(body) if line.line_id}
+
+    def fate_findings(number, fates):
+        me = f"#{number}"
+        open_lines = {line.key: line for line in unproved_lines(proofs[number])}
+        if not isinstance(fates, dict):
+            return [("line-fate", f"{me} has lines {fates!r}; write an object keyed by each open line's id"
+                     f" (or its text when it has none), each {FATE_SHAPES}")]
+        found = [("line-fate", f"{me} closes with the open line '{line.text}' and no fate for it; add"
+                  f" lines[{key!r}] = {FATE_SHAPES}, or land the commit that proves it")
+                 for key, line in open_lines.items() if key not in fates]
+        for key, fate in fates.items():
+            line = open_lines.get(key)
+            if line is None:
+                found.append(("line-fate", f"{me} gives a fate to '{key}', which is not an open line of {me};"
+                              " key each fate by the line's id, or its text when it has none"))
+                continue
+            match fate:
+                case {"dropped": str(why)} if why.strip() and len(fate) == 1:
+                    pass
+                case {"moved": int() | str() as target} if set(fate) <= {"moved", "id"}:
+                    line_id = fate.get("id") or line.line_id
+                    if target == number or not stays_open(target):
+                        found.append(("line-fate", f"{me} moves '{key}' to {target!r}, which is not a cause"
+                                      " that stays open"))
+                    elif not isinstance(line_id, str) or not re.fullmatch(ID, line_id):
+                        found.append(("line-fate", f"{me} moves '{key}' with no line id; give \"id\": \"<id>\""
+                                      " so a commit can prove it in its new issue"))
+                    elif (target, line_id) in line_ids or line_id in existing_ids(target):
+                        found.append(("line-fate", f"{me} moves '{key}' as '{line_id}', an id another line of"
+                                      f" {target!r} already has; give it a new \"id\""))
+                    else:
+                        line_ids.add((target, line_id))
+                case _:
+                    found.append(("line-fate", f"{me} gives '{key}' the fate {fate!r}; write {FATE_SHAPES}"))
+        return found
 
     for number, verdict in sorted(verdicts.items()):
         me = f"#{number}"
@@ -437,7 +510,8 @@ def plan_findings(plan, issues):
         if kind == "slice" and verdict["as"] not in SLICE_FORMS:
             found.append(("kind", f"{me} is a slice as {verdict['as']!r}; use checkbox or sub-issue"))
         if kind == "slice" and verdict["as"] == "checkbox":
-            folded = FOLDED_LINE.match(verdict["line"])
+            # A folded line is "<id>: <text>", the checklist line shape close-issues proves by its id.
+            folded = LINE_ID.match(verdict["line"])
             if not folded:
                 found.append(("line-id", f"{me} folds in as {verdict['line']!r}, which has no line id; write"
                               " '<id>: <text>' so a commit can prove it with 'Part of #N: <id>'"))
@@ -453,6 +527,8 @@ def plan_findings(plan, issues):
         open_children = [c["number"] for c in issue["subIssues"]["nodes"] if c["state"] == "OPEN"]
         if kind == "slice" and verdict["as"] == "checkbox" and open_children:
             found.append(("checkbox", f"{me} has open sub-issues, so it stays a sub-issue, not a checkbox"))
+        if kind in FATED:
+            found += fate_findings(number, verdict.get("lines", {}))
         if kind in CLOSING:
             left = [c for c in open_children if verdicts.get(c, {}).get("verdict") not in CLOSING | MOVING]
             if left:
@@ -547,6 +623,9 @@ def page(plan, issues, repo):
     lines += ["", "## Closing", "",
               (f"{plural(kinds['done'], 'issue')} done with proof, {plural(kinds['duplicate'], 'duplicate')},"
                f" {folded} folded into a cause as checkboxes, {kinds['out-of-date']} out of date.")]
+    fates = line_fates(plan, issues)
+    if fates:
+        lines += ["", "## Open lines of closing issues", "", *fates]
     unsure = [(n, v) for n, v in sorted(verdicts.items()) if v.get("verdict") == "unsure"]
     if unsure:
         lines += ["", "## Unsure", ""]
@@ -558,6 +637,28 @@ def page(plan, issues, repo):
         lines += ["", f"## Milestones over {MAX_CAUSES} causes", ""]
         lines += [f"- {m}: {c}, because {reasons.get(m, '(no reason given)')}" for m, c in over]
     return "\n".join(lines) + "\n"
+
+
+def line_fates(plan, issues):
+    """One page line per open line of a closing issue: where it moves, or why it is dropped."""
+    by_number = {i["number"]: i for i in issues}
+    new_causes = plan.get("new_causes", {})
+    rows = []
+    for number, verdict in sorted(verdicts_of(plan).items()):
+        if verdict.get("verdict") not in FATED or not isinstance(verdict.get("lines"), dict):
+            continue
+        texts = {line.key: line.text for line in checklist(by_number[number]["body"])}
+        for key, fate in verdict["lines"].items():
+            me = f"- #{number} {by_number[number]['title']}: '{texts.get(key, key)}'"
+            if "moved" in fate:
+                target = fate["moved"]
+                name = (f"new: {new_causes[target]['title']}" if isinstance(target, str)
+                        else f"#{target} {by_number[target]['title']}")
+                line_id = fate.get("id") or key
+                rows.append(f"{me} moves to {name} as '{line_id}'")
+            else:
+                rows.append(f"{me} is dropped: {fate['dropped']}")
+    return rows
 
 
 def depth(number, by_number):
@@ -745,19 +846,12 @@ def read_issue(repo, number):
     return issue
 
 
-def close_issue_script():
-    script = Path(__file__).resolve().parents[2] / "close-issues" / "scripts" / "close_issue.py"
-    if not script.is_file():
-        raise RuntimeError(f"apply closes through the close-issues skill, expected at {script}")
-    return script
-
-
 def run_close(repo, command, number, *options):
-    result = subprocess.run(
-        [sys.executable, str(close_issue_script()), command, "--repo", repo, "--issue", str(number), *options],
-        capture_output=True, text=True, check=False)
-    if result.returncode != 0:
-        raise RuntimeError(f"close_issue.py {command} #{number}: {(result.stderr or result.stdout).strip()}")
+    out, err = io.StringIO(), io.StringIO()
+    with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+        code = close_issue.main([command, "--repo", repo, "--issue", str(number), *options])
+    if code != 0:
+        raise RuntimeError(f"close_issue.py {command} #{number}: {(err.getvalue() or out.getvalue()).strip()}")
 
 
 def edit_body(repo, issue, body):
@@ -778,6 +872,29 @@ def carry_into(repo, number, target, checkbox=None):
     body = with_lines_in_section(body, "## Folded in", [
         f"### {issue['title']} {marker}", "", (issue["body"] or "").strip() or "(no details)"])
     edit_body(repo, survivor, body)
+
+
+def settle_lines(repo, number, fates, cause):
+    """Carry out each open line's fate: add a moved line to its target's '## Done when', then
+    record every move and drop under '## Checklist changes' and take the lines out of the body.
+    A rerun skips what an earlier run already did."""
+    issue = read_issue(repo, number)
+    present = {line.key: line for line in checklist(issue["body"])}
+    ordered = [key for key in present if key in fates] + sorted(key for key in fates if key not in present)
+    for key in ordered:
+        fate = fates[key]
+        if "moved" in fate and key in present:
+            target = read_issue(repo, cause(fate["moved"]))
+            if not carries(target["body"], present[key], number):
+                line_id = fate.get("id") or present[key].line_id
+                edit_body(repo, target, with_lines_in_section(
+                    target["body"], "## Done when", [moved_line(line_id, present[key], number)]))
+    recorded = changes(issue["body"])
+    records = [change_record(key, moved_to=cause(fate["moved"])) if "moved" in fate
+               else change_record(key, dropped=fate["dropped"])
+               for key, fate in ((key, fates[key]) for key in ordered) if key not in recorded]
+    body = without_lines(issue["body"], set(fates))
+    edit_body(repo, issue, with_lines_in_section(body, "## Checklist changes", records) if records else body)
 
 
 def hang_under(repo, number, parent):
@@ -821,8 +938,10 @@ def apply_operation(repo, op, created):
             if read_issue(repo, ref)["stateReason"] != "DUPLICATE":
                 run_close(repo, "duplicate", ref, "--of", str(target))
         case "done":
+            settle_lines(repo, ref, data.get("lines", {}), cause)
             run_close(repo, "completed", ref, *[arg for p in data["proof"] for arg in ("--proof", p)])
         case "out-of-date":
+            settle_lines(repo, ref, data.get("lines", {}), cause)
             if read_issue(repo, ref)["state"] == "OPEN":
                 run_close(repo, "out-of-date", ref, "--evidence", data["evidence"])
 
@@ -929,7 +1048,7 @@ def draft(args):
 def plan_command(args):
     plan, code = load_plan(args.plan, args.verdicts)
     issues = synced_issues(args.repo)
-    found = plan_findings(plan, issues)
+    found = plan_findings(plan, issues, closing_evidence(plan, issues, args.repo, landed_commits_of(args.repo)))
     if found:
         print(f"{args.plan}: {len(found)} finding(s); fix the plan and run this again:")
         for _, message in found:
@@ -952,7 +1071,8 @@ def apply(args):
     resuming = state_path.is_file()
     created = json.loads(state_path.read_text())["created"] if resuming else {}
     issues = synced_issues(args.repo)
-    found = [] if resuming else plan_findings(plan, issues)
+    found = [] if resuming else plan_findings(
+        plan, issues, closing_evidence(plan, issues, args.repo, landed_commits_of(args.repo)))
     if found:
         print("the tracker no longer matches the plan; run plan again:", file=sys.stderr)
         for _, message in found:
