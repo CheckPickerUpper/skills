@@ -20,7 +20,8 @@ holds what spans batches.
   "verdicts": {
     "101": {"verdict": "cause", "reason": "the only issue about refunds"},
     "102": {"verdict": "slice", "cause": 101, "as": "checkbox", "line": "Refunds reach the original card"},
-    "103": {"verdict": "slice", "cause": "import-writer", "as": "sub-issue"},
+    "103": {"verdict": "slice", "cause": "import-writer", "as": "sub-issue",
+            "because": "parallel", "detail": "a second agent builds the import screen"},
     "104": {"verdict": "duplicate", "of": 101},
     "105": {"verdict": "done", "proof": ["https://github.com/o/r/commit/abc123", "test_refund passes"]},
     "106": {"verdict": "wrong-premise", "title": "Import validates each row as the server does",
@@ -48,7 +49,7 @@ An issue with verdicts in two files is refused.
 | `done` | `proof` (a list) | `close_issue.py completed` with each proof |
 | `duplicate` | `of` | copies its details into `of` under `(was #N)`, then `close_issue.py duplicate` |
 | `slice`, as `checkbox` | `cause`, `line` | adds `- [ ] line (was #N)` to the cause's `## Done when`, copies its details under `## Folded in`, then closes it as a duplicate of the cause |
-| `slice`, as `sub-issue` | `cause` | makes it a sub-issue of the cause |
+| `slice`, as `sub-issue` | `cause`, `because` (`parallel`, `other-owner` or `outside-wait`), `detail` | makes it a sub-issue of the cause |
 | `cause` | `reason` | nothing; it stays open at the top |
 | `wrong-premise` | `title`, `fix`, `under` | retitles it, writes `## Proper fix`, makes it a sub-issue of `under` |
 | `out-of-date` | `evidence` | `close_issue.py out-of-date` with the evidence |

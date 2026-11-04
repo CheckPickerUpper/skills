@@ -45,7 +45,10 @@ beside this one.
      cause's `## Done when` with its own line id (its details are copied
      into the cause and it closes), or a sub-issue only when a different
      person or agent works it in parallel, someone else owns it, or it waits
-     on something outside the cause.
+     on something outside the cause; its verdict names which (`because`) and
+     the fact behind it (`detail`), and the plan check refuses any other. An
+     issue that is already a sub-issue is judged the same way: being filed as
+     one is not a reason to stay one.
    - **Cause:** its own issue, with the reason it is a different cause from
      the ones it looks like.
    - **Wrong premise:** ask of every issue whether the fix it asks for is a

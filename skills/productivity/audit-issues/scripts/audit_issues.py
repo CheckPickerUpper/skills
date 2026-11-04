@@ -104,6 +104,13 @@ CLOSING = {"done", "duplicate", "out-of-date"}
 MOVING = {"slice", "wrong-premise"}
 STAYING_TOP = {"cause", "still-real", "unsure"}
 SLICE_FORMS = ("checkbox", "sub-issue")
+# The only reasons a slice of a cause stays its own sub-issue; every other slice is a
+# checklist line of the cause. Already being a sub-issue is not a reason.
+SUB_ISSUE_REASONS = {
+    "parallel": "a different person or agent works it at the same time as the rest",
+    "other-owner": "someone other than the cause's owner owns it",
+    "outside-wait": "it waits on something outside the cause",
+}
 
 
 # Reading issue bodies.
@@ -403,7 +410,8 @@ def plan_findings(plan, issues):
         if kind not in VERDICT_FIELDS:
             found.append(("kind", f"{me} has verdict {kind!r}; use one of {', '.join(VERDICT_FIELDS)}"))
             continue
-        needed = list(VERDICT_FIELDS[kind]) + (["line"] if verdict.get("as") == "checkbox" else [])
+        form_fields = {"checkbox": ["line"], "sub-issue": ["because", "detail"]}.get(verdict.get("as"), [])
+        needed = list(VERDICT_FIELDS[kind]) + (form_fields if kind == "slice" else [])
         empty = [field for field in needed if verdict.get(field) in (None, "", [])]
         if empty:
             found.append(("incomplete", f"{me} ({kind}) needs {', '.join(empty)}"))
@@ -419,6 +427,10 @@ def plan_findings(plan, issues):
                     found.append(("duplicate", f"{me} duplicates #{verdict['of']}, which does not stay open"))
         if kind == "slice" and verdict["as"] not in SLICE_FORMS:
             found.append(("kind", f"{me} is a slice as {verdict['as']!r}; use checkbox or sub-issue"))
+        if kind == "slice" and verdict["as"] == "sub-issue" and verdict["because"] not in SUB_ISSUE_REASONS:
+            found.append(("sub-issue", f"{me} stays a sub-issue because {verdict['because']!r}, which is not a"
+                          " reason; make it a checklist line of its cause, or give one of: "
+                          + "; ".join(f"{k} ({v})" for k, v in SUB_ISSUE_REASONS.items())))
         open_children = [c["number"] for c in issue["subIssues"]["nodes"] if c["state"] == "OPEN"]
         if kind == "slice" and verdict["as"] == "checkbox" and open_children:
             found.append(("checkbox", f"{me} has open sub-issues, so it stays a sub-issue, not a checkbox"))
