@@ -74,7 +74,11 @@ Tools kept around but rarely used. None yet.
 ./scripts/link-skills.sh --client codex
 ./scripts/link-skills.sh --client gemini
 ./scripts/link-skills.sh --client pi
+uv run scripts/run_tests.py
 ```
+
+`run_tests.py` runs every test in one process and fails any test, or the whole
+run, over the limits in `scripts/test-bar.json`.
 
 ## Client targeting
 
