@@ -1,6 +1,6 @@
 ---
 name: build-vs-buy
-description: "Run on every new feature, capability, service, integration or mechanism before writing code, and again on the code once it exists. Use before adding or swapping a dependency; before writing streaming, pub/sub, push, retries, rate limits, tokens, parsing, decoding, validation, money, dates, fake time, test waits, background jobs, browser automation, CLI parsing, logging or any other standard capability; when someone asks 'is there a library', 'what should we use' or 'don't hand-roll this'; when a fix means aliasing, stubbing, shimming or excluding a dependency; and when reviewing code or a diff that may hand-roll what an existing dependency, the platform or a maintained library already owns. Reads the repository's declared library choices and manifests, names the standard approach, maps coverage, picks one owner (reuse, adopt, buy, build, combine or defer), records the decision where the work is tracked, and audits written code for hand-rolled standard parts."
+description: "Run on every new feature, capability, service, integration or mechanism before writing code, and again on the code once it exists. That includes code an agent writes for its own work: a scratch script, a test harness, a test runner, an audit or measurement tool. Use before adding or swapping a dependency; before writing streaming, pub/sub, push, retries, rate limits, tokens, parsing, decoding, validation, money, dates, fake time, test waits, mutation testing, per-test timing, background jobs, browser automation, CLI parsing, logging or any other standard capability; when someone asks 'is there a library', 'what should we use' or 'don't hand-roll this'; when a fix means aliasing, stubbing, shimming or excluding a dependency; and when reviewing code or a diff that may hand-roll what an existing dependency, the platform or a maintained library already owns. Reads the repository's declared library choices and manifests, names the standard approach, maps coverage, picks one owner (reuse, adopt, buy, build, combine or defer), records the decision where the work is tracked, and audits written code for hand-rolled standard parts."
 metadata:
   when: "starting a new feature or mechanism, choosing a dependency, or reviewing code that may hand-roll a solved problem"
   situation: Planning and design
@@ -19,6 +19,10 @@ The result is one evidence-backed decision, not a catalog of options.
 ## Never
 
 - Write a mechanism before this skill has chosen its owner.
+- Treat code written for your own work (a scratch script, a test harness, a
+  runner, an audit tool) as outside this skill. It is code, and what it does
+  usually has a name and a standard tool: breaking code to prove tests fail is
+  mutation testing; timing and limiting tests is the test runner's job.
 - Treat a request for a library as a request for a package name, or let the
   first example name the solution.
 - Hand-build a standard part because no single library owns the whole
@@ -53,7 +57,7 @@ search shows otherwise. A diff or plan that contains one triggers this skill.
 | Values | decimal money and currency, dates, times and time zones, locale formatting, units |
 | Storage | database drivers, query builders, migrations, generating migrations from a declared schema, caching, file paths, temporary files, atomic replace |
 | Interfaces | command-line parsing, routing, forms, state management, UI components, icons |
-| Tests | fake time and clocks, waiting for events, fixtures and test databases, browser automation and pooling, snapshot and golden files, selecting tests and checks by changed files, per-step time limits |
+| Tests | mutation testing, per-test timing and time limits, fake time and clocks, waiting for events, fixtures and test databases, browser automation and pooling, snapshot and golden files, selecting tests and checks by changed files, per-step time limits |
 | Operations | logging, tracing, metrics, error reporting, feature flags |
 | Code | collection algorithms, text and diff utilities, code analysis and generation |
 
