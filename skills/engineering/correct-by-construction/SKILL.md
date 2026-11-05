@@ -1,6 +1,6 @@
 ---
 name: correct-by-construction
-description: "Make a bad state impossible to write, at the earliest owner that knows it, with one owner per fact. Use for bugs, corrupted or generated artifacts, recurring agent mistakes, code smells, root-cause requests, 'prevent this class', bad APIs, models and schemas, repeated API or CLI friction, and enforcement rules (hooks, lints, guards, skills). Use when writing or reviewing types: deriving one type from another, loosening fields with optional, Partial, Any, Option or casts, or asking how to extract part of a type. Use for drift questions: 'where can this drift', 'is any fact owned twice', a check that said green while the enforcer said red, or before trusting a status surface. Locates the writer, strips incident words, names the class, climbs to the earliest owner (type, source of truth, generator, judge), removes competing representations and every bypass, and proves the bad state cannot be written."
+description: "Make a bad state impossible to write, at the earliest owner that knows it, with one owner per fact. Use for bugs, corrupted or generated artifacts, recurring agent mistakes, code smells, root-cause requests, 'prevent this class', bad APIs, models and schemas, repeated API or CLI friction, and enforcement rules (hooks, lints, guards, skills). Use when writing or reviewing types: deriving one type from another, loosening fields with optional, Partial, Any, Option or casts, or asking how to extract part of a type. Use for drift questions: 'where can this drift', 'is any fact owned twice', a check that said green while the enforcer said red, or before trusting a status surface. Use when several bugs come from one family of things built the same way, or someone asks whether a class is gone. Locates the writer, strips incident words, names the class, climbs to the earliest owner (type, source of truth, generator, judge), lists the steps every member of the family passes through and makes each one shared, removes competing representations and every bypass, and proves the bad state cannot be written."
 metadata:
   when: "a whole kind of bug should be impossible, a type loosens or carves its source, or a fact may have two owners"
   situation: Something is broken
@@ -197,7 +197,31 @@ or loose record.
 Done when one earliest owner is named, both tests pass, and any judge has a
 demonstrated refusal.
 
-### 7. Give each fact one owner
+### 7. List the family's shared steps
+
+When the bad state sits in one member of a family, many things built the same
+way (payment methods, discount types, form submissions), the earliest owner is
+usually a step every member passes through, not the member.
+
+- List the steps every member goes through, from the trigger to the last
+  effect.
+- Mark each step as one shared function or as code each member writes for
+  itself. A step members write for themselves is an open class even where no
+  bug has been seen yet.
+- A class is closed when its step is one shared function that members
+  configure only by declaration. A fix inside one member closes nothing: the
+  next member writes the step again.
+- When one member runs in two places (a client and a server, a quote and a
+  settlement, a preview and a commit), separate values from code paths. Values
+  may differ, because one place knows facts the other cannot, and the place
+  that owns a fact corrects the other. Code paths may not: given the same
+  inputs, both places run the same function and take the same branches.
+
+Done when every step is listed as shared or per member, and each per-member
+step has its shared owner named. Worked families are in
+[`references/family-steps.md`](references/family-steps.md).
+
+### 8. Give each fact one owner
 
 Before accepting a mapping, switch, lookup table, normalizer, adapter or
 paired classification, ask:
@@ -219,7 +243,7 @@ Deriving from the one source (`type Order = Static<typeof orderSchema>`) is
 correct; two that must agree is the defect. Exhaustiveness proves coverage,
 not single ownership.
 
-### 8. Remove representations with no independent job
+### 9. Remove representations with no independent job
 
 For every alias, projection, label, status, wrapper, carved subset or
 reconstructed contract, inspect at least one place above the boundary that
@@ -234,7 +258,7 @@ unnecessary. "Best within the current design" is not owner proof when changing
 the design deletes it. Do not wait to be asked whether going higher changes
 the answer.
 
-### 9. Reject compensations that leave the route open
+### 10. Reject compensations that leave the route open
 
 Name the route each lower fix leaves open. Patch signals: a local null check,
 clamp, broad catch, default or fallback; a larger timeout, retry or buffer; a
@@ -243,14 +267,14 @@ remap, adapter, compatibility or legacy lane; a second classification kept in
 sync by a conversion. Keep one only with an independent domain purpose and the
 bad state already impossible upstream.
 
-### 10. State the required change exactly
+### 11. State the required change exactly
 
 Name the surface, symbol or path that must change; what it must own or accept;
 every writer, lane, adapter, fallback or escape to remove, redirect, seal or
 make uncallable; and the observable result that proves the next consumer no
 longer compensates. "Use the existing owner" is not a change.
 
-### 11. Make the owner protective
+### 12. Make the owner protective
 
 When editing is authorized, change the enforcing place so future callers
 receive the protected state by construction: the public contract, type
@@ -259,7 +283,7 @@ runtime patch, shim or call-site fix while the old type is still available.
 When editing is not authorized, return the same prescription and mark closure
 unproved.
 
-### 12. Delete every bypass lane
+### 13. Delete every bypass lane
 
 Sweep direct constructors and raw literals, manual copies beside generated
 output, alternate APIs and wrappers, fallback branches, configuration and
@@ -268,7 +292,7 @@ consumer surfaces still exposing the old contract. Redirect or remove each.
 No expert mode, legacy lane or lower-level escape survives that can recreate
 the state.
 
-### 13. Prove the class is closed
+### 14. Prove the class is closed
 
 - the smallest former bad composition fails the type checker, build,
   generator or constructor, without a cast or `any`;
@@ -341,6 +365,9 @@ than one when the bad state spans them. Do not hand the user a menu of these.
   static closure for a property the language cannot express.
 - Run a similar-class sweep before the original class has its before-it-runs
   proof, or use one to avoid reopening a leaked path in the original class.
+- Fix one member's copy of a step every member of its family passes through,
+  or report a separate class per bug when the bugs come from one family. List
+  the family's steps instead (step 7).
 
 ## Output shape
 
@@ -365,6 +392,11 @@ block, with a blank line between blocks:
   - **Proof:** one check per sub-bullet. When code changed, the verification
     command, its exit code, and the evidence the old writer is gone. When the
     class is still open, what remains open and the missing proof.
+
+When step 7 found a family, put its steps right after the bold sentence, as a
+table with three columns: the step, whether it is shared or per member today,
+and the change that makes it one shared function. Then give one block per
+per-member step.
 
 End with **What needs you:** what only the user decides or does, or that
 nothing does.

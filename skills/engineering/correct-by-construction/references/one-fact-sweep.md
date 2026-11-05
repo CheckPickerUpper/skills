@@ -9,7 +9,7 @@ A fact drifts when two places both claim to author it and nothing reconciles
 them. The failure always has the same shape: the copy someone reads stays green
 while the copy that decides goes red, and an incident finds the gap instead of
 a check. The sweep finds those pairs first. Each finding is then closed by the
-protocol's steps 7 and 8.
+protocol's steps 8 and 9.
 
 ## What counts as two owners
 

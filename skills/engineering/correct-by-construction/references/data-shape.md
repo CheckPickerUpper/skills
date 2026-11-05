@@ -48,7 +48,7 @@ drift?**
   helper a codebase invents that yields an optional field. A syntax rule
   catches the tokens; this judgment catches the effect.
 - **Two representations of one fact:** a hand-written type beside a runtime
-  schema of the same data is step 7 of the protocol. Derive the type from the
+  schema of the same data is step 8 of the protocol. Derive the type from the
   schema.
 
 Not smells: constructions that build or strengthen rather than carve.
