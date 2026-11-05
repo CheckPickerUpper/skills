@@ -11,7 +11,7 @@ metadata:
 # Anti-AI-slop writing
 
 Write the way a careful human expert writes for a reader they respect:
-**specific facts in plain words.** Chat
+**specific facts in exact words.** Chat
 models drift toward the statistically safe sentence, so a vague, positive claim
 replaces the specific fact. Every sign below is a symptom of that drift. The
 cure for nearly all of them is the same: find the fact behind the phrase and
@@ -22,7 +22,7 @@ write the fact.
 1. **Before drafting**, gather the specifics: names, numbers, dates, places,
    quotes, what the thing actually does. Prose with no specifics to carry turns
    into slop however it is phrased.
-2. **Draft** in plain words, using the "Write instead" column below.
+2. **Draft** in exact words: the field's standard terms and the real names, using the "Write instead" column below.
 3. **Sweep the draft** against every table below, sign by sign. Rewrite each
    hit. A rewrite that swaps one banned phrase for its neighbour in the same
    row is still a hit.
@@ -59,6 +59,8 @@ Quotes and code keep their own wording.
 | Anaphora | clause after clause, or bullet after bullet, opening with the same word ("Every answer... Every import... Every venture...") | Vary the openings by saying what each one is about; merge the ones that repeat a claim. |
 | Benefit tail | a "before" or "so no one has to" clause that pictures a bad moment the thing beats: "catches errors before the code ships", "flags drift before it becomes a problem", "before anyone ever opens a ticket", "long before a customer notices", "the moment something breaks, you know", "before it costs you", "so no one has to check by hand", "so you can focus on what matters", "so nothing slips through the cracks", "so your team can ship with confidence", "without anyone lifting a finger", "without ever leaving your editor" | Delete the tail; if the sentence still says what the thing does, leave it off, or replace it with the fact it hid: "Runs the type checker on every commit; last month it refused 14 commits." Timing stays only when it is the news, against a real alternative: "the check runs at commit, not at release, so a failure points at one change." |
 | Placeholder nouns | a category word standing in for the thing the reader knows by name: "record", "item", "entry", "entity", "kind", "type", "object", "field", "data", "resource", "instance", "thing", "stuff" | The name the reader uses for that thing, in their product or field. A question to the reader opens with one concrete case they would recognise and gives each option as what happens if they choose it. |
+| Figures of speech | a figurative word for a literal fact: "wipes out" for overwrites, "survives" for stays active, "lands" for is committed, "reaches" for is passed to, "its own machine" for the client, "the rest" for a list left unsaid | The literal word the field uses, or the list itself. |
+| Invented terms | a name made up in the project or the conversation, used as if the reader knows it | The field's standard term, or the coined name said in standard terms the first time. |
 | Stiff synonyms | utilize, authored, relocated, attempted, passed away, commence, facilitate, endeavor | use, wrote, moved, tried, died, start, help, try. |
 | Elegant variation | a new label for the same subject in each sentence | One name for one thing, every time. |
 | Hedging disclaimers | it's important/worth noting; while specific details are limited; not widely documented; based on available information; in the provided sources; does not by itself establish; should not be confused with; as of my last knowledge update; as an AI language model | What is known, cited. Leave out what is not known; never announce its absence. |
