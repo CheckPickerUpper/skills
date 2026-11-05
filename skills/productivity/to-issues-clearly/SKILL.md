@@ -37,6 +37,25 @@ The stranger is a skilled engineer new to this repository. They understand types
 
 Name the operation and the primary object; details live in the body. A title that needs a semicolon is two titles or a spec wearing a title's clothes — cut it.
 
+### Exact words
+
+Write the way an expert in the field writes to another expert who has never
+seen this codebase or this conversation. Every word points to one thing that
+reader knows without guessing.
+
+- Keep the field's standard terms (client, server, overwrites, compile-time
+  error, sum type) and the real names (functions, files, commands, places,
+  people). Never swap a standard term for a paraphrase of it.
+- A term invented in this project or conversation gets said in standard terms
+  the first time, or is left out.
+- No figure of speech for a literal fact: not "wipes out" for overwrites,
+  "survives" for stays active, "lands" for is committed, "its own machine" for
+  the client.
+- Name the thing, never the category it belongs to: not "the record", "the
+  item", "the member".
+- Say what happens, not how the code passes it along: not "never reaches",
+  "is wired to", "flows into".
+
 ### Decision titles
 
 Use this shape only when the choice is genuinely unresolved:
@@ -303,7 +322,7 @@ placeholder noun: "record", "item", "entry", "entity", "kind", "type", "object",
 "field", "data", "resource", "thing". It opens with one concrete case, then gives
 each option as what the user would see happen if they pick it. Names they would have
 to look up (a decision document number, a library, a code construct) stay out, or
-come after the plain words.
+come after the words that name the thing.
 
 Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made, not a recommendation the skill invented.
 
