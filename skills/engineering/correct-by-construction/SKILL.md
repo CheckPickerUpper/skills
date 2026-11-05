@@ -316,6 +316,11 @@ than one when the bad state spans them. Do not hand the user a menu of these.
   history without prescribing its removal.
 - Add a guard, fallback, retry, lint, comment or doc and call it prevention
   while the old write path exists; keep the old lane beside the corrected one.
+- Add a limit, budget, counter, assertion or alarm to live code that fires if
+  the bad state comes back. It presumes the class is still open, and when it
+  fires it blocks real work. Once the shape makes the state unwritable, the
+  proof is a test or static check that runs before the code lands; at run
+  time the code only records facts, and nothing fails or blocks on them.
 - List patch-versus-root options when one option leaves the bad state writable.
 - Call a check, judge or mechanism real and stop there. A real need still
   needs an owner for its code: before keeping custom code, check existing
@@ -353,8 +358,10 @@ block, with a blank line between blocks:
   - **Class:** the sentence from step 4.
   - **Fix:** the earliest owner and each structural change, one per
     sub-bullet, with every bypass removed.
-  - **Can't come back:** the type, judge, generator or check that refuses the
-    bad state from now on.
+  - **Can't come back:** the shape that makes the bad state unwritable (a
+    type, a package boundary, a generator, the deleted path), and the test or
+    static check that refuses a reintroduction before the code lands. Never a
+    limit, budget, counter or assertion in live code.
   - **Proof:** one check per sub-bullet. When code changed, the verification
     command, its exit code, and the evidence the old writer is gone. When the
     class is still open, what remains open and the missing proof.
