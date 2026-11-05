@@ -37,6 +37,9 @@ behaviour, the boundary the run exercises and what would make it fail. Read
 what the command really runs, nested scripts included; its name, its length or
 its presence in an old brief does not answer the question.
 
+- **Run on current code.** Before a long run, check that the checkout holds
+  the development branch's latest commits. A run on a stale checkout measures
+  code that is already gone; update it first.
 - **Reuse a result that still covers the claim.** When the same commit,
   inputs, environment and dependency versions already passed, read that result
   instead of running it again. Run again only when one of those changed, and
@@ -301,7 +304,9 @@ nothing about them.
 
 7. **Fix the cause at its owner,** once, for every test or run that has it:
    the shared helper, the fixture, the runner, the cache key, the build step,
-   the check's own entry point.
+   the check's own entry point. The fix changes the measured cause and nothing
+   else: a new script, hook, service or check that measures or guards the slow
+   thing is not a speed fix, and is built only when the user asks for it.
    - **First ask whether the step needs to exist.** When another step proves
      what it proves, earlier or later (a release that runs after the push
      counts), delete it from the stage that runs more often, together with any
