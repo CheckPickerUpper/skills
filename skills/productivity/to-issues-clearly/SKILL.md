@@ -348,6 +348,12 @@ so ...`), then state what should be true instead. For a behavior issue,
 that is what a person does and sees now, then what they see after: no
 type, function, file or line names, which go in the next section.
 
+**What changes**
+
+- **A short headline in the verifier's words.** When <the verifier does
+  or meets something>, <what goes wrong now> no longer happens; <what
+  happens instead>.
+
 ## Cause and required change
 
 - **Written at:** the file and line where the bad state is written.
@@ -371,6 +377,15 @@ its issue. The commit that finishes a line names it, `Part of #N: works`, and
 that commit, not a hand-ticked box, is what marks it done. Never tick a box by
 hand, and never delete a line silently: record it under `## Checklist changes`
 as moved to another issue or dropped with its reason.
+
+`What changes` is the outcome report a release would print for this issue,
+in the shape `issues-to-outcomes` uses: one item per change a person notices,
+each a bold headline and one before-and-after scenario sentence. When different
+people notice different changes (the players and the staff who run the game,
+the users and the engineers who build on the code), give each kind of person
+its own bold label with their items under it. For a new tool rather than a
+fix, the scenario is "When you want <something>, you no longer have to <the old
+workaround>; <what the tool does>."
 
 The verifier's language governs the body too. It is a report, not a case being argued.
 
