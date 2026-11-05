@@ -61,8 +61,8 @@ authoritative schema.
 Read the whole target first: every file the shape touches, and any existing
 union, enum or trait the reshape could collide with. A reshape grounded on half
 the code breaks an invariant three files away. Then follow these steps in
-order. The findings go into the main answer's Root Cause, The Class and
-Class Fix sections, written as full sentences.
+order. The findings go into the main answer's blocks (Now, Where, Class, Fix,
+Can't come back, Proof), one fact per bullet.
 
 ### 1. Name the bad state concretely
 

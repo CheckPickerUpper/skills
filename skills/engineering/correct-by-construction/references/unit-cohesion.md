@@ -74,7 +74,7 @@ solve size with internal helpers behind one public unit.
 4. For each single unit: independent wholes inside → grab bag, with the split.
 5. At write time, run the name test before the code exists.
 
-Report each whole in the main answer's sections, in full sentences: what
+Report each whole in the main answer's blocks, one fact per bullet: what
 breaks today and what the fold or split lets the consumer do; the whole the
 consumer means to adopt and the units carrying it now; the verdict (one unit,
 aspect split, grab bag or false seam) with the existence test both ways; the

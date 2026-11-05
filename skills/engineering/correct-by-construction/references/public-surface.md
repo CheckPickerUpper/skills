@@ -22,8 +22,7 @@ first" step you saw is one door.
 
 ## Answer
 
-The findings go into the main answer's Root Cause, The Class and Class Fix
-sections, in full sentences: say whether the surface is right, the surface
+The findings go into the main answer's blocks, one fact per bullet: say whether the surface is right, the surface
 that should exist, and the check, shape or hard cut that makes the wrong path
 unavailable; then the bad shape, why it makes callers do extra work, and the
 fixed shape. No options menu, no compatibility compromise.
@@ -145,7 +144,7 @@ text`, not a list of token kinds.
 
 ## When it is closed
 
-Class Fix states, in sentences: what the next user or agent experiences on the
+The Fix, Can't come back and Proof bullets state: what the next user or agent experiences on the
 normal path, the before and after shape with what changes and why it matters,
 the rule now impossible to break, and the type, private API, generator,
 compile-fail case, hook or lint that proves it.

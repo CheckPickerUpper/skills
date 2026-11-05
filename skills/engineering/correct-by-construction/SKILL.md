@@ -340,58 +340,62 @@ than one when the bad state spans them. Do not hand the user a menu of these.
 ## Output shape
 
 <what-to-do>
-Give every distinct class its own numbered section, with these labels in this
-order and blank lines between sections:
+Show the answer formatted, never inside a code block. Open with one bold
+sentence that answers the question. Then give every distinct class its own
+block, with a blank line between blocks:
 
-```text
-1. <short name for the class>
+- A bold numbered label that names what happens, in the reader's words.
+- Then these bullets, in this order, each one line, or sub-bullets with one
+  change or one check each:
+  - **Now:** what happens today, with the decisive measurement or value.
+  - **Where:** the writer that creates the bad state, not what notices it, as
+    a path and symbol.
+  - **Class:** the sentence from step 4.
+  - **Fix:** the earliest owner and each structural change, one per
+    sub-bullet, with every bypass removed.
+  - **Can't come back:** the type, judge, generator or check that refuses the
+    bad state from now on.
+  - **Proof:** one check per sub-bullet. When code changed, the verification
+    command, its exit code, and the evidence the old writer is gone. When the
+    class is still open, what remains open and the missing proof.
 
-Root Cause: <the writer or mechanism, and the evidence that locates it>
+End with **What needs you:** what only the user decides or does, or that
+nothing does.
 
-The Class: <the bad state, stated without incident-only details>
-
-Class Fix: <the earliest owner and structural change, every bypass removed,
-and the proof the class is closed, or what remains open and the missing proof>
-```
-
-**Root Cause** names what creates the bad state, not what notices it, with the
-decisive paths, symbols, values or measurements once. **The Class** is the
-sentence from step 4. **Class Fix** names the owner, the exact change, every
-bypass to remove, and the proof; when code changed, the verification command,
-exit code and evidence the old writer is gone.
-
-Write full, plain sentences. Add a small code shape only when it makes the bad
-or fixed shape clearer. No preamble, closing summary or second checklist that
-repeats the sections.
+Write each bullet as one fact in the field's standard terms. Add a small code
+shape only when it makes the bad or fixed shape clearer. No preamble, no
+paragraphs under a label, and no closing summary that repeats the blocks.
 </what-to-do>
 
 <supporting-info>
 Example:
 
-```text
-1. Replays create duplicate notifications
+**Replays send notifications twice, and server code builds client pieces.**
 
-Root Cause: The rebuild emits through the public notifier during replay, and
-each replay keys its notification by a newly allocated handle.
+**1. Replays send duplicate notifications**
+- **Now:** replaying an order's history sends its "shipped" notification again
+  on every replay.
+- **Where:** the rebuild emits through the public notifier, keyed by a newly
+  allocated handle.
+- **Class:** internal reconstruction can publish external events under
+  temporary identities.
+- **Fix:**
+  - Replay side effects stay private to the rebuild.
+  - Published events are keyed by the order's stable id.
+- **Can't come back:** the notifier accepts only a stable-id key type.
+- **Proof:** a repeated-replay test sees one notification.
 
-The Class: Internal reconstruction can publish external events under
-temporary identities.
+**2. Server construction needs client presentation**
+- **Now:** server code passes no-op presentation stand-ins to build a player.
+- **Where:** the server aggregate's constructor requires presentation adapters.
+- **Class:** an authoritative server aggregate depends on client-only
+  presentation services.
+- **Fix:**
+  - Split shared presence from server behavior and client presentation.
+  - Remove presentation from the server constructor and delete the stand-ins.
+- **Can't come back:** the server package has no import of the presentation
+  package, and a check refuses one.
+- **Proof:** the server compiles against its own interface.
 
-Class Fix: Keep replay side effects private and key published events by
-stable domain identity. A repeated-replay test proves reconstruction publishes
-no extra event.
-
-2. Server construction needs client presentation
-
-Root Cause: The server aggregate's constructor requires presentation adapters,
-so server code passes no-op stand-ins.
-
-The Class: An authoritative server aggregate depends on client-only
-presentation services.
-
-Class Fix: Split shared presence from server behavior and client
-presentation, remove presentation from the server constructor, and delete the
-stand-ins. The server compiles against its own interface with no presentation
-import.
-```
+**What needs you:** nothing.
 </supporting-info>
