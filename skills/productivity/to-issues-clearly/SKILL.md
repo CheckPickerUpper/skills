@@ -124,6 +124,9 @@ The shape and the stranger test catch most of it. These constructions still get 
 | "X either works or cannot be declared" | Two outcomes joined by an invisible rule. |
 | "X is an answer a caller can act on" | Abstract. Name the answer and who is stuck without it. |
 | "X forgets / remembers / knows Y" | Code personified. Code does not forget. |
+| "X never reaches / isn't passed to / isn't wired to / doesn't propagate to Y" | How the code hands a call along, which nobody using the product sees. Name what the person does and what then fails to happen. |
+
+**Code-flow verbs are refused in a behavior title.** "reaches", "passes", "hands", "routes", "dispatches", "propagates", "flows", "wired", "triggers", "fires", "emits" and "calls" describe the code's plumbing. Ask: **would someone who uses the product but never reads the code know what breaks from the title alone?** If not, name the thing they use and what they see go wrong.
 
 **No bare abstract noun as the subject.** "Availability states the same fact four times" — availability of *what*? Name something the reader can picture.
 
@@ -320,9 +323,11 @@ Never record the decision only in a comment. The body and the open or closed sta
 ~~~markdown
 ## Outcome
 
-What done looks like, in one short paragraph. When a current failure
-motivates the change, open with it (`X does Y, so ...`), then state
-what should be true instead.
+What done looks like, in one short paragraph, in the verifier's words.
+When a current failure motivates the change, open with it (`X does Y,
+so ...`), then state what should be true instead. For a behavior issue,
+that is what a person does and sees now, then what they see after: no
+type, function, file or line names, which go in the next section.
 
 ## Cause and required change
 
@@ -350,6 +355,8 @@ as moved to another issue or dropped with its reason.
 
 The verifier's language governs the body too. It is a report, not a case being argued.
 
+**Code names stay out of a behavior issue's Outcome and Done when.** The person checking it uses the product, so each line says what they do and what they see. Types, functions, files and the planned wiring go in `## Cause and required change`, for the implementer.
+
 **Every criterion is something the verifier can check.** For a behavior issue that means watching the product do the thing. For a code-internal issue it means an engineer-observable check: the typecheck passes, a `grep` for the deleted symbol returns nothing, the suite is green with no behavior diff. Someone must be able to close the issue by running the check and seeing the result — not by reading the diff and agreeing with it.
 
 | Checkable | Not checkable |
@@ -358,6 +365,7 @@ The verifier's language governs the body too. It is a report, not a case being a
 | An item marked drop-only and unselectable no longer compiles | Make availability a proper union |
 | Buying a second hour while one is running ends four hours from now, not two | Fix the extend logic |
 | No server file imports the client presentation shape | Separate the concerns properly |
+| When the thrown weapon hits, the attack that threw it goes on to its next step | Every hit is handed to the attack through a direct call |
 
 Three rules that catch most bad criteria:
 
