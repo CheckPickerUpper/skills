@@ -1,6 +1,6 @@
 ---
 name: audit-issues
-description: "Audit a GitHub issue tracker: group issues by the fix that would make them all disappear, rewrite workaround premises to the proper fix, close what is done, duplicated or out of date, and show the owner a short before-and-after page to approve before anything changes. Use when asked to audit, clean up, triage, groom, merge or sweep issues, or to say which open issues are still real. A script finds hidden open work, suggests likely slices of one cause and oversized milestones, checks the plan, and applies it only once approved; closes go through close-issues; scope decisions go to the owner."
+description: "Audit a GitHub issue tracker: group issues by the fix that would make them all disappear, rewrite workaround premises to the proper fix, close what is done, duplicated or out of date, and show the owner a short before-and-after page to approve before anything changes. Use when asked to audit, clean up, triage, groom, merge or sweep issues, or to say which open issues are still real. Reads and changes open issues only, never closed ones. A script suggests likely slices of one cause and oversized milestones, checks the plan, and applies it only once approved; closes go through close-issues; scope decisions go to the owner."
 short_description: "Audit a tracker: one issue per cause, approved before applied."
 allow_implicit_invocation: true
 metadata:
@@ -23,8 +23,11 @@ runs through the `close-issues` skill's script, so that skill must be installed
 beside this one.
 
 <what-to-do>
+Closed issues are out of scope: an audit never reopens, edits or checks a
+closed issue, whatever its body still says.
+
 1. **Scan.** Run `audit scan --repo OWNER/REPO [--milestone TITLE]`. It lists
-   open work hidden under closed issues (fix each as it says and rerun until it
+   open issues under a closed parent (move each as it says and rerun until it
    exits 0), milestones with more than 10 top-level issues, groups of issues
    that look like slices of one cause, weaker one-signal leads, and issues
    whose asked-for fix reads like a workaround. Its groups are leads; you

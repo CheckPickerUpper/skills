@@ -1,7 +1,7 @@
-"""Audit a GitHub tracker: find hidden open work, suggest causes, and apply an approved plan.
+"""Audit a GitHub tracker's open issues: suggest causes and apply an approved plan.
 
     audit_issues.py scan --repo OWNER/REPO [--milestone TITLE]
-        Lists open work hidden under closed issues (exits 1 while any remains),
+        Lists open issues under a closed parent (exits 1 while any remains),
         milestones with more than 10 top-level issues, groups of issues that look
         like one cause (error text, one bug in several languages, or two shared
         file paths or code names), weaker one-signal leads, and issues whose
@@ -52,7 +52,7 @@ CLOSE_ISSUES = Path(__file__).resolve().parents[2] / "close-issues" / "scripts"
 sys.path.insert(0, str(CLOSE_ISSUES))
 try:
     import close_issue
-    from close_issue import has_section, is_decision, unticked_lines
+    from close_issue import has_section, is_decision
     from checklist_proof import HEADING, ID, LINE_ID, carries, change_record, changes, checklist, moved_line, unproved_lines, without_lines
 except ModuleNotFoundError as error:
     raise SystemExit(f"audit_issues.py reads checklists and closes through the close-issues skill,"
@@ -69,9 +69,8 @@ NOT_A_WORKAROUND = "Not a workaround:"
 OVER_LIMIT_REASON = "More than 10 causes because"
 
 RULE = (
-    "Open work stays visible: an issue closes as completed only when nothing under it"
-    " is open, a duplicate names its original, a decision closes with its answer in the"
-    " body, and an open issue sits under an open parent."
+    "An audit reads and changes open issues only; closed issues are never reopened,"
+    " edited or checked. An open issue sits under an open parent."
 )
 ISSUE_FIELDS = """
   id number title url state stateReason body updatedAt
@@ -82,10 +81,7 @@ ISSUE_FIELDS = """
   duplicateOf { number url }
 """
 FIXES = {
-    "closed-parent": "Move each under an open parent, or reopen the parent if its work is not done.",
-    "hidden": "Reopen each: it closed with work still open under it.",
-    "no-original": "Reopen each and close it again through close-issues' duplicate command.",
-    "no-decision": "Write each decision under '## Decision' in the body, or reopen it.",
+    "closed-parent": "Move each under an open parent, or make it a top-level issue.",
 }
 WAITING = "Waiting on the owner (report these; an audit never answers them):"
 
@@ -168,26 +164,17 @@ def open_parent(issue):
 # Structural findings.
 
 def findings(issue):
-    """(kind, message) pairs for one issue: structural findings and decisions waiting on the owner."""
+    """(kind, message) pairs for one open issue: structural findings and decisions waiting on
+    the owner. A closed issue has none: an audit never reopens, edits or checks one."""
+    if issue["state"] != "OPEN":
+        return []
     me = f"#{issue['number']} {issue['title']}"
     found = []
-    if issue["state"] == "OPEN":
-        parent = issue["parent"]
-        if parent and parent["state"] != "OPEN":
-            found.append(("closed-parent", f"{me} is open under closed parent #{parent['number']}"))
-        if is_decision(issue) and not has_section(issue["body"], "## Decision"):
-            found.append(("waiting", f"{me} waits on the owner's decision"))
-        return found
-    if issue["stateReason"] == "COMPLETED":
-        for child in issue["subIssues"]["nodes"]:
-            if child["state"] == "OPEN":
-                found.append(("hidden", f"closed {me} has open sub-issue #{child['number']} {child['title']}"))
-        for text in unticked_lines(issue["body"]):
-            found.append(("hidden", f"closed {me} has an unticked line: {text}"))
-        if is_decision(issue) and not has_section(issue["body"], "## Decision"):
-            found.append(("no-decision", f"{me} closed as decided with no '## Decision' section"))
-    if issue["stateReason"] == "DUPLICATE" and not issue["duplicateOf"]:
-        found.append(("no-original", f"{me} closed as a duplicate of nothing"))
+    parent = issue["parent"]
+    if parent and parent["state"] != "OPEN":
+        found.append(("closed-parent", f"{me} is open under closed parent #{parent['number']}"))
+    if is_decision(issue) and not has_section(issue["body"], "## Decision"):
+        found.append(("waiting", f"{me} waits on the owner's decision"))
     return found
 
 
@@ -963,7 +950,7 @@ def scan(args):
             print(f"  - #{number} {titles[number]} ({word})")
     if any(k != "waiting" for k, _ in found):
         return EXIT_FINDINGS
-    print(f"\n{args.repo}: {len(issues)} issues read; no open work hides under a closed issue.")
+    print(f"\n{args.repo}: {len(issues)} issues read; no open issue sits under a closed parent.")
     return 0
 
 
