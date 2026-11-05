@@ -302,19 +302,6 @@ each option as what the user would see happen if they pick it. Names they would 
 to look up (a decision document number, a library, a code construct) stay out, or
 come after the plain words.
 
-Before:
-
-> Can a record's kind change after it exists? (An imported source turning out to be a scan.)
-
-After:
-
-> You import `notes.pdf` as a text document. Later the app finds it is a scanned
-> image with no text. Should it:
->
-> - **keep the text document** and add the scan beside it, so what already uses the
->   document is unchanged, or
-> - **turn the same document into a scan**, so everything that used it now sees a scan?
-
 Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made, not a recommendation the skill invented.
 
 Do not prepend the generic `Outcome` and `Done when` sections to a decision issue. `Why we need this decision` explains the consequence of waiting, and its own `Done when` defines the decision's completion.
