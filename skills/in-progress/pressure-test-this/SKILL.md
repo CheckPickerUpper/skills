@@ -80,6 +80,7 @@ Actively attempt to refute every provisional fracture. Default to rejection unle
 - An existing upstream type, boundary, or framework invariant already makes the trace impossible.
 - It relies on speculative external disasters (e.g. arbitrary hardware bit flips) rather than structural weaknesses.
 - It is a style preference or convention argument without a concrete invariant failure.
+- Its example is one the design under test would never produce, such as a value or call the design already rules out. Withdraw it; never keep it and correct it later.
 
 Survivors are real fractures. Everything else is destroyed without comment.
 

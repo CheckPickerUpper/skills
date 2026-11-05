@@ -1,12 +1,18 @@
 ---
 name: build-vs-buy
-description: "Run on every new feature, capability, service, integration or mechanism before writing code, and again on the code once it exists. That includes code an agent writes for its own work: a scratch script, a test harness, a test runner, an audit or measurement tool. Use before adding or swapping a dependency; before writing streaming, pub/sub, push, retries, rate limits, tokens, parsing, decoding, validation, money, dates, fake time, test waits, mutation testing, per-test timing, background jobs, browser automation, CLI parsing, logging or any other standard capability; when someone asks 'is there a library', 'what should we use' or 'don't hand-roll this'; when a fix means aliasing, stubbing, shimming or excluding a dependency; and when reviewing code or a diff that may hand-roll what an existing dependency, the platform or a maintained library already owns. Reads the repository's declared library choices and manifests, names the standard approach, maps coverage, picks one owner (reuse, adopt, buy, build, combine or defer), records the decision where the work is tracked, and audits written code for hand-rolled standard parts."
+description: "Run before writing any script, service, hook or check that is not itself the fix asked for, and on every new feature, capability, service, integration or mechanism before writing code, and again on the code once it exists. That includes code an agent writes for its own work: a scratch script, a test harness, a test runner, an audit or measurement tool. Use before adding or swapping a dependency; before writing streaming, pub/sub, push, retries, rate limits, tokens, parsing, decoding, validation, money, dates, fake time, test waits, mutation testing, per-test timing, background jobs, browser automation, CLI parsing, logging or any other standard capability; when someone asks 'is there a library', 'what should we use' or 'don't hand-roll this'; when a fix means aliasing, stubbing, shimming or excluding a dependency; and when reviewing code or a diff that may hand-roll what an existing dependency, the platform or a maintained library already owns. Reads the repository's declared library choices and manifests, names the standard approach, maps coverage, picks one owner (reuse, adopt, buy, build, combine or defer), records the decision where the work is tracked, and audits written code for hand-rolled standard parts."
 metadata:
   when: "starting a new feature or mechanism, choosing a dependency, or reviewing code that may hand-roll a solved problem"
   situation: Planning and design
 ---
 
 # /build-vs-buy
+
+<what-to-do>
+Fix the cause that was measured or reported, and nothing beside it. A script,
+service, hook or set of checks that the fix does not need is built only after
+the user says so; propose it in one line and wait.
+</what-to-do>
 
 Every capability has an owner: code the project already has, a dependency it
 already declared, the language or platform, a maintained library, a managed
