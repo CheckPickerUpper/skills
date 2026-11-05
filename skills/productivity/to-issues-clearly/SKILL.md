@@ -279,7 +279,7 @@ Choose one:
 
 - [Entry point, ownership, or address question, when relevant]
 - [Anonymous, signed-in, or privacy boundary question, when relevant]
-- [Source of truth, lifecycle, or duplicate-record question, when relevant]
+- [Source of truth, lifecycle, or duplicate-copy question, when relevant]
 - [Missing, empty, unavailable, or error-state question, when relevant]
 
 ## Done when
@@ -292,6 +292,28 @@ Choose one:
 ~~~
 
 Use only the questions and criteria relevant to the decision. The checklist is a prompt for missing boundaries, not boilerplate to paste into every issue. If the source does not establish a fact, turn it into a question or constraint; do not invent the answer.
+
+#### Wording a question
+
+A question the user must answer names the actual thing they would see, never a
+placeholder noun: "record", "item", "entry", "entity", "kind", "type", "object",
+"field", "data", "resource", "thing". It opens with one concrete case, then gives
+each option as what the user would see happen if they pick it. Names they would have
+to look up (a decision document number, a library, a code construct) stay out, or
+come after the plain words.
+
+Before:
+
+> Can a record's kind change after it exists? (An imported source turning out to be a scan.)
+
+After:
+
+> You import `notes.pdf` as a text document. Later the app finds it is a scanned
+> image with no text. Should it:
+>
+> - **keep the text document** and add the scan beside it, so what already uses the
+>   document is unchanged, or
+> - **turn the same document into a scan**, so everything that used it now sees a scan?
 
 Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made, not a recommendation the skill invented.
 

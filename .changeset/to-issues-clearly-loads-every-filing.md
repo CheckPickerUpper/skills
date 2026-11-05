@@ -2,4 +2,4 @@
 "checkpickerupper-skills": patch
 ---
 
-**`to-issues-clearly`** now loads every time an issue is about to be filed or reshaped, including a bug an agent finds in the middle of other work and files on the spot, not only when a plan or audit is turned into issues.
+**`to-issues-clearly`** now loads every time an issue is about to be filed or reshaped, including a bug an agent finds in the middle of other work and files on the spot, not only when a plan or audit is turned into issues. A decision issue's questions now name the actual thing the reader would see instead of words like "record" or "kind", open with one concrete case, and give each option as what happens if it is chosen.
