@@ -218,6 +218,11 @@ class EarnedTicks(unittest.TestCase):
         commits = [("c0ffee1234", "Cleanse effects\n\nPart of #1962: cleanse, heal")]
         self.assertEqual(line_findings(ev(lines_issue(CLEANSE), commits)), [])
 
+    def test_an_underscore_id_is_proved_by_the_commit_claiming_it(self):
+        body = "## Done when\n\n- [ ] all_or_none: Declare every struct\n- [ ] keep-going: Keep going\n"
+        commits = [("c0ffee1234", "Part of #1962: all_or_none, keep-going")]
+        self.assertEqual(line_findings(ev(lines_issue(body), commits)), [])
+
     def test_a_commit_for_another_issue_number_proves_nothing(self):
         commits = [("c0ffee1234", "Part of #19620: cleanse\nPart of other/repo#1962: heal")]
         self.assertEqual(kinds(line_findings(ev(lines_issue(CLEANSE), commits))), ["ticked-unproven", "unticked"])
