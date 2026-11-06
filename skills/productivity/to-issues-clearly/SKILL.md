@@ -319,12 +319,14 @@ Use only the questions and criteria relevant to the decision. The checklist is a
 
 A question the user must answer names the actual thing they would see, never a
 placeholder noun: "record", "item", "entry", "entity", "kind", "type", "object",
-"field", "data", "resource", "thing". It opens with one concrete case, then gives
-each option as what the user would see happen if they pick it. Names they would have
-to look up (a decision document number, a library, a code construct) stay out, or
-come after the words that name the thing.
+"field", "data", "resource", "thing". It opens with one line on what the thing is
+for, in what the user sees, then one concrete case. It offers two or three options,
+each one correct and each with its trade-off in one plain clause: what the user would
+notice or lose. A number in a trade-off was measured; an unmeasured one is left out,
+never estimated. Names they would have to look up (a decision document number, a
+library, a code construct) stay out, or come after the words that name the thing.
 
-Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made, not a recommendation the skill invented.
+Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made. One option may be marked recommended, with its reason in the same clause; the user still decides.
 
 Do not prepend the generic `Outcome` and `Done when` sections to a decision issue. `Why we need this decision` explains the consequence of waiting, and its own `Done when` defines the decision's completion.
 
