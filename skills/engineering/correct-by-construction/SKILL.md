@@ -1,6 +1,6 @@
 ---
 name: correct-by-construction
-description: "Make a bad state impossible to write, at the earliest owner that knows it, with one owner per fact. Use for bugs, corrupted or generated artifacts, recurring agent mistakes, code smells, root-cause requests, 'prevent this class', bad APIs, models and schemas, repeated API or CLI friction, and enforcement rules (hooks, lints, guards, skills). Use when writing or reviewing types: deriving one type from another, loosening fields with optional, Partial, Any, Option or casts, or asking how to extract part of a type. Use for drift questions: 'where can this drift', 'is any fact owned twice', a check that said green while the enforcer said red, or before trusting a status surface. Use when several bugs come from one family of things built the same way, or someone asks whether a class is gone. Locates the writer, strips incident words, names the class, climbs to the earliest owner (type, source of truth, generator, judge), lists the steps every member of the family passes through and makes each one shared, removes competing representations and every bypass, and proves the bad state cannot be written."
+description: "Make a bad state impossible to write, at the earliest owner that knows it, with one owner per fact. Use for bugs, corrupted or generated artifacts, recurring agent mistakes, code smells, root-cause requests, 'prevent this class', bad APIs, models and schemas, repeated API or CLI friction, and enforcement rules (hooks, lints, guards, skills). Use when writing or reviewing types: deriving one type from another, loosening fields with optional, Partial, Any, Option or casts, or asking how to extract part of a type. Use for drift questions: 'where can this drift', 'is any fact owned twice', a check that said green while the enforcer said red, or before trusting a status surface. Use when several bugs come from one family of things built the same way, or someone asks whether a class is gone. Use before working an issue or checklist line that repeats one change across members (each language, client, rule or package). Locates the writer, strips incident words, names the class, climbs to the earliest owner (type, source of truth, generator, judge), lists the steps every member of the family passes through and makes each one shared, removes competing representations and every bypass, and proves the bad state cannot be written."
 metadata:
   when: "a whole kind of bug should be impossible, a type loosens or carves its source, or a fact may have two owners"
   situation: Something is broken
@@ -393,10 +393,16 @@ block, with a blank line between blocks:
     command, its exit code, and the evidence the old writer is gone. When the
     class is still open, what remains open and the missing proof.
 
-When step 7 found a family, put its steps right after the bold sentence, as a
-table with three columns: the step, whether it is shared or per member today,
-and the change that makes it one shared function. Then give one block per
-per-member step.
+When step 7 found a family, the bold sentence is followed by three short
+lines and nothing else about the family:
+
+- **Per member:** only what really differs per member, which each member
+  declares as data.
+- **One owner:** every other step, with the shared owner that takes it.
+- **Do and prove:** the action, and the one test that runs over every member.
+
+Add a class block only for a step that needs a **Where** or **Proof** those
+lines do not carry. Never list each member's copy of a shared step.
 
 End with **What needs you:** what only the user decides or does, or that
 nothing does.
