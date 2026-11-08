@@ -113,41 +113,6 @@ file. Keep every published skill in the README catalogs, but add a
 client-targeted skill to `.claude-plugin/plugin.json` only when it targets
 Claude or is universal.
 
-## Publishing
-
-Every push to `main` releases, so a push to `main` needs the maintainer's
-explicit go-ahead for that change; an agent asks before each push and never
-pushes on its own judgment. With that go-ahead, publish skills, catalog
-entries, and plugin registrations directly to `main` from a task worktree after
-validation. Routine releases do not use GitHub issues or pull requests. If
-GitHub rejects a direct push, report the exact restriction instead of routing
-the change through an issue or pull request.
-
-Every pushed change to a published skill, catalog entry, or plugin
-registration carries a changeset: run `npx changeset`, choose the bump
-(`major` for a removed or renamed skill or a breaking contract, `minor` for a
-new skill, `patch` for a fix or wording change), and describe what changed for
-someone who uses the skill. Commit the generated `.changeset/*.md` with the
-change.
-
-A changeset describes what the release changes compared with the last
-release, never what one commit did. While a change is unreleased, a later
-commit to it edits that change's changeset, or deletes the one it supersedes,
-and never adds a second changeset for the same change. Before each commit,
-check that every pending file in `.changeset/` still says what the code now
-does.
-
-Write one changeset per change, in the shape of the existing entries in
-`CHANGELOG.md`:
-
-- Open with one sentence naming what changed, with the skill in bold code,
-  such as "Ship **`pizza1`** in the **Engineering** bucket, so it installs
-  with `npx skills` and loads from the Claude Code plugin."
-- Follow with a paragraph that names the skill, marks it `(user-invoked)` or
-  `(model-invoked)`, and says what it now does for its user.
-- Add bullets only for distinct behavior changes, and an upgrade step only
-  when users must act.
-
 ## Releases
 
 Every push to `main` that leaves pending changesets is released by the Release
