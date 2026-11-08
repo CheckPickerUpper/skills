@@ -1,47 +1,5 @@
 # checkpickerupper-skills
 
-## 2.2.1
-
-### Patch Changes
-
-- [`82c4cec`](https://github.com/CheckPickerUpper/skills/commit/82c4cec74b345df439f13eb283c81d72a13f8fa3) **`anti-ai-slop-writing`** bans seven more signs and drafts in exact words, the field's standard terms and real names, instead of plain everyday words:
-
-  - stacked "ever", "anyone" and "anything" used only for force ("no one ever has to check");
-  - slogan cadence, the short all-covering sentence that reads like a maxim whether or not it is true ("Every answer cites the exact page or minute.");
-  - anaphora, clause after clause opening with the same word;
-  - the benefit tail, a "before" or "so no one has to" clause that sells by picturing a bad moment ("catches errors before the code ships"), with a delete-the-tail test and the fact to write instead;
-  - placeholder nouns, category words such as "record", "item", "entity" or "kind" standing in for the thing the reader knows by name, including in questions to the reader;
-  - figures of speech for literal facts, such as "wipes out" for overwrites or "its own machine" for the client;
-  - terms invented in the project or the conversation, used as if the reader knows them.
-
-- [`aee4793`](https://github.com/CheckPickerUpper/skills/commit/aee47937246ce4aa2cbfd810a533f2edc31795d4) **`audit-issues`**: two audits of the same repository running at once no longer crash with a missing-file error while saving the local issue copy; each write uses its own temporary file and the copy is always whole.
-
-- [`52c7cee`](https://github.com/CheckPickerUpper/skills/commit/52c7cee1a19e5ca6f0d01fcba2e6f043d68c9f72) **`audit-issues`**: an issue that closes as done or out of date with open checklist lines now says in the plan where each line goes (moved to a cause that stays open, or dropped with a reason), the approval page lists those fates, and `apply` makes the edits itself: it adds each moved line to its cause, records each move or drop, removes the lines and any heading they leave empty, then closes. **`close-issues`** recognises a moved line that gained a line id in its new issue, so close-issues accepts the close on the first run instead of refusing it after the owner approved.
-
-- [`a155874`](https://github.com/CheckPickerUpper/skills/commit/a155874144d774946bb3cdc6937428f668460ba8) **`audit-issues`** sends no progress reports before its approval page, gives every cause in no milestone a proposed milestone on that page instead of asking the owner to group them, and names every issue as a link with its title.
-
-- [`fc6aba8`](https://github.com/CheckPickerUpper/skills/commit/fc6aba889bf4d3d87caf9c444961e35521a03eda) **`audit-issues`** reads and changes open issues only. It no longer lists closed issues with unticked checklist lines, open sub-issues, a decision with no `## Decision` section or a duplicate with no original, and never asks to reopen or edit one; on a large tracker those turned an audit of the open issues into a sweep of every issue ever closed. An open issue under a closed parent is still listed, to move under an open parent or to the top level.
-
-- [`a869c3e`](https://github.com/CheckPickerUpper/skills/commit/a869c3e62a20f1bda353a02517c565a53d17b82c) Settle the order for **`close-issues`** when a "Done when" line can only pass once the commit exists: the commit says `Part of #N`, the line is ticked after the real pass, and the script closes the issue with that commit as proof.
-
-- [`0c5747f`](https://github.com/CheckPickerUpper/skills/commit/0c5747f9642ddfda36b9d8b55b92e4798d97430c) **`close-issues`**: `completed` on a reopened issue adds its proof to the existing `## Proof` section instead of replacing it, and running it again with the same proof adds no duplicate line.
-
-- [`a1f7c0b`](https://github.com/CheckPickerUpper/skills/commit/a1f7c0bcfafcd5e1915ad7806268c4604da5813c) **`close-issues`** no longer reports a checklist line as lost when it is given a line id (`- [ ] <id>: <same text>`), so an issue's lines can get ids before the commit that proves them. A line deleted outright is still refused.
-
-- [`6ea1605`](https://github.com/CheckPickerUpper/skills/commit/6ea16054bed84d1355ffa315868db252d94012b4) **`close-issues`** reads a checklist line id that contains an underscore, such as `- [ ] all_or_none: <text>`, and a commit saying `Part of #N: all_or_none` proves it. Before, such a line was read as having no id and stayed open no matter which commit claimed it.
-
-- [`c9d624e`](https://github.com/CheckPickerUpper/skills/commit/c9d624e986868a152d57ba0b07bc97147f2e7533) **`correct-by-construction`** reports each class as a short block instead of three paragraphs: the answer in one bold sentence, then for each class a bold label naming what happens and one-line bullets for Now, Where, Class, Fix, Can't come back and Proof, ending with what needs the reader. It also never prescribes a runtime limit, counter or alarm that fires if the bad state returns: the bad state is made unwritable, and the proof is a test or static check that runs before the code lands.
-
-- [`c065f30`](https://github.com/CheckPickerUpper/skills/commit/c065f30a1925935d1ab99686364bb7f9107f5384) **`correct-by-construction`** now handles a family of things built the same way, such as discount types, transaction types or form submissions. It lists the steps every member goes through, marks each step as shared or written per member, and calls a class closed only when its step is one shared function that members configure by declaration. When one member runs in two places, such as a client and a server, values may differ but code paths may not. The report opens with that list of steps as a table. A new reference, `references/family-steps.md`, works through four families.
-
-- [`aee0e7e`](https://github.com/CheckPickerUpper/skills/commit/aee0e7ef30741fdaf49724c9478e892b71074d96) **`facts-as-data`**: the census reads code in every language (Zig, Odin, Nim, Julia, OCaml, Vue, extensionless scripts and any other text file) instead of a fixed list of extensions, skipping only prose, data, lockfiles, minified or generated files, media and binaries. A path that gives it nothing to read (a typo, test files only, or only files that are not code) now exits 2 naming the path and what it matched, instead of reporting "No unsettled leads".
-
-- [`efb4dd4`](https://github.com/CheckPickerUpper/skills/commit/efb4dd4400d45c4239f7793bff9e332a9e221cfd) **`issues-to-outcomes`** groups a report by who notices each change (the people who use the product, the staff who run it), and writes each item as a short bold headline followed by one "When you do X, Y no longer happens; now Z" scenario, so the reader can scan the headlines and picture each change.
-
-- [`2fffb57`](https://github.com/CheckPickerUpper/skills/commit/2fffb57d6e2afc00e8f1ebd92ba0e3a90e9fc5b6) **`ruthless-bottleneck-destroyer`** fixes only the measured cause of a slowdown: a new script, hook, service or check that measures or guards the slow thing is not a speed fix and is built only when the user asks. Before a long run it checks the checkout holds the development branch's latest commits, so it never measures code that is already gone.
-
-- [`35aafba`](https://github.com/CheckPickerUpper/skills/commit/35aafbae7aa0371560c27f8c36ff9806f4272cb8) **`to-issues-clearly`** now loads every time an issue is about to be filed or reshaped, including a bug an agent finds in the middle of other work and files on the spot, not only when a plan or audit is turned into issues. A decision issue's questions now name the actual thing the reader would see instead of words like "record" or "kind", open with one line on what the thing is for and one concrete case, and give two or three correct options, each with its trade-off in one plain clause and no unmeasured numbers; one option may be marked recommended while the user still decides. A behavior title now refuses code-flow verbs such as "reaches", "passes" or "wired", and a behavior issue's Outcome and Done when say what a person does and sees, with type, function and file names kept to the implementer's section. Titles and bodies are written in exact words: the field's standard terms and the real names, with no invented terms, figures of speech, or categories standing in for the thing. Each issue's Outcome ends with a What changes list in the shape `issues-to-outcomes` reports: a bold headline and one "When you do X, Y no longer happens; now Z" sentence per change, grouped by who notices it.
-
 ## 2.2.0
 
 ### Minor Changes
