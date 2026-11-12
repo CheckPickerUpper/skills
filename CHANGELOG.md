@@ -1,5 +1,29 @@
 # checkpickerupper-skills
 
+## 3.1.0
+
+### Minor Changes
+
+- [`297a05e`](https://github.com/CheckPickerUpper/skills/commit/297a05ee168e72ce8f572aaf66a6d9d67e067650) **`correct-by-construction`** loads before work on a change repeated across members, and reports a family in three lines.
+
+  The skill now triggers before an agent works an issue or checklist line that repeats one change across languages, clients, rules or packages. When it finds a family, the report opens with three lines: what differs per member, the one owner of every other step, and the action with its single test over every member. It no longer lists each member's copy of a shared step.
+
+- [`cfcd38a`](https://github.com/CheckPickerUpper/skills/commit/cfcd38aef979941adc2b5389efde3ab387a05d70) **`ruthless-bottleneck-destroyer`** answers why work takes so long to land.
+
+  When you ask why issues take so long to become pushed commits, the skill traces each piece of work from issue to close and reports only what happened more than once: a bug that came back after its fix, work that was redone, a check rerun with nothing changed. Each item names the issues and commits, the step that let the repeat back in, and the fix that stops it. Machine load, agent thinking time and waiting stay out of the answer, as before.
+
+  - A bug that comes back after its fix now counts as repeated work. A bug fixed once is still written off.
+
+- [`297a05e`](https://github.com/CheckPickerUpper/skills/commit/297a05ee168e72ce8f572aaf66a6d9d67e067650) **`to-issues-clearly`** runs a family check before splitting one change across members.
+
+  When an issue's fix would be the same change made in each language, client, rule or package, the skill no longer files one checklist line per member. It lists what really differs per member (one data row each) and gives everything else one shared owner, filed as the line that lands first, proved by one test over every member, and recorded under `## Family` in the issue body. A bug already filed against one member points at that shared line.
+
+- [`3902bdc`](https://github.com/CheckPickerUpper/skills/commit/3902bdc821cf5b3a6043a50c9ccf2cca24ae7006) **`zen-of-checkpickerupper`** grows to twenty-three lines and cites only published skills.
+
+  Two new lines judge how a value moves through code: "Decide once; downstream takes the piece, not the whole" (branch on the case at one boundary and pass the narrower piece, so a case without it cannot be passed in) and "Return the thing, not whether you have it" (a yes/no that guards data it does not hold can disagree with it). Line 1 now gives the test for placing a field: does it mean something for every case, or is a value on the wrong case nonsense. Line 6 adds two duplicate-owner examples: two accessors answering "has it" for the same cases, and one value reachable through two fields.
+
+  - Each expansion now names `correct-by-construction` or `antimatter-code-quality-review` as its source instead of skills that were never published.
+
 ## 3.0.0
 
 ### Major Changes
