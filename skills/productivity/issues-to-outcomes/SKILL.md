@@ -47,6 +47,11 @@ Write the report in this order.
 4. **What you will still run into.** Only when something the reader will hit
    is still broken or unfinished. Leave the section out when nothing is.
 
+Never report a "not verified yet" list. Verify what can be verified before
+sending the report. Something that cannot be verified here is named once, with
+what makes it impossible, such as no machine of that system. Work that waits
+on another piece is reported as waiting on that piece.
+
 Group related work into one item. Five fixes to the same failure are one line
 about that failure, not five lines.
 
