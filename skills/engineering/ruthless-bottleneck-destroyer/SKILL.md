@@ -1,6 +1,6 @@
 ---
 name: ruthless-bottleneck-destroyer
-description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long or where the time goes, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must have something to catch, catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Deletes checks with nothing to catch, proves catching and uniqueness by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, makes the slow shape unwritable at its owner instead of adding a check for it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
+description: "Use before writing, keeping, deleting or judging a test; whenever a test passes or is reported as weak; when tests, checks, builds, hooks, a push gate or a CI pipeline are slow; whenever the user sets or changes a time limit for a test or a check, asks why something is slow, what takes so long, where the time goes or why work takes so long to land, or asks for the slow tests; before running any test suite, build, check or review; and before any status update, summary or handoff that accounts for time. Every check must have something to catch, catch its break, be the only check that does, run only when its inputs change, and cost only what its claim needs. Deletes checks with nothing to catch, proves catching and uniqueness by breaking the rule on purpose, removes repeated work and each slow thing's shared cause at its owner for every checkout, makes the slow shape unwritable at its owner instead of adding a check for it, and keeps going until everything meets the bar. Never reports a weak or slow test without fixing it, never fakes a speed-up, never throws hardware at repeated work, never reports machine load."
 short_description: "Every check has something to catch, catches its break, is the only one that does, runs only when its inputs change, and costs only what its claim needs."
 allow_implicit_invocation: true
 metadata:
@@ -144,15 +144,16 @@ it) or `wait` (naming what it waits for and who owns that).
   - how many agents there are, who relays messages to whom, the questions
     they ask, rules they did not follow, how many reviews a change gets;
   - failed checks or flaky tests as a cause of slowness (a failure is a bug to
-    fix, not repeated work);
+    fix, not repeated work), unless the same failure came back after a fix;
   - time totals with no repeat in them ("an hour of building and testing",
     hours per category, a breakdown of the day);
   - outages and broken tools, and whoever fixed them;
   - work that justified its time (bugs caught, tests repaired);
   - plans and order: what lands next, who was told what.
 
-  Fixing bugs and repairing tests is the cost of doing business, never
+  Fixing a bug or repairing a test once is the cost of doing business, never
   slowness: write that time off and report only the repeated work around it.
+  A bug that comes back after its fix is repeated work, and it is reported.
 
   When everything you find is on this list, the answer is "no repeated work
   found", followed by what you checked.
@@ -404,6 +405,40 @@ places compared; the per-test record shows every test and every check under
 the bar; each fixed cause has its rule and, where possible, a check that
 refuses it; each stored result has its invalidation list; and every checkout
 has the fixes.
+
+## When work lands slowly
+
+When the user asks why work takes so long to land, from an issue to a pushed
+commit or a feature the user can use, the answer is the repeated work on that
+path. The red herrings above stay out of it.
+
+1. **List the work** in the window the user names: the issues closed or still
+   open and their commits. Read the history (`git log`, the issue timeline,
+   reverts); never answer from memory.
+2. **Trace each one** from issue to first commit, to push, to close, and mark
+   every step that happened more than once:
+   - a bug that came back: the same symptom in a second issue, a revert, a fix
+     of a fix, the same failure seen again after a fix landed;
+   - work redone: a brief or plan rewritten because it was wrong, a commit
+     replaced, a change made and undone, a review finding what a rule already
+     said;
+   - a step rerun on the same input: the same gate or check run again with
+     nothing changed.
+3. **Find the step that let each one back in**: a test that does not catch the
+   bug, a rule stated only in prose, a fix made at one instance instead of the
+   owner, two owners of one fact, a brief that left the worker a choice.
+4. **Fix that step** so the repeat cannot happen again, using
+   `correct-by-construction` for a bug's class, then report.
+
+Report one item per repeat, bullets only:
+
+- **What repeated:** the issues and commits, each as a link with its title,
+  and how many times it happened.
+- **Why it came back:** the step that let it, with `file:line` or the rule.
+- **Stop:** the fix, and the check or rule that keeps it from returning.
+
+Then "Left:" with repeats not yet fixed, or "nothing". When nothing repeated,
+the answer is "no repeated work found", followed by the work items checked.
 
 ## Report
 
