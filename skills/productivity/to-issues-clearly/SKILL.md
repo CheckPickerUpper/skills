@@ -330,6 +330,12 @@ library, a code construct) stay out, or come after the words that name the thing
 
 Make the options concrete and mutually distinguishable. Keep the choice open in the issue: `Choose one` records the decision to be made. One option may be marked recommended, with its reason in the same clause; the user still decides.
 
+Before offering a choice, remove every option that is not a real one:
+
+- **An option the issue's own reasoning calls wrong is deleted, not offered.** "Cheap to build and wrong in the case that matters" beside "correct" is not a choice between two answers; it is the answer, so the issue is not a decision. Asking someone to pick between the right design and a known-wrong one wastes their turn.
+- **Options that are settings of one behaviour become a setting the user changes on screen.** "The bot may only reword" against "the bot may also add and delete" is a control in the product, not a choice made once for everyone. The decision is that the control exists and what it starts at.
+- **A choice about what a screen shows starts from the components the project already has.** Name the component that already draws the behaviour (a tracked-change view that strikes out removed words, a diff, an undo bar) and offer only options it can draw. An abstract description of a behaviour the user can already see in a component makes them explain their own product back.
+
 Do not prepend the generic `Outcome` and `Done when` sections to a decision issue. `Why we need this decision` explains the consequence of waiting, and its own `Done when` defines the decision's completion.
 
 #### Recording a decision
