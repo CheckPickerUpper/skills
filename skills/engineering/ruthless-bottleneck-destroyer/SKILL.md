@@ -19,7 +19,7 @@ properties, each with its own proof:
 | **It catches its break** | a test that passes whether or not the behaviour happened | break the rule on purpose; the test fails |
 | **It is the only one that does** | two tests, or two stages, prove the same thing | the same break: exactly one test fails |
 | **It runs only when its inputs change** | reruns on unchanged code, coarse cache keys, a second checkout rebuilding | an unchanged rerun does zero work; one changed input redoes only its own unit |
-| **It costs only what its claim needs** | setup rebuilt per test, sleeps, process spawns, hardware thrown at repeats | the per-test time limit the runner enforces, and a check that refuses each slow shape |
+| **It costs only what its claim needs** | setup rebuilt per test, sleeps, process spawns, hardware thrown at repeats | each test's recorded time under the bar, with its slow shape removed at the owner so it cannot be written again |
 
 A check with nothing to catch is deleted, along with any dead code it guards;
 when the rule can move upstream, move it there and delete the check. A check
@@ -93,6 +93,10 @@ it) or `wait` (naming what it waits for and who owns that).
 - **Report a weak, unfailable, duplicate or slow check and leave it.**
   Finding it is the start of the fix. Telling another agent to stop is not a
   fix either.
+- **Answer slow tests with a gate.** A limit that fails the run, refuses a
+  push or blocks a commit only stops slow tests from landing; the slow tests
+  still exist. The job is that none exists: make each one fast at its shared
+  cause. Never offer a gate as the response to a list of slow tests.
 - **Return before the bar is met.** No timing table, no "next thing to cut",
   no "these stay as they are", no asking whether to continue or which repeats
   to remove. Every return costs the user a turn.
