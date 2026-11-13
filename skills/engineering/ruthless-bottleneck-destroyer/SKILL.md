@@ -97,6 +97,12 @@ it) or `wait` (naming what it waits for and who owns that).
   push or blocks a commit only stops slow tests from landing; the slow tests
   still exist. The job is that none exists: make each one fast at its shared
   cause. Never offer a gate as the response to a list of slow tests.
+- **Call a cost "expensive" without naming the operation.** "Expensive
+  setup" leaves the reader to guess what to remove. Name what the test does:
+  starts a process, creates a repository or file tree, boots a world,
+  runtime or browser, or compiles a program. Then give the fix for that
+  operation: the decision as a function of plain values, and one test of
+  the real boundary per claim.
 - **Return before the bar is met.** No timing table, no "next thing to cut",
   no "these stay as they are", no asking whether to continue or which repeats
   to remove. Every return costs the user a turn.
@@ -283,6 +289,7 @@ nothing about them.
 
    | Cause | Fix |
    | --- | --- |
+   | A test that starts a process, creates a repository or file tree, boots a world, runtime or browser, or compiles a program, to check a decision that only reads values from it | Pull the decision out as a function of plain values that the real code calls after its reads, and test that function in-process. Keep exactly one test per claim about the real boundary itself |
    | Script logic in a command file, so a test can only run it as a child process | The work is an exported function the test imports; the command file only parses arguments and prints |
    | A blocking child process per test | One non-blocking spawn helper, wiring tests run concurrently, one per command, and a check that refuses blocking spawn calls in tests |
    | A fixed sleep, or polling until a lock or lease clears | Wait for the event: the process exit, the written row, the listener accepting, the lock released |
@@ -378,6 +385,9 @@ nothing about them.
       resource; the call that starts a server, opens a fresh database or
       boots a browser is private to it, so a test cannot spell the slow
       shape;
+    - the decision is a function of plain values that the boundary code
+      calls after its reads, so a test of the decision has nothing to
+      start, create, boot or compile;
     - the runner's configuration owns the scope (global setup starts the one
       server; per-file setup hands out copies), so a test file has nothing
       to configure;
