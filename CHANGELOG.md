@@ -1,5 +1,20 @@
 # checkpickerupper-skills
 
+## 3.2.0
+
+### Minor Changes
+
+- [`ddde002`](https://github.com/CheckPickerUpper/skills/commit/ddde00211ebed0ba9e2f0f50899f2a2020cf6078) **`ruthless-bottleneck-destroyer`** answers slow tests by making them fast, never with a gate, and names the exact operation that makes a test slow.
+
+  A list of slow tests is now answered by fixing each one's shared cause. The skill no longer offers a time limit that fails the run or refuses a push as the response, because that only stops slow tests from landing while they still exist.
+
+  - A test that starts a process, creates a repository or file tree, boots a world, runtime or browser, or compiles a program, just to check a decision, gets that decision pulled out as a function of plain values. That function is tested in-process, and one test per claim still runs the real boundary.
+  - The skill refuses to call a cost "expensive" without naming which of those operations it is, because a vague word leaves the reader to guess what to remove.
+
+- [`7808be8`](https://github.com/CheckPickerUpper/skills/commit/7808be84bf5f8c445cd2f84de31e2f8d857ec575) **`to-issues-clearly`** offers only real options in a decision issue.
+
+  An option the issue's own reasoning calls wrong is deleted rather than offered. Options that are only different settings of one behaviour become a control the user changes on screen, and the decision is that the control exists. A choice about what a screen shows names the component the project already has for it, and offers only what that component can draw.
+
 ## 3.1.0
 
 ### Minor Changes
