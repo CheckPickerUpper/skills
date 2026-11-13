@@ -31,6 +31,11 @@ The result is one evidence-backed decision, not a catalog of options.
   mutation testing; timing and limiting tests is the test runner's job.
 - Treat a request for a library as a request for a package name, or let the
   first example name the solution.
+- Answer "is there a <language> version of <our library>" by searching only
+  the user's own repositories. The library is a concept: state what it does in
+  one sentence, search that language's whole ecosystem for anything that does
+  it, and when nothing does, the answer is to build the same library in that
+  language, never a check or rule bolted onto another tool.
 - Hand-build a standard part because no single library owns the whole
   outcome; combine owners instead.
 - Treat popularity, familiarity, precedent, sticker price or diff size as
