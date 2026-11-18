@@ -1,6 +1,6 @@
 ---
 name: write-tests
-description: "Use every time a test is about to be written or edited, in any language and any test framework: a unit, integration, scene, story, snapshot or end-to-end test, a fixture, a factory, a test double, a parametrized table, or a regression test for a bug fix. Also use when deciding whether to keep or delete a test. A test earns its place only if it fails against a plausible wrong implementation and no other test already fails for the same break. Lists the bad tests agents write, each with its fix, and how to prove a test catches its break."
+description: "Use every time a test is about to be written or edited, in any language and any test framework: a unit, integration, scene, story, snapshot or end-to-end test, a fixture, a factory, a test double, a parametrized table, or a regression test for a bug fix. Also use when deciding whether to keep or delete a test, or pruning a module's tests. A test earns its place only if it fails against a plausible wrong implementation and no other test already fails for the same break. Lists the bad tests agents write, each with its fix, and how to prove a test catches its break."
 metadata:
   when: "about to write, edit, keep or delete a test"
   situation: Writing code
@@ -61,7 +61,8 @@ fix. For new behaviour, it fails before the code exists.
 - **Every assertion in a parametrized test depends on the parameter.** An
   assertion that passes the same for every row goes in its own test.
 - **Expected values are stated or read from the table the code reads.** Never
-  compute the expected value with the function under test.
+  compute the expected value with the function under test or with its formula:
+  `applyDiscount(100, 0.2)` expects `80`, never `price - price * 0.2`.
 - **Use the strongest assertion the claim allows:** the exact value, the
   exact error variant, the whole payload when its shape matters.
 - **Name the test for the situation, in plain words.** "A shopper with 3
@@ -81,7 +82,9 @@ fix. For new behaviour, it fails before the code exists.
 | Snapshot of a constant or a config value | Nothing. A snapshot earns its place only for output with a behavioural claim |
 | Re-checks what the type checker already refuses | Nothing. The compiler is the test |
 | Tests a library's own behaviour | Test your code that uses it |
-| Restates the implementation, line by line | Assert what a caller observes |
+| Restates the implementation: private state, internal call order, which helper ran | Assert what a caller observes: `cart.total()`, not `cart._items.length` |
+| Asserts removed code stays gone, such as a file absent from its old path | Nothing. Bringing the code back is a decision, not a regression |
+| Needs a production hook written only for it, such as `_resetCacheForTests()` | Test through the public entry point, and delete the hook with the test |
 | Passes when the code returns its default or an empty result | Assert a value only the correct path produces, and give each failure its own variant |
 | Replaces an internal module with a fake | Use the real module; replace only the outside effect |
 | A catch-all fake that accepts any call | A replacement that offers only the calls the boundary has, and refuses the rest |
@@ -121,6 +124,19 @@ fix. For new behaviour, it fails before the code exists.
 
 Done when the test failed on the broken or pre-fix code, passes on the fixed
 code, and is the only test that failed for its break.
+
+## Prune a module's tests
+
+Run "Prove the test" over every test in the module, and check each against
+the table above.
+
+- Delete every test no break fails and every test the table refuses.
+- A deleted test that was the only one covering behaviour a caller relies on
+  is rewritten against that behaviour instead.
+- Delete production code that only the deleted tests used.
+
+Done when every test left fails on its own break and only on it, and no
+production code exists only for tests.
 
 ## When a test fails for the wrong reason
 
